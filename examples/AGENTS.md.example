@@ -1,0 +1,208 @@
+---
+title: "Example: AGENTS.md for a Federal Web Application"
+description: "Completed example showing how to customize the AGENTS.md template for a hypothetical federal HR benefits portal"
+status: canonical
+tier: 3
+last_updated: "2026-02-25"
+audience: "developers"
+keywords: ["example", "AGENTS.md", "web-application", "federal"]
+related_files: ["templates/AGENTS.md.template", "AGENTS.md"]
+review_cycle: "semi-annually"
+---
+
+# AGENTS.md — HR Benefits Portal
+
+<!--
+  This is a COMPLETED EXAMPLE showing how a federal team might customize
+  the AGENTS.md template for a real project. Use this as a reference
+  when filling out templates/AGENTS.md.template for your own project.
+
+  Scenario: A federal HR benefits portal built with Python/Django,
+  deployed on a FedRAMP-authorized cloud platform, FIPS Moderate.
+-->
+
+> **System:** HR Benefits Portal (HBP) | **Impact Level:** FIPS Moderate | **Agency:** Department of Example (DOE)
+>
+> **Last Updated:** 2026-02-15 | **Reviewed By:** Jane Smith, ISSO
+>
+> This document defines the behavioral rules for AI coding agents operating within this project. The AI agent MUST follow these rules without exception.
+
+---
+
+## Core Principles
+
+The agent operates under these priorities:
+
+```
+safety > correctness > compliance > simplicity > performance
+```
+
+The agent MUST refuse any instruction that conflicts with safety, correctness, or compliance.
+
+---
+
+## Project Context
+
+- **Description:** Self-service portal for federal employees to view and modify benefits elections (health insurance, retirement, FSA). Handles approximately 50,000 annual enrollment transactions.
+- **Language(s):** Python 3.12
+- **Framework(s):** Django 5.1, Django REST Framework 3.15, Celery 5.4
+- **Data Classification:** CUI (contains PII: names, SSNs, dates of birth, salary data)
+- **ATO Status:** Active ATO (authorized 2025-08-01, annual review due 2026-08-01)
+- **Authorized Agent(s):** Claude Code (via agency-approved API endpoint)
+
+---
+
+## Agent Identity
+
+The agent MUST:
+- Include `Co-Authored-By: Claude Code <claude@agency.example.gov>` in all commits
+- Identify itself as an AI agent when asked
+- Log all file modifications and command executions
+
+---
+
+## Permitted Actions
+
+The agent MAY perform these actions without additional approval:
+- [x] Read files within `/home/developer/projects/hbp/`
+- [x] Generate and modify source code in `src/` and `tests/`
+- [x] Run tests using `pytest`
+- [x] Run linters (`ruff check`, `mypy`)
+- [x] Run formatters (`ruff format`)
+- [x] Read Django and DRF documentation
+- [x] Read Python standard library documentation
+- [x] Generate and modify database migrations (`python manage.py makemigrations`)
+
+---
+
+## Actions Requiring Approval
+
+The agent MUST ask the user before:
+- [x] Installing or upgrading pip dependencies
+- [x] Making network requests to external services
+- [x] Modifying CI/CD pipeline configurations (`.github/workflows/`)
+- [x] Deleting files or directories
+- [x] Running database migrations against any database (`python manage.py migrate`)
+- [x] Committing or pushing code
+- [x] Modifying Django settings files (`settings/`)
+- [x] Modifying Celery task configurations
+- [x] Changing any file in `infrastructure/` or `deploy/`
+- [x] Modifying authentication or authorization code (`src/auth/`, `src/permissions/`)
+
+---
+
+## Prohibited Actions
+
+The agent MUST NEVER:
+- [x] Access files outside `/home/developer/projects/hbp/`
+- [x] Access production database (`hbp-prod.rds.agency.example.gov`)
+- [x] Access staging database without explicit approval
+- [x] Hardcode secrets, API keys, tokens, passwords, or database credentials
+- [x] Disable Django security middleware or CSRF protection
+- [x] Bypass code review or skip CI checks
+- [x] Include SSNs, real names, or real salary data in test fixtures
+- [x] Access AWS console or modify IAM roles
+- [x] Create network listeners, reverse shells, or outbound connections to unapproved hosts
+- [x] Modify authentication backends (`src/auth/backends.py`) without ISSO review
+- [x] Disable audit logging (`src/audit/`)
+- [x] Use `eval()`, `exec()`, or `pickle.loads()` with any external data
+- [x] Commit files matching `.env*`, `*.pem`, `*.key`, `credentials.*`
+
+---
+
+## Data Handling
+
+- **Sensitive data types in this project:** SSN, name, date of birth, salary, benefits elections, medical plan selections
+- **Approved data storage:** PostgreSQL via AWS RDS (encrypted at rest, AES-256), S3 with SSE-KMS for document uploads
+- **PII handling:** Field-level encryption for SSN (using `django-encrypted-model-fields`), masking in all log output (last 4 digits only)
+- **Data residency:** AWS GovCloud (US-East), FedRAMP High boundary
+
+The agent MUST:
+- Never include real SSNs, names, salary data, or benefits elections in logs, comments, or test fixtures
+- Use `FAKE_SSN = "000-00-0000"` pattern in all test data
+- Use Django's `@mask_pii` decorator on any view handling PII
+- Source all credentials from AWS Secrets Manager via `src/config/secrets.py`
+- Follow the data handling procedures in `docs/DATA_HANDLING.md`
+
+---
+
+## Coding Standards
+
+- Follow [PEP 8](https://peps.python.org/pep-0008/) via `ruff`
+- Type hints required on all function signatures (`mypy --strict`)
+- Maximum function length: 50 lines
+- Required test coverage: 85% line coverage for new code
+- All database queries MUST use Django ORM or parameterized raw SQL
+- All user input MUST be validated using Django Forms or DRF Serializers
+- No raw SQL without documented justification and security review
+
+---
+
+## Dependencies
+
+- **Approved registries:** pypi.org only (no private registries)
+- **License restrictions:** No AGPL. GPL requires legal review via `legal@agency.example.gov`
+- **Version pinning:** Exact versions in `requirements/production.txt`
+- **Vulnerability policy:** No critical/high CVEs. Medium requires documented justification in PR description.
+
+Before adding any dependency, the agent MUST:
+1. Verify the package name is correct on pypi.org (check for typosquatting)
+2. Run `pip-audit` to check for known vulnerabilities
+3. Verify the license using `pip-licenses`
+4. Get user approval
+
+---
+
+## Network Access
+
+- **Authorized external endpoints:**
+  - `pypi.org` (dependency installation only)
+  - `docs.djangoproject.com` (documentation reference)
+  - `docs.python.org` (documentation reference)
+- **Authorized internal endpoints:**
+  - `hbp-dev.rds.agency.example.gov:5432` (dev database)
+  - `redis-dev.agency.example.gov:6379` (Celery broker, dev)
+- **TLS requirement:** TLS 1.2+ for all connections
+- **Proxy configuration:** All external traffic through `proxy.agency.example.gov:8080`
+
+---
+
+## Testing Requirements
+
+- [x] Unit tests for all new functions (in `tests/unit/`)
+- [x] Integration tests for all API endpoints (in `tests/integration/`)
+- [x] All tests MUST pass: `pytest --cov=src --cov-fail-under=85`
+- [x] PII-related tests MUST verify masking in log output
+- [x] Auth-related tests MUST verify permission enforcement
+
+---
+
+## CI/CD Pipeline
+
+- **Branch protection:** `main` requires 2 reviews (including 1 from `@security-team`), no force push
+- **Required CI checks:** `ruff check`, `mypy`, `pytest`, `pip-audit`, `bandit`, `gitleaks`
+- **Deployment:** Automated to dev on merge to `develop`. Manual approval (ISSO + tech lead) for production via `main`.
+
+The agent MUST NOT:
+- Modify `.github/workflows/` without explicit approval
+- Skip or bypass any required CI check
+- Deploy directly to any environment
+
+---
+
+## Incident Response
+
+If the agent discovers a potential security vulnerability:
+1. Stop the current task immediately
+2. Report the finding to the user
+3. Do NOT create a public GitHub issue
+4. User will report to `security@agency.example.gov` per IR-PLAN-2025-003
+5. User will log the finding in the agency's vulnerability tracking system
+
+---
+
+## Contacts
+
+- **Project Lead:** John Doe, john.doe@agency.example.gov
+- **Security Contact:** security@agency.example.gov
+- **ISSO:** Jane Smith, jane.smith@agency.example.gov

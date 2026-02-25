@@ -1,0 +1,148 @@
+# Federal Agentic AI Guidance — Document Index
+#
+# Auto-generated from YAML frontmatter in content files.
+# Agents SHOULD read this file to understand the repository structure
+# before making changes that span multiple documents.
+#
+# Schema version: 1.0
+# Last generated: 2026-02-25
+
+schema_version: "1.0"
+generated: "2026-02-25"
+repo: "cloud-gov/federal-agentic-ai-guidance"
+scope: "FIPS Moderate | Single-agent | Internal enterprise"
+
+# Frontmatter schema — all .md content files MUST include at minimum:
+#   title (required), description (required), status (required), tier (required)
+# Optional: last_updated, nist_controls, frameworks, audience, keywords, related_files, review_cycle
+frontmatter_schema:
+  required: ["title", "description", "status", "tier"]
+  optional:
+    [
+      "last_updated",
+      "nist_controls",
+      "frameworks",
+      "audience",
+      "keywords",
+      "related_files",
+      "review_cycle",
+    ]
+  status_values: ["canonical", "draft", "deprecated"]
+  tier_values:
+    1: "Core guidance — authoritative rules and control mappings"
+    2: "Supporting documentation — how-to guides and setup instructions"
+    3: "Templates and checklists — reusable artifacts for projects"
+  audience_values: ["developers", "isso", "managers", "all"]
+  review_cycle_values: ["quarterly", "semi-annually", "annually"]
+
+# Document inventory
+documents:
+  # ── Tier 1: Core Guidance ────────────────────────────────────────
+  - path: "AGENTS.md"
+    title: "Federal AI Agent Behavior Rules"
+    description: "Master behavioral contract defining what AI coding agents MUST, SHOULD, and MAY do in federal development environments"
+    status: canonical
+    tier: 1
+    last_updated: "2026-02-25"
+    audience: all
+    nist_controls_count: 19
+    review_cycle: quarterly
+
+  - path: "CODING_PRACTICES.md"
+    title: "Secure Coding Practices for AI-Assisted Federal Development"
+    description: "Secure coding standards for AI-assisted development — input validation, secrets management, dependency security, OWASP/SSDF alignment"
+    status: canonical
+    tier: 1
+    last_updated: "2026-02-25"
+    audience: developers
+    nist_controls_count: 13
+    review_cycle: quarterly
+
+  - path: "docs/SECURITY-CONTROLS.md"
+    title: "NIST SP 800-53 Rev 5.2 Control Overlay for Agentic AI Systems"
+    description: "800-53 control overlay mapping 37 security controls across 10 families to concrete AI agent behaviors and verification methods"
+    status: canonical
+    tier: 1
+    last_updated: "2026-02-25"
+    audience: isso
+    nist_controls_count: 36
+    review_cycle: quarterly
+
+  - path: "docs/AGENT-IDENTITY.md"
+    title: "Agent Identity, Authentication, Authorization, and Delegation"
+    description: "Agent identity management aligned with NCCOE concept paper — authentication, authorization, delegation, and audit logging for AI agents"
+    status: canonical
+    tier: 1
+    last_updated: "2026-02-25"
+    audience: developers
+    nist_controls_count: 8
+    review_cycle: quarterly
+
+  # ── Tier 2: Supporting Documentation ─────────────────────────────
+  - path: "docs/GETTING-STARTED.md"
+    title: "Getting Started: Repository Setup and Environment Hardening"
+    description: "Step-by-step guide for setting up a development repository with security controls for AI coding agents"
+    status: canonical
+    tier: 2
+    last_updated: "2026-02-25"
+    audience: developers
+    nist_controls_count: 4
+    review_cycle: semi-annually
+
+  - path: "docs/TRACEABILITY.md"
+    title: "Control Traceability Matrix"
+    description: "Bidirectional mapping between NIST 800-53 controls, OWASP risks, document sections, and checklist items"
+    status: canonical
+    tier: 2
+    last_updated: "2026-02-25"
+    audience: isso
+    review_cycle: quarterly
+
+  # ── Tier 3: Templates and Checklists ─────────────────────────────
+  - path: "templates/AGENTS.md.template"
+    title: "AGENTS.md Project Template"
+    description: "Copy-paste template for creating a project-specific AGENTS.md with customizable agent behavior rules"
+    status: canonical
+    tier: 3
+    last_updated: "2026-02-25"
+    audience: developers
+    review_cycle: semi-annually
+
+  - path: "templates/risk-assessment.md"
+    title: "AI Agent Risk Assessment Worksheet"
+    description: "Structured risk assessment template aligned with NIST AI RMF — threat analysis, control assessment, and sign-off"
+    status: canonical
+    tier: 3
+    last_updated: "2026-02-25"
+    audience: isso
+    nist_controls_count: 2
+    review_cycle: semi-annually
+
+  - path: "checklists/pre-deployment.md"
+    title: "Pre-Deployment Security Checklist"
+    description: "58-item security checklist for deploying AI-assisted code — secrets, input validation, auth, dependencies, testing, infrastructure"
+    status: canonical
+    tier: 3
+    last_updated: "2026-02-25"
+    audience: developers
+    nist_controls_count: 7
+    review_cycle: semi-annually
+
+  # Summary statistics
+  # ── Examples ──────────────────────────────────────────────────────
+  - path: "examples/AGENTS.md.example"
+    title: "Example: AGENTS.md for a Federal Web Application"
+    description: "Completed example showing how to customize the AGENTS.md template for a hypothetical federal HR benefits portal"
+    status: canonical
+    tier: 3
+    last_updated: "2026-02-25"
+    audience: developers
+    review_cycle: semi-annually
+
+stats:
+  total_documents: 10
+  tier_1_core: 4
+  tier_2_supporting: 2
+  tier_3_templates: 4
+  total_nist_controls_referenced: 42
+  frameworks_covered: 12
