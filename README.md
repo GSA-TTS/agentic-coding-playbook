@@ -125,7 +125,7 @@ This repository uses a **dual-layer architecture**:
 - **Policy layer** (docs, templates, checklists): Human-readable guidance explaining *what* to do and *why* — unchanged from v0.1.x
 - **Execution layer** (skills): Agent-actionable procedures in [Agent Skills format](https://agentskills.io) explaining *how* — step-by-step workflows agents can follow
 
-Skills are compatible with Open Code, OpenAI Codex CLI, Gemini CLI, Cursor, VS Code, and [25+ other platforms](https://agentskills.io).
+Skills are compatible with Open Code, Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, VS Code, and [25+ other platforms](https://agentskills.io).
 
 <!-- GENERATED:SKILLS_TABLE:START — do not edit, run: bash scripts/generate-index.sh -->
 | Skill | Purpose | Scripts? |
