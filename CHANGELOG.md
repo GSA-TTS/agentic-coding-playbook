@@ -4,6 +4,19 @@ All notable changes to this guidance will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.3.1] - 2026-02-26
+
+### Fixed
+
+- `scripts/lib/common.sh` — replaced `head -n -1` with `sed '$ d'` for macOS/BSD compatibility; the negative line count syntax is GNU-specific and caused "head: illegal line count -- -1" errors on macOS
+- `scripts/validate-docs.sh` — same fix for frontmatter extraction (2 occurrences)
+- `scripts/validate-skills.sh` — same fix for frontmatter extraction
+- INDEX.yaml — regenerated with corrected frontmatter parsing (now correctly shows 47 unique NIST controls and 14 frameworks)
+
+### Changed
+
+- README.md — added Claude Code to list of compatible AI coding agents
+
 ## [0.3.0] - 2026-02-26
 
 ### Added

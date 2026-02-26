@@ -161,6 +161,7 @@ This guidance tracks evolving federal standards. Each document includes version 
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-02-26 | 0.3.1 | macOS compatibility fix for frontmatter parsing in generate-index.sh |
 | 2026-02-26 | 0.3.0 | LLM context optimization — progressive disclosure, Quick References, tiered loading |
 | 2026-02-25 | 0.2.2 | QA/QC — example §14-§15, traceability matrix, word-splitting fix |
 | 2026-02-25 | 0.2.1 | Centralized config/schema — shared script library, DRY enforcement |
