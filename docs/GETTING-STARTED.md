@@ -9,13 +9,31 @@ frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218"]
 audience: "developers"
 keywords: ["setup", "repository", "pre-commit", "secrets-scanning", "branch-protection", "CI-CD"]
 related_files: ["AGENTS.md", "CODING_PRACTICES.md", "templates/AGENTS.md.template"]
+load_priority: "on-demand"
 review_cycle: "semi-annually"
 ---
+
+<!-- LOAD: on-demand — Load when setting up a new repository, configuring CI/CD, or hardening development environment. -->
 
 # Getting Started: Repository Setup and Environment Hardening
 
 > **Version:** 0.1.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
->
+
+## Quick Reference
+
+Setup steps in order (each maps to an 800-53 control family):
+
+1. **Repository init** — `.gitignore` with secrets exclusions, `.editorconfig`, branch protection (CM-2)
+2. **AGENTS.md** — Copy template, customize for your project (PL-4)
+3. **Pre-commit hooks** — Secrets scanner (gitleaks/detect-secrets), linter, formatter (IA-5, SA-11)
+4. **CI/CD pipeline** — SAST, SCA, secrets scan, test suite, human approval gate (SA-11, CM-5)
+5. **Environment hardening** — Least-privilege agent credentials, network allowlist, TLS enforcement (AC-6, SC-8)
+
+> **Full step-by-step guide with tool recommendations in sections below.**
+> **Automated setup: Use the `federal-repo-setup` skill.**
+
+---
+
 > **Disclaimer:** This guidance is informational only and is not authoritative federal policy. Each agency must tailor these steps to their specific ATO requirements, organizational policies, and risk tolerance.
 
 This document walks through setting up a development repository with security controls appropriate for AI-assisted federal software development. Every step maps to a NIST SP 800-53 control family so your work is traceable to your System Security Plan (SSP).

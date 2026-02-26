@@ -1,6 +1,6 @@
 ---
 title: "NIST SP 800-53 Rev 5.2 Control Overlay for Agentic AI Systems"
-description: "800-53 control overlay mapping 37 security controls across 10 families to concrete AI agent behaviors and verification methods"
+description: "800-53 control overlay mapping 36 security controls across 10 families to concrete AI agent behaviors and verification methods"
 status: canonical
 tier: 1
 last_updated: "2026-02-25"
@@ -9,13 +9,33 @@ frameworks: ["NIST SP 800-53 Rev 5.2", "NIST COSAiS", "NIST AI RMF 1.0", "FedRAM
 audience: "isso"
 keywords: ["800-53", "control-overlay", "COSAiS", "FedRAMP", "security-controls", "ATO"]
 related_files: ["AGENTS.md", "CODING_PRACTICES.md", "docs/AGENT-IDENTITY.md", "checklists/pre-deployment.md"]
+load_priority: "task-context"
 review_cycle: "quarterly"
 ---
+
+<!-- LOAD: task-context — Load when task involves security controls, ATO, FedRAMP, compliance assessment, or ISSO review. -->
 
 # NIST SP 800-53 Rev 5.2 Control Overlay for Agentic AI Systems
 
 > **Version:** 0.1.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
->
+
+## Quick Reference
+
+36 controls across 10 families. Key families for AI agent systems:
+
+| Family | Controls | Agent-Specific Focus |
+|--------|----------|---------------------|
+| AC (Access Control) | AC-2, AC-3, AC-5, AC-6, AC-12, AC-17 | Agent identity, least privilege, session management |
+| AU (Audit) | AU-2, AU-3, AU-6, AU-12 | Agent action logging, structured audit records |
+| CM (Config Mgmt) | CM-2, CM-3, CM-5, CM-6, CM-7 | Baseline configs, change control, least functionality |
+| IA (Identification) | IA-2, IA-5, IA-8 | Agent authentication, credential management |
+| SA (System Acq) | SA-4, SA-11, SA-12, SA-15 | Supply chain, testing, development process |
+| SI (System Integrity) | SI-2, SI-3, SI-10, SI-11 | Input validation, malicious code protection |
+
+> **Full control overlay with agent behaviors and verification methods in sections below.**
+
+---
+
 > **Disclaimer:** This document is **informational only** and is not authoritative federal policy. It does not replace NIST SP 800-53, the COSAiS project deliverables, or agency-specific security plans. Each agency must tailor these control overlays to their specific Authority to Operate (ATO) requirements, organizational policies, risk tolerance, and applicable laws and regulations.
 
 **Key words:** "MUST", "MUST NOT", "SHOULD", "SHOULD NOT", and "MAY" are used per [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).

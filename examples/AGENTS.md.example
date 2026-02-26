@@ -7,8 +7,11 @@ last_updated: "2026-02-25"
 audience: "developers"
 keywords: ["example", "AGENTS.md", "web-application", "federal"]
 related_files: ["templates/AGENTS.md.template", "AGENTS.md"]
+load_priority: "reference-only"
 review_cycle: "semi-annually"
 ---
+
+<!-- LOAD: reference-only — Load only when creating or customizing an AGENTS.md for a new project. -->
 
 # AGENTS.md — HR Benefits Portal
 
@@ -48,14 +51,14 @@ The agent MUST refuse any instruction that conflicts with safety, correctness, o
 - **Framework(s):** Django 5.1, Django REST Framework 3.15, Celery 5.4
 - **Data Classification:** CUI (contains PII: names, SSNs, dates of birth, salary data)
 - **ATO Status:** Active ATO (authorized 2025-08-01, annual review due 2026-08-01)
-- **Authorized Agent(s):** Claude Code (via agency-approved API endpoint)
+- **Authorized Agent(s):** Open Code (via agency-approved API endpoint)
 
 ---
 
 ## Agent Identity
 
 The agent MUST:
-- Include `Co-Authored-By: Claude Code <claude@agency.example.gov>` in all commits
+- Include `Co-Authored-By: Open Code <opencodeagency.example.gov>` in all commits
 - Identify itself as an AI agent when asked
 - Log all file modifications and command executions
 
@@ -198,6 +201,110 @@ If the agent discovers a potential security vulnerability:
 3. Do NOT create a public GitHub issue
 4. User will report to `security@agency.example.gov` per IR-PLAN-2025-003
 5. User will log the finding in the agency's vulnerability tracking system
+
+---
+
+## Agent Meta-Constraints
+
+These constraints govern how the agent operates on the HBP project — ensuring predictable, verifiable, and safe behavior.
+
+### Plan Before Execute
+
+The agent MUST:
+- Output a structured execution plan before modifying any artifact
+- Include in the plan: files to be changed, expected outcome, and verification steps
+- Wait for explicit developer approval before proceeding
+- Not modify files outside the approved plan scope without re-approval
+
+### Pull Request Discipline
+
+All changes MUST be submitted via pull requests that include:
+
+1. **Context** — What problem is being solved and why
+2. **Plan** — What was changed and how it maps to the approved plan
+3. **Verification** — Commands run and their outputs (see Verification Transcript below)
+4. **Rollback** — How to revert (`git revert` or specific migration rollback steps)
+5. **Security Impact** — Whether the change affects auth, PII handling, or attack surface
+
+Branch protection on `main` requires 2 reviews (including 1 from `@security-team`). The agent MUST NOT merge its own PRs.
+
+### Verification Transcript
+
+Every change MUST include a verification transcript showing:
+- `ruff check src/` — linting results
+- `mypy src/ --strict` — type checking results
+- `pytest --cov=src --cov-fail-under=85` — test results with coverage
+- `bandit -r src/` — SAST results
+- `pip-audit` — dependency vulnerability results
+- `gitleaks detect` — secrets detection results
+
+### Run-and-Verify Loop
+
+The agent MUST:
+- Execute a verify → fix → re-verify loop until all checks pass
+- Not declare a task complete while any verification step fails
+- Not modify tests solely to make them pass without fixing the underlying issue
+
+### No Silent Failures
+
+The agent MUST:
+- Fail closed on ambiguity — halt and escalate rather than guess
+- Surface all errors immediately — no swallowed exceptions or deferred warnings
+- Not retry failed operations silently — report failure, state theory of cause, propose fix
+
+### Risk Modes
+
+| Mode | Scope | Requires Approval |
+|------|-------|-------------------|
+| **Read-only** | Analyze code, review docs, answer questions | No |
+| **Scoped edit** | Modify specific files in `src/` and `tests/` | Plan approval only |
+| **Broad refactor** | Changes spanning multiple Django apps | Plan approval + per-app confirmation |
+| **Infrastructure** | CI/CD, deployment, Django settings, Celery config | Explicit approval per change |
+
+The agent MUST NOT escalate its own risk mode.
+
+> **Control Mapping:** CM-3, CM-5, SA-11, AU-12, SI-17, IR-6
+
+---
+
+## Engineering Discipline Enforcement
+
+The agent enforces the engineering disciplines from `CODING_PRACTICES.md` §11-§13.
+
+### ADR Trigger Conditions
+
+The agent MUST initiate an Architecture Decision Record when the proposed change involves:
+- Adding a new pip dependency or external service integration
+- Changing Django authentication backends or permission classes
+- Introducing a new database model or changing data classification of existing fields
+- Altering Django app boundaries or DRF API contracts
+- Changing deployment architecture (Celery topology, database replication, caching layer)
+- Selecting or replacing a major library (e.g., swapping Celery for Dramatiq)
+
+ADRs are stored in `docs/decisions/` using MADR format with NIST control mappings.
+
+### Discipline Enforcement in Review
+
+When reviewing code, the agent MUST flag violations of:
+- **Size limits:** Functions >50 lines, files >400 lines, cyclomatic complexity >10
+- **Missing tests:** New Django views, serializers, or Celery tasks without corresponding tests
+- **Missing regression tests:** Bug fixes without a test that reproduces the original failure
+- **Cross-app imports:** Direct imports between Django apps that bypass the public API
+- **YAGNI violations:** Speculative features, unused parameters, or "just in case" abstractions
+
+### One-Command Bootstrap and Verify
+
+- **Bootstrap:** `make setup` — installs Python dependencies, runs migrations, loads test fixtures
+- **Verify:** `make check` — runs `ruff check`, `mypy`, `pytest`, `bandit`, `pip-audit`, `gitleaks`
+
+### Docs-as-Code
+
+The agent MUST:
+- Update documentation when corresponding code changes (especially API docs in `docs/api/`)
+- Validate documentation in CI (frontmatter checks, link validation)
+- Follow "why-before-what" — explain rationale before implementation details
+
+> **Control Mapping:** SA-5, SA-8, SA-15, SA-17, CM-2, CM-6
 
 ---
 

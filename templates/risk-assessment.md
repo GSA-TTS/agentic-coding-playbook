@@ -9,8 +9,11 @@ frameworks: ["NIST AI RMF 1.0", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2
 audience: "isso"
 keywords: ["risk-assessment", "AI-RMF", "threat-analysis", "OWASP", "ATO"]
 related_files: ["docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md"]
+load_priority: "reference-only"
 review_cycle: "semi-annually"
 ---
+
+<!-- LOAD: reference-only — Load only when performing a risk assessment or preparing ATO documentation. -->
 
 # AI Agent Risk Assessment Worksheet
 

@@ -1,6 +1,6 @@
 ---
 title: "Pre-Deployment Security Checklist"
-description: "58-item security checklist for deploying AI-assisted code — secrets, input validation, auth, dependencies, testing, infrastructure"
+description: "Security checklist for deploying AI-assisted code — secrets, input validation, auth, dependencies, testing, infrastructure"
 status: canonical
 tier: 3
 last_updated: "2026-02-25"
@@ -9,8 +9,11 @@ frameworks: ["NIST SP 800-53 Rev 5.2", "OWASP Top 10 LLM 2025", "OWASP Top 10 Ag
 audience: "developers"
 keywords: ["checklist", "pre-deployment", "security-review", "sign-off"]
 related_files: ["CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md"]
+load_priority: "reference-only"
 review_cycle: "semi-annually"
 ---
+
+<!-- LOAD: reference-only — Load only when preparing for deployment or running the pre-deployment checklist. -->
 
 # Pre-Deployment Security Checklist for AI-Assisted Code
 

@@ -1,0 +1,26 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://www\\.whitehouse\\.gov"
+    },
+    {
+      "pattern": "^https://www\\.nccoe\\.nist\\.gov"
+    },
+    {
+      "pattern": "^mailto:"
+    },
+    {
+      "pattern": "^#"
+    },
+    {
+      "pattern": "^https://github\\.com/cloud-gov/federal-agentic-ai-guidance"
+    }
+  ],
+  "replacementPatterns": [],
+  "httpHeaders": [],
+  "timeout": "10s",
+  "retryOn429": true,
+  "retryCount": 2,
+  "fallbackRetryDelay": "5s",
+  "aliveStatusCodes": [200, 206, 301, 302, 307, 308]
+}

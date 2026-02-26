@@ -1,0 +1,43 @@
+# markdownlint configuration
+# See: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Allow long lines (documentation often has long table rows and URLs)
+MD013: false
+
+# Allow inline HTML (used for comments and NIST control annotations)
+MD033: false
+
+# Allow multiple headings with same content (different sections may reuse headers)
+MD024: false
+
+# Allow trailing punctuation in headings (e.g., "What Is This?")
+MD026: false
+
+# Allow bare URLs (common in reference lists)
+MD034: false
+
+# Allow HTML comments
+MD051: false
+
+# First line in file should be a top-level heading — disabled because frontmatter comes first
+MD041: false
+
+# Allow emphasis used instead of heading
+MD036: false
+
+# Allow multiple top-level headings (frontmatter title + document H1)
+MD025: false
+
+# Allow lists without surrounding blank lines (RFC 2119 MUST/SHOULD formatting)
+MD032: false
+
+# Allow fenced code blocks without language specifier (pseudocode, examples)
+MD040: false
+
+# Allow fenced code blocks without surrounding blank lines
+MD031: false
+
+# Allow flexible table column spacing (tables use compact format)
+MD056: false
+MD058: false
+MD060: false

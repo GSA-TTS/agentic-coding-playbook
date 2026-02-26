@@ -1,0 +1,80 @@
+name: CI — Documentation Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: DavidAnson/markdownlint-cli2-action@07035fd053f7be764496c0f8d8f9f41f98305101 # v22.0.0
+        with:
+          globs: "**/*.md"
+
+  link-check:
+    name: Link Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: gaurav-nelson/github-action-markdown-link-check@3c3b66f1f7d0900e37b71eca45b63ea9eedfce31 # v1.0.17
+        with:
+          config-file: ".markdown-link-check.json"
+          use-quiet-mode: "yes"
+          folder-path: "."
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run ShellCheck on scripts
+        run: shellcheck -x -e SC1091 scripts/*.sh scripts/lib/*.sh
+      - name: Run ShellCheck on skill scripts
+        run: |
+          shopt -s nullglob
+          SCRIPTS=(skills/*/scripts/*.sh)
+          if [ ${#SCRIPTS[@]} -gt 0 ]; then
+            shellcheck -x -e SC1091 "${SCRIPTS[@]}"
+          else
+            echo "No skill shell scripts found — skipping"
+          fi
+
+  frontmatter-validation:
+    name: Frontmatter & Index Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Validate frontmatter and INDEX.yaml
+        run: |
+          chmod +x scripts/validate-docs.sh
+          bash scripts/validate-docs.sh
+
+      - name: Verify INDEX.yaml is up to date
+        run: |
+          chmod +x scripts/generate-index.sh
+          bash scripts/generate-index.sh --check
+
+  skills-validation:
+    name: Skills Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Validate skills format
+        run: |
+          chmod +x scripts/validate-skills.sh
+          bash scripts/validate-skills.sh

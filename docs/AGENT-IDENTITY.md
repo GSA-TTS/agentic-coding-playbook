@@ -5,39 +5,41 @@ status: canonical
 tier: 1
 last_updated: "2026-02-25"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "IA-2", "IA-5", "IA-8"]
-frameworks:
-  [
-    "NCCOE Agent Identity & Authorization",
-    "NIST CAISI",
-    "NIST SP 800-53 Rev 5.2",
-    "NIST SP 800-63",
-  ]
+frameworks: ["NCCOE Agent Identity & Authorization", "NIST CAISI", "NIST SP 800-53 Rev 5.2", "NIST SP 800-63"]
 audience: "developers"
-keywords:
-  [
-    "agent-identity",
-    "OAuth",
-    "RBAC",
-    "delegation",
-    "audit-logging",
-    "NCCOE",
-    "authentication",
-  ]
-related_files:
-  ["AGENTS.md", "docs/SECURITY-CONTROLS.md", "templates/risk-assessment.md"]
+keywords: ["agent-identity", "OAuth", "RBAC", "delegation", "audit-logging", "NCCOE", "authentication"]
+related_files: ["AGENTS.md", "docs/SECURITY-CONTROLS.md", "templates/risk-assessment.md"]
+load_priority: "task-context"
 review_cycle: "quarterly"
 ---
+
+<!-- LOAD: task-context — Load when task involves authentication, authorization, identity, OAuth, RBAC, delegation, or audit logging. -->
 
 # Agent Identity, Authentication, Authorization, and Delegation
 
 > **Version:** 0.1.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
->
+
+## Quick Reference
+
+| Concern | Requirement |
+|---------|-------------|
+| Identity | Unique agent ID per instance, human-readable name, version tracked |
+| Authentication | OAuth 2.0 client credentials or API keys via approved KMS, no shared credentials |
+| Authorization | RBAC with least privilege, explicit permission lists, deny-by-default |
+| Delegation | Agent acts on behalf of authenticated user, inherits user's max permissions (never exceeds) |
+| Session | Time-limited tokens, automatic expiry, no persistent sessions without re-auth |
+| Audit | Log every action with: agent ID, delegating user, timestamp, action, outcome |
+| Revocation | Immediate credential revocation capability, break-glass procedures documented |
+
+> **Full guidance with NCCOE alignment and implementation patterns in sections below.**
+
+---
+
 > **Disclaimer:** This guidance is informational only and is not authoritative federal policy. Each agency must tailor these recommendations to their specific ATO requirements, organizational policies, and risk tolerance.
 
 This document provides practical guidance for managing AI coding agent identities within federal systems. It covers how agents are identified, how they authenticate, what they are authorized to do, how user identity delegates to agent identity, and how all of it gets logged for audit.
 
 **Alignment:** This guidance aligns with:
-
 - **NCCOE** — [Accelerating the Adoption of Software and AI Agent Identity and Authorization](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization) Concept Paper (February 2026)
 - **NIST CAISI** — [AI Agent Standards Initiative](https://www.nist.gov/caisi/ai-agent-standards-initiative) (February 2026)
 
@@ -70,12 +72,12 @@ Federal identity and access management (IAM) systems were designed around two ca
 
 The NCCOE concept paper (February 2026) identifies four focus areas for managing this new category of identity:
 
-| #   | NCCOE Focus Area                                                                                              | This Document                             |
-| --- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| 1   | **Identification** — Distinguishing AI agents from human users and managing metadata about agent capabilities | [Section 2](#2-agent-identity-model)      |
-| 2   | **Authorization** — Using OAuth 2.0, RBAC, and policy-based access control for agent rights                   | [Section 4](#4-authorization)             |
-| 3   | **Access Delegation** — Linking user identities to AI agents for accountability                               | [Section 5](#5-delegation-model)          |
-| 4   | **Logging and Transparency** — Linking agent actions to their non-human entity for audit                      | [Section 6](#6-audit-and-non-repudiation) |
+| # | NCCOE Focus Area | This Document |
+|---|---|---|
+| 1 | **Identification** — Distinguishing AI agents from human users and managing metadata about agent capabilities | [Section 2](#2-agent-identity-model) |
+| 2 | **Authorization** — Using OAuth 2.0, RBAC, and policy-based access control for agent rights | [Section 4](#4-authorization) |
+| 3 | **Access Delegation** — Linking user identities to AI agents for accountability | [Section 5](#5-delegation-model) |
+| 4 | **Logging and Transparency** — Linking agent actions to their non-human entity for audit | [Section 6](#6-audit-and-non-repudiation) |
 
 The NIST CAISI initiative is developing standards for AI agent behavior more broadly. While those standards are still emerging, this document provides actionable guidance you can implement now.
 
@@ -97,11 +99,11 @@ An AI coding agent needs a distinct identity within your system — separate fro
 
 There are three common patterns for how agents authenticate to systems. Each has tradeoffs.
 
-| Approach                  | Description                                               | Pros                                                                    | Cons                                                                                             |
-| ------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| **Agent service account** | Agent gets its own account with its own credentials       | Clear audit trail; fine-grained permissions; revocable                  | Requires account provisioning; credential management overhead                                    |
-| **User-delegated token**  | Agent uses a scoped token derived from the user's session | Inherits user context; no separate provisioning; natural accountability | Token scope must be carefully limited; user session dependency                                   |
-| **Shared credentials**    | Agent uses the user's credentials directly                | Simple setup                                                            | No distinction in audit logs; violates least privilege; cannot revoke agent access independently |
+| Approach | Description | Pros | Cons |
+|---|---|---|---|
+| **Agent service account** | Agent gets its own account with its own credentials | Clear audit trail; fine-grained permissions; revocable | Requires account provisioning; credential management overhead |
+| **User-delegated token** | Agent uses a scoped token derived from the user's session | Inherits user context; no separate provisioning; natural accountability | Token scope must be carefully limited; user session dependency |
+| **Shared credentials** | Agent uses the user's credentials directly | Simple setup | No distinction in audit logs; violates least privilege; cannot revoke agent access independently |
 
 **Recommendation:** Federal systems SHOULD use either agent service accounts or user-delegated tokens. Shared credentials MUST NOT be used in production systems because they make it impossible to distinguish agent actions from user actions in audit logs.
 
@@ -109,19 +111,18 @@ There are three common patterns for how agents authenticate to systems. Each has
 
 Every AI agent operating in your system MUST have the following metadata recorded and available for audit:
 
-| Field           | Description                               | Example                                     |
-| --------------- | ----------------------------------------- | ------------------------------------------- |
-| `agent_id`      | Unique identifier for this agent instance | `claude-code-a1b2c3d4`                      |
-| `agent_name`    | Human-readable name of the agent product  | `Claude Code`                               |
-| `agent_version` | Version of the agent software             | `1.42.0`                                    |
-| `agent_type`    | Category of agent                         | `coding-assistant`                          |
-| `owning_user`   | The human user who invoked the agent      | `jane.doe@agency.gov`                       |
-| `capabilities`  | What the agent is allowed to do           | `["file_read", "file_write", "shell_exec"]` |
-| `created_at`    | When the agent session was created        | `2026-02-25T14:30:00Z`                      |
-| `expires_at`    | When the agent's authorization expires    | `2026-02-25T22:30:00Z`                      |
+| Field | Description | Example |
+|---|---|---|
+| `agent_id` | Unique identifier for this agent instance | `open-code-a1b2c3d4` |
+| `agent_name` | Human-readable name of the agent product | `Open Code` |
+| `agent_version` | Version of the agent software | `1.42.0` |
+| `agent_type` | Category of agent | `coding-assistant` |
+| `owning_user` | The human user who invoked the agent | `jane.doe@agency.gov` |
+| `capabilities` | What the agent is allowed to do | `["file_read", "file_write", "shell_exec"]` |
+| `created_at` | When the agent session was created | `2026-02-25T14:30:00Z` |
+| `expires_at` | When the agent's authorization expires | `2026-02-25T22:30:00Z` |
 
 The agent SHOULD also track:
-
 - **Model identifier** — which AI model is powering the agent (e.g., `claude-opus-4-6`)
 - **Provider** — the vendor or service (e.g., `anthropic`, `openai`, `self-hosted`)
 - **Deployment context** — where the agent is running (e.g., `developer-workstation`, `ci-pipeline`, `cloud-ide`)
@@ -131,24 +132,21 @@ The agent SHOULD also track:
 Every action taken by an agent MUST be distinguishable from a human action in all systems the agent touches.
 
 **In version control:**
-
 - Agent-authored commits MUST include a co-authorship trailer:
   ```
-  Co-Authored-By: Claude Code <agent@example.com>
+  Co-Authored-By: Open Code <agent@example.com>
   ```
 - The committer identity SHOULD identify the agent, not the user, when possible
 - If the VCS system does not support separate committer/author fields, the commit message body MUST identify the agent
 
 **In API calls:**
-
 - The `User-Agent` header SHOULD include the agent name and version:
   ```
-  User-Agent: claude-code/1.42.0 (federal-workstation)
+  User-Agent: open-code/1.42.0 (federal-workstation)
   ```
 - If the API supports custom headers, include an `X-Agent-Id` header with the agent's unique identifier
 
 **In audit logs:**
-
 - Every log entry MUST include both the `owning_user` and the `agent_id` (see [Section 6](#6-audit-and-non-repudiation))
 
 ### 2.4 Naming Conventions for Agent Accounts
@@ -160,13 +158,11 @@ svc-agent-{agent-type}-{environment}-{sequence}
 ```
 
 Examples:
-
-- `svc-agent-claude-dev-001` — Claude Code agent in development
+- `svc-agent-claude-dev-001` — Open Code agent in development
 - `svc-agent-copilot-staging-001` — GitHub Copilot agent in staging
 - `svc-agent-cursor-prod-001` — Cursor agent in production
 
 Naming rules:
-
 - Agent service account names MUST contain "agent" or "ai" to distinguish them from human and traditional service accounts
 - Agent accounts MUST be placed in a distinct organizational unit (OU) or group in your identity provider
 - Agent accounts MUST NOT share naming patterns with human accounts
@@ -188,14 +184,12 @@ AI agents authenticate differently than humans. They cannot present a PIV/CAC ca
 When an agent acts as a standalone service — for example, a CI/CD pipeline agent that runs automated code reviews — use the OAuth 2.0 client credentials grant.
 
 **How it works:**
-
 1. The agent is registered as an OAuth client with your identity provider
 2. The agent authenticates using a `client_id` and `client_secret` (or client certificate)
 3. The identity provider issues a short-lived access token
 4. The agent includes this token in API requests
 
 **Requirements:**
-
 - The client secret MUST be stored in an approved secrets management solution — never in source code or environment variables committed to version control
 - Access tokens MUST have a maximum lifetime of **1 hour**
 - The agent MUST request only the scopes needed for the current task
@@ -208,14 +202,12 @@ When an agent acts as a standalone service — for example, a CI/CD pipeline age
 When an agent acts on behalf of a specific user — for example, a coding assistant helping a developer in their IDE — use the OAuth 2.0 on-behalf-of (OBO) flow or a comparable delegation mechanism.
 
 **How it works:**
-
 1. The user authenticates normally (PIV/CAC, SSO, MFA)
 2. The user's session generates a delegation token for the agent
 3. The agent uses this delegation token to access resources on the user's behalf
 4. All actions are traceable to both the user and the agent
 
 **Requirements:**
-
 - The delegation token MUST have a narrower scope than the user's full permissions
 - The delegation token MUST expire when the user's session ends (or sooner)
 - The token MUST NOT be transferable to other agents or sessions
@@ -228,7 +220,6 @@ When an agent acts on behalf of a specific user — for example, a coding assist
 Many AI agents connect to external model providers (Anthropic, OpenAI, etc.) using API keys. These keys require careful management.
 
 **Requirements:**
-
 - API keys MUST be stored in approved secrets management solutions (HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, or agency equivalent)
 - API keys MUST NOT be committed to version control, stored in `.env` files that could be committed, or passed as command-line arguments (which appear in process listings)
 - API keys MUST be rotated on a regular schedule (90 days maximum; 30 days recommended)
@@ -236,7 +227,6 @@ Many AI agents connect to external model providers (Anthropic, OpenAI, etc.) usi
 - API key usage SHOULD be monitored for anomalous patterns (unusual volume, off-hours access, unexpected endpoints)
 
 **Rotation procedure:**
-
 1. Generate new key in the provider's management console
 2. Update the secrets management solution with the new key
 3. Verify the agent functions with the new key
@@ -248,26 +238,24 @@ Many AI agents connect to external model providers (Anthropic, OpenAI, etc.) usi
 AI agents cannot directly use PIV or CAC smart cards. However, PIV/CAC authentication can gate agent access.
 
 **Pattern: PIV-gated agent activation:**
-
 1. User authenticates to the workstation or IDE using PIV/CAC
 2. Successful PIV authentication unlocks the ability to invoke the agent
 3. The agent receives a delegated token derived from the PIV-authenticated session
 4. The agent's token inherits the user's PIV-verified identity for audit purposes
 
 **Requirements:**
-
 - Agent access MUST be contingent on the user having completed strong authentication (PIV/CAC or equivalent MFA)
 - If the user's PIV session expires or is revoked, the agent's delegated token MUST be invalidated
 - The agent MUST NOT cache or store PIV-derived credentials beyond the current session
 
 ### 3.5 Token Scope and Lifetime Requirements
 
-| Token Type                  | Maximum Lifetime                    | Scope Rule                               |
-| --------------------------- | ----------------------------------- | ---------------------------------------- |
-| Agent service account token | 1 hour                              | Minimum scopes for task category         |
-| User-delegated token        | Shorter of: 8 hours or user session | Subset of user's permissions             |
-| CI/CD pipeline token        | Duration of pipeline run            | Read-only unless write explicitly needed |
-| API provider key            | 90 days (rotate)                    | Per-environment, per-agent-type          |
+| Token Type | Maximum Lifetime | Scope Rule |
+|---|---|---|
+| Agent service account token | 1 hour | Minimum scopes for task category |
+| User-delegated token | Shorter of: 8 hours or user session | Subset of user's permissions |
+| CI/CD pipeline token | Duration of pipeline run | Read-only unless write explicitly needed |
+| API provider key | 90 days (rotate) | Per-environment, per-agent-type |
 
 **Scope examples:**
 
@@ -301,7 +289,6 @@ Authorization determines what an agent is allowed to do once it has been identif
 The principle of least privilege is the foundation of agent authorization. Agents MUST start with zero permissions and be granted only what they need.
 
 **Rules:**
-
 - Agents MUST be authorized only for the specific tasks they are designed to perform
 - Agents MUST NOT inherit the full permission set of the invoking user
 - Permissions MUST be granted at the narrowest scope possible (specific repository, not all repositories; specific directory, not entire filesystem)
@@ -312,16 +299,15 @@ The principle of least privilege is the foundation of agent authorization. Agent
 
 Define agent roles that map to specific capability levels. This is simpler to manage than per-agent permission lists.
 
-| Role              | Permissions                                                              | Use Case                                   |
-| ----------------- | ------------------------------------------------------------------------ | ------------------------------------------ |
-| `agent-reader`    | Read files, read git history, read CI results                            | Code review, documentation lookup          |
-| `agent-developer` | Read/write files, create branches, run tests, commit to feature branches | Interactive coding assistance              |
-| `agent-ci`        | Read files, run builds, run tests, publish artifacts                     | CI/CD pipeline automation                  |
-| `agent-reviewer`  | Read files, read PRs, post review comments                               | Automated code review                      |
-| `agent-admin`     | Should not exist for agents                                              | Agents MUST NOT have administrative access |
+| Role | Permissions | Use Case |
+|---|---|---|
+| `agent-reader` | Read files, read git history, read CI results | Code review, documentation lookup |
+| `agent-developer` | Read/write files, create branches, run tests, commit to feature branches | Interactive coding assistance |
+| `agent-ci` | Read files, run builds, run tests, publish artifacts | CI/CD pipeline automation |
+| `agent-reviewer` | Read files, read PRs, post review comments | Automated code review |
+| `agent-admin` | Should not exist for agents | Agents MUST NOT have administrative access |
 
 **Assignment rules:**
-
 - Each agent MUST be assigned exactly one role per system
 - Role escalation (moving from `agent-reader` to `agent-developer`) MUST require human approval
 - The `agent-admin` role MUST NOT exist — agents MUST NOT have administrative access to any system
@@ -332,7 +318,6 @@ Define agent roles that map to specific capability levels. This is simpler to ma
 For fine-grained authorization decisions, use a policy engine. This allows rules like "Agent X can write to files in `/src/` but not `/config/`" or "Agent Y can run `npm test` but not `npm publish`."
 
 **Common policy engines:**
-
 - **Open Policy Agent (OPA)** — General-purpose, widely adopted in federal environments
 - **Cedar** — AWS-developed, designed for fine-grained authorization
 - **Agency-specific solutions** — Many agencies have existing policy decision points (PDPs)
@@ -360,16 +345,16 @@ allow_shell_exec {
 
 Define explicit boundaries for what agents can and cannot do. These boundaries apply regardless of the agent's role.
 
-| Capability               | Default                             | Notes                                                                     |
-| ------------------------ | ----------------------------------- | ------------------------------------------------------------------------- |
-| **Filesystem read**      | Project directory only              | No access to home directory, system files, or other projects              |
-| **Filesystem write**     | Project source directories only     | No write access to config, deployment, or CI directories without approval |
-| **Shell execution**      | Allowlisted commands only           | See allowlist in your AGENTS.md                                           |
-| **Network access**       | Deny by default                     | Specific endpoints allowlisted per project                                |
-| **Git operations**       | Commit and push to feature branches | No force push; no push to main/production branches                        |
-| **Package installation** | With approval                       | Agent may suggest; human approves                                         |
-| **Database access**      | Read-only in non-production         | No direct production database access                                      |
-| **Secrets access**       | Deny                                | Agent cannot read secrets directly; uses delegated tokens                 |
+| Capability | Default | Notes |
+|---|---|---|
+| **Filesystem read** | Project directory only | No access to home directory, system files, or other projects |
+| **Filesystem write** | Project source directories only | No write access to config, deployment, or CI directories without approval |
+| **Shell execution** | Allowlisted commands only | See allowlist in your AGENTS.md |
+| **Network access** | Deny by default | Specific endpoints allowlisted per project |
+| **Git operations** | Commit and push to feature branches | No force push; no push to main/production branches |
+| **Package installation** | With approval | Agent may suggest; human approves |
+| **Database access** | Read-only in non-production | No direct production database access |
+| **Secrets access** | Deny | Agent cannot read secrets directly; uses delegated tokens |
 
 ### 4.5 Deny-by-Default Posture
 
@@ -404,7 +389,6 @@ User (authenticated via PIV/MFA)
 ```
 
 **Rules:**
-
 - Every agent action MUST be traceable back to the user who initiated the session
 - The user MUST be informed about what actions the agent has taken (or proposes to take)
 - The user retains full accountability for agent actions — the agent does not absorb responsibility
@@ -428,12 +412,11 @@ A delegation token encodes the relationship between the user and the agent. It a
   "project": "project-alpha",
   "iat": 1740494400,
   "exp": 1740523200,
-  "jti": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  "jti": "example_token_id"
 }
 ```
 
 Key fields:
-
 - `sub` — the agent's identity
 - `act.sub` — the delegating user's identity (the "actor on behalf of" claim)
 - `scope` — the specific permissions delegated
@@ -447,14 +430,12 @@ Key fields:
 Users MUST be able to revoke agent delegation at any time, with immediate effect.
 
 **Revocation requirements:**
-
 - Revoking the user's session MUST revoke all delegated agent tokens
 - The user MUST have a mechanism to revoke agent access independently of their own session (e.g., a "disconnect agent" button)
 - Revocation MUST take effect within **60 seconds** (token validation must check revocation lists)
 - Revoked tokens MUST be logged with the reason for revocation
 
 **Scope limitation requirements:**
-
 - Delegation tokens MUST be scoped to a specific project or repository
 - Delegation tokens MUST NOT grant access to resources the user does not have access to
 - Delegation tokens SHOULD be scoped to the current task (e.g., "implement feature X" does not need deploy permissions)
@@ -464,7 +445,6 @@ Users MUST be able to revoke agent delegation at any time, with immediate effect
 Agents MUST NOT impersonate users. The distinction is important: acting on behalf of a user (with delegation) is legitimate; pretending to be a user is not.
 
 **Rules:**
-
 - Agent API calls MUST use the agent's own identity, with the delegation claim indicating the user — not the user's identity directly
 - Agent-authored content (commits, comments, messages) MUST be identifiable as agent-authored
 - If a system does not support delegation claims (no "on behalf of" concept), the agent MUST use its own service account and include the user's identity in metadata or log entries
@@ -485,24 +465,24 @@ Every action taken by an agent MUST be logged in a way that answers: Who request
 
 Every agent action log entry MUST include the following fields:
 
-| Field                 | Description                                                                  | Required |
-| --------------------- | ---------------------------------------------------------------------------- | -------- |
-| `timestamp`           | When the action occurred (ISO 8601, UTC)                                     | MUST     |
-| `event_id`            | Unique identifier for this event                                             | MUST     |
-| `correlation_id`      | Links related events in a chain of actions                                   | MUST     |
-| `session_id`          | The agent session this action belongs to                                     | MUST     |
-| `requesting_user`     | The human who initiated the session                                          | MUST     |
-| `agent_id`            | The agent instance that performed the action                                 | MUST     |
-| `agent_name`          | Human-readable agent name                                                    | MUST     |
-| `agent_version`       | Agent software version                                                       | MUST     |
-| `action_type`         | Category of action (file_read, file_write, shell_exec, api_call, git_commit) | MUST     |
-| `action_detail`       | Specific action taken                                                        | MUST     |
-| `resource`            | What was acted upon (file path, API endpoint, repository)                    | MUST     |
-| `result`              | Outcome (success, failure, denied, error)                                    | MUST     |
-| `authorization_basis` | Which role, policy, or approval authorized this action                       | SHOULD   |
-| `delegation_token_id` | The JTI of the delegation token used                                         | SHOULD   |
-| `model_id`            | The AI model that powered the action                                         | SHOULD   |
-| `risk_level`          | Assessed risk of the action (low, medium, high)                              | SHOULD   |
+| Field | Description | Required |
+|---|---|---|
+| `timestamp` | When the action occurred (ISO 8601, UTC) | MUST |
+| `event_id` | Unique identifier for this event | MUST |
+| `correlation_id` | Links related events in a chain of actions | MUST |
+| `session_id` | The agent session this action belongs to | MUST |
+| `requesting_user` | The human who initiated the session | MUST |
+| `agent_id` | The agent instance that performed the action | MUST |
+| `agent_name` | Human-readable agent name | MUST |
+| `agent_version` | Agent software version | MUST |
+| `action_type` | Category of action (file_read, file_write, shell_exec, api_call, git_commit) | MUST |
+| `action_detail` | Specific action taken | MUST |
+| `resource` | What was acted upon (file path, API endpoint, repository) | MUST |
+| `result` | Outcome (success, failure, denied, error) | MUST |
+| `authorization_basis` | Which role, policy, or approval authorized this action | SHOULD |
+| `delegation_token_id` | The JTI of the delegation token used | SHOULD |
+| `model_id` | The AI model that powered the action | SHOULD |
+| `risk_level` | Assessed risk of the action (low, medium, high) | SHOULD |
 
 ### 6.2 Log Format Specification
 
@@ -517,15 +497,15 @@ Agent audit logs MUST use structured JSON format. One JSON object per line (JSON
   "correlation_id": "corr_9e8d7c6b",
   "session_id": "sess_a1b2c3d4",
   "requesting_user": "jane.doe@agency.gov",
-  "agent_id": "claude-code-a1b2c3d4",
-  "agent_name": "Claude Code",
+  "agent_id": "open-code-a1b2c3d4",
+  "agent_name": "Open Code",
   "agent_version": "1.42.0",
   "action_type": "file_write",
   "action_detail": "Modified src/api/handler.ts — added input validation",
   "resource": "/project-alpha/src/api/handler.ts",
   "result": "success",
   "authorization_basis": "role:agent-developer",
-  "delegation_token_id": "insert-token-id-here"
+  "delegation_token_id": "example_token_id"
 }
 ```
 
@@ -538,15 +518,15 @@ Agent audit logs MUST use structured JSON format. One JSON object per line (JSON
   "correlation_id": "corr_9e8d7c6b",
   "session_id": "sess_a1b2c3d4",
   "requesting_user": "jane.doe@agency.gov",
-  "agent_id": "claude-code-a1b2c3d4",
-  "agent_name": "Claude Code",
+  "agent_id": "open-code-a1b2c3d4",
+  "agent_name": "Open Code",
   "agent_version": "1.42.0",
   "action_type": "file_write",
   "action_detail": "Attempted to modify deploy/production.yaml",
   "resource": "/project-alpha/deploy/production.yaml",
   "result": "denied",
   "authorization_basis": "policy:deny_production_config_write",
-  "delegation_token_id": "insert-token-id-here"
+  "delegation_token_id": "example_token_id"
 }
 ```
 
@@ -555,7 +535,6 @@ Agent audit logs MUST use structured JSON format. One JSON object per line (JSON
 When an agent performs a sequence of related actions (e.g., read a file, modify it, run tests, commit), all events in that sequence MUST share a `correlation_id`. This enables auditors to reconstruct the full chain of events.
 
 **Rules:**
-
 - A new `correlation_id` MUST be generated when the user gives the agent a new task
 - All actions within that task MUST use the same `correlation_id`
 - If a task spawns sub-tasks, each sub-task SHOULD have its own `correlation_id` that references the parent via a `parent_correlation_id` field
@@ -565,11 +544,11 @@ When an agent performs a sequence of related actions (e.g., read a file, modify 
 
 Agent audit logs MUST be retained according to your agency's records management policy. As a baseline:
 
-| Log Category                                               | Minimum Retention | Rationale                   |
-| ---------------------------------------------------------- | ----------------- | --------------------------- |
-| Security-relevant events (auth, access denial, escalation) | 3 years           | NARA GRS 3.2, agency policy |
-| Standard operational events (file reads/writes, test runs) | 1 year            | Operational needs           |
-| Session metadata (start, end, user, agent)                 | 3 years           | Accountability              |
+| Log Category | Minimum Retention | Rationale |
+|---|---|---|
+| Security-relevant events (auth, access denial, escalation) | 3 years | NARA GRS 3.2, agency policy |
+| Standard operational events (file reads/writes, test runs) | 1 year | Operational needs |
+| Session metadata (start, end, user, agent) | 3 years | Accountability |
 
 Logs MUST be stored in a tamper-evident manner. Agents MUST NOT have write access to their own audit logs — logs MUST be written to a system the agent cannot modify or delete.
 
@@ -578,7 +557,6 @@ Logs MUST be stored in a tamper-evident manner. Agents MUST NOT have write acces
 Non-repudiation means proving that a specific agent took a specific action at a specific time, and that neither the user nor the agent can deny it.
 
 **Requirements:**
-
 - Audit logs MUST be written to an append-only store that the agent cannot modify
 - Logs SHOULD be integrity-protected (cryptographic hashing, log signing, or blockchain-style chaining)
 - The delegation token used for each action MUST be logged, so the authorization chain can be verified after the fact
@@ -601,14 +579,13 @@ Not every agent action needs human approval — that would eliminate the product
 
 Classify agent actions into three risk tiers. Each tier has a different approval requirement.
 
-| Tier                              | Risk Level | Approval Requirement                             | Examples                                                                                                 |
-| --------------------------------- | ---------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **Tier 1 — Auto-approve**         | Low        | Agent proceeds without asking                    | Read files, run tests, search codebase, view git history                                                 |
-| **Tier 2 — Notify**               | Medium     | Agent proceeds but notifies the user             | Write files in project directory, commit to feature branch, install dev dependency                       |
-| **Tier 3 — Block until approved** | High       | Agent stops and waits for explicit user approval | Push to remote, modify CI/CD config, delete files, access external APIs, install production dependencies |
+| Tier | Risk Level | Approval Requirement | Examples |
+|---|---|---|---|
+| **Tier 1 — Auto-approve** | Low | Agent proceeds without asking | Read files, run tests, search codebase, view git history |
+| **Tier 2 — Notify** | Medium | Agent proceeds but notifies the user | Write files in project directory, commit to feature branch, install dev dependency |
+| **Tier 3 — Block until approved** | High | Agent stops and waits for explicit user approval | Push to remote, modify CI/CD config, delete files, access external APIs, install production dependencies |
 
 **Classification rules:**
-
 - If an action is **reversible** and confined to the project — Tier 1 or Tier 2
 - If an action **leaves the local environment** (network, push, deploy) — Tier 3
 - If an action is **destructive** (delete, overwrite, force push) — Tier 3
@@ -618,7 +595,6 @@ Classify agent actions into three risk tiers. Each tier has a different approval
 ### 7.2 Approval Workflow Examples
 
 **Tier 2 notification (file write):**
-
 ```
 Agent: I modified src/api/handler.ts to add input validation for the
        email parameter. Changes: +12 lines, -3 lines.
@@ -626,7 +602,6 @@ Agent: I modified src/api/handler.ts to add input validation for the
 ```
 
 **Tier 3 approval request (push to remote):**
-
 ```
 Agent: I have 3 commits on branch feat/input-validation ready to push
        to origin. Changes include:
@@ -638,7 +613,6 @@ Agent: I have 3 commits on branch feat/input-validation ready to push
 ```
 
 **Tier 3 approval request (external API call):**
-
 ```
 Agent: To check for known vulnerabilities in the lodash package, I need
        to query the OSV.dev API (https://api.osv.dev/v1/query).
@@ -719,22 +693,22 @@ Use this checklist when setting up agent identity and access management for a pr
 
 ## NIST SP 800-53 Control Cross-Reference
 
-| Section                      | Primary Controls                             | NCCOE Focus Area                   |
-| ---------------------------- | -------------------------------------------- | ---------------------------------- |
-| 2. Agent Identity Model      | AC-2, IA-2, IA-4, IA-8                       | 1 — Identification                 |
-| 3. Authentication            | IA-2, IA-5, SC-12, SC-23                     | 1 — Identification, 3 — Delegation |
-| 4. Authorization             | AC-3, AC-6, AC-16, CM-7                      | 2 — Authorization                  |
-| 5. Delegation Model          | AC-2, AC-3, AC-17, IA-2, IA-4                | 3 — Access Delegation              |
-| 6. Audit and Non-Repudiation | AU-2, AU-3, AU-6, AU-10, AU-11, AU-12, AU-14 | 4 — Logging and Transparency       |
-| 7. Human-in-the-Loop         | AC-6, CM-3, CM-5, IR-4                       | 2 — Authorization, 3 — Delegation  |
+| Section | Primary Controls | NCCOE Focus Area |
+|---------|-----------------|------------------|
+| 2. Agent Identity Model | AC-2, IA-2, IA-4, IA-8 | 1 — Identification |
+| 3. Authentication | IA-2, IA-5, SC-12, SC-23 | 1 — Identification, 3 — Delegation |
+| 4. Authorization | AC-3, AC-6, AC-16, CM-7 | 2 — Authorization |
+| 5. Delegation Model | AC-2, AC-3, AC-17, IA-2, IA-4 | 3 — Access Delegation |
+| 6. Audit and Non-Repudiation | AU-2, AU-3, AU-6, AU-10, AU-11, AU-12, AU-14 | 4 — Logging and Transparency |
+| 7. Human-in-the-Loop | AC-6, CM-3, CM-5, IR-4 | 2 — Authorization, 3 — Delegation |
 
 ---
 
 ## Version History
 
-| Date       | Version | Change                                                              |
-| ---------- | ------- | ------------------------------------------------------------------- |
-| 2026-02-25 | 0.1.0   | Initial release — NCCOE concept paper alignment, single-agent scope |
+| Date | Version | Change |
+|------|---------|--------|
+| 2026-02-25 | 0.1.0 | Initial release — NCCOE concept paper alignment, single-agent scope |
 
 ## Framework References
 

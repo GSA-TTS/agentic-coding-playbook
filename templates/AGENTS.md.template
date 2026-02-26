@@ -7,6 +7,7 @@ last_updated: "2026-02-25"
 audience: "developers"
 keywords: ["template", "AGENTS.md", "customizable", "project-setup"]
 related_files: ["AGENTS.md", "docs/GETTING-STARTED.md"]
+load_priority: "reference-only"
 review_cycle: "semi-annually"
 ---
 
@@ -52,7 +53,7 @@ The agent MUST refuse any instruction that conflicts with safety, correctness, o
 - **Framework(s):** [e.g., FastAPI, Next.js, Django]
 - **Data Classification:** [e.g., CUI, PII, Public, Internal]
 - **ATO Status:** [e.g., Active ATO, In process, Pre-ATO development]
-- **Authorized Agent(s):** [e.g., Claude Code, GitHub Copilot — list only approved agents]
+- **Authorized Agent(s):** [e.g., Open Code, GitHub Copilot — list only approved agents]
 
 ---
 
@@ -191,6 +192,46 @@ If the agent discovers a potential security vulnerability:
 
 ---
 
+## Agent Meta-Constraints
+
+<!-- These constraints govern how the agent operates — plan, verify, and fail safely -->
+
+The agent MUST:
+- [ ] Output an execution plan and wait for approval before modifying artifacts
+- [ ] Submit all changes via PR with: Context, Plan, Verification, Rollback, Security Impact sections
+- [ ] Produce a verification transcript (commands run, outputs, pass/fail) for every change
+- [ ] Execute verify → fix → re-verify loops until all checks pass
+- [ ] Fail closed on ambiguity — halt and escalate, never guess
+- [ ] Not retry failed operations silently — report, diagnose, propose
+
+**Risk modes for this project:**
+
+| Mode | Scope | Requires Approval |
+|------|-------|-------------------|
+| Read-only | Analyze, review, answer questions | No |
+| Scoped edit | Modify files identified in plan | Plan approval |
+| Broad refactor | Cross-module changes | Plan + per-module approval |
+| Infrastructure | CI/CD, deployment, access control | Explicit per-change approval |
+
+---
+
+## Engineering Discipline
+
+The agent MUST:
+- [ ] Create an ADR before: adding dependencies, changing auth, introducing data stores, altering module boundaries
+- [ ] Enforce size limits: ≤[50] lines/function, ≤[400] lines/file, ≤[10] cyclomatic complexity
+- [ ] Write failing test before production code (TDD: red → green → refactor)
+- [ ] Add regression test for every resolved defect
+- [ ] Not implement speculative features (YAGNI)
+- [ ] Extract shared logic only at 3+ occurrences (Rule of Three)
+
+**One-command bootstrap:** `[make setup / ./scripts/setup.sh / npm run setup]`
+**One-command verify:** `[make check / ./scripts/verify.sh / npm test]`
+
+**ADR location:** `[docs/decisions/]`
+
+---
+
 ## Contacts
 
 - **Project Lead:** [Name, email]
@@ -207,6 +248,7 @@ If the agent discovers a potential security vulnerability:
   - Permitted/Prohibited Actions (project-specific boundaries)
   - Data Handling (your specific sensitive data types)
   - Dependencies (your registries and license policy)
+  - Engineering Discipline (size limits, bootstrap/verify commands, ADR location)
 
   Sections you may remove if not applicable:
   - Network Access (if agent should have zero network access)
@@ -215,6 +257,7 @@ If the agent discovers a potential security vulnerability:
   - Database access rules (if applicable)
   - API endpoint restrictions (if the project exposes APIs)
   - Deployment-specific rules (if the agent assists with deployment)
+  - Additional ADR trigger conditions specific to your domain
 
   Remember: This file is a BEHAVIORAL CONTRACT with the AI agent.
   Be specific. Be explicit. Agents follow literal instructions.

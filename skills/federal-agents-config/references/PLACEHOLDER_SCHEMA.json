@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Federal AGENTS.md Configuration",
+  "description": "Schema for the JSON configuration used to generate a project-specific AGENTS.md",
+  "type": "object",
+  "required": ["system_name", "language"],
+  "properties": {
+    "system_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Name of the system (e.g., 'Federal HR Benefits Portal')"
+    },
+    "agency_name": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Agency or organization name (e.g., 'Department of Health and Human Services')"
+    },
+    "system_description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Brief description of what the system does"
+    },
+    "impact_level": {
+      "type": "string",
+      "enum": ["low", "moderate", "high"],
+      "default": "moderate",
+      "description": "FIPS impact level"
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Primary programming language with version (e.g., 'Python 3.12')"
+    },
+    "framework": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Framework used (e.g., 'FastAPI', 'Next.js', 'Django')"
+    },
+    "data_classification": {
+      "type": "string",
+      "enum": ["public", "internal", "cui", "pii", "phi"],
+      "default": "internal",
+      "description": "Highest data classification handled by the system"
+    },
+    "ato_status": {
+      "type": "string",
+      "enum": ["active", "in-process", "pre-ato"],
+      "default": "pre-ato",
+      "description": "Authority to Operate status"
+    },
+    "agent_names": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "maxItems": 10,
+      "description": "List of authorized AI coding agents"
+    },
+    "prohibited_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      },
+      "maxItems": 20,
+      "description": "Additional project-specific prohibited actions (appended to defaults)"
+    },
+    "permitted_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      },
+      "maxItems": 20,
+      "description": "Additional project-specific permitted actions (appended to defaults)"
+    },
+    "approval_required_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      },
+      "maxItems": 20,
+      "description": "Additional actions requiring approval (appended to defaults)"
+    },
+    "sensitive_data_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "maxItems": 20,
+      "description": "Specific sensitive data types (e.g., 'SSN', 'email addresses')"
+    },
+    "approved_storage": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "maxItems": 10,
+      "description": "Approved data storage locations"
+    },
+    "secrets_backend": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Secrets management tool (e.g., 'AWS Secrets Manager')"
+    },
+    "approved_registries": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "maxItems": 10,
+      "description": "Approved package registries"
+    },
+    "license_restrictions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "maxItems": 10,
+      "description": "License restrictions"
+    },
+    "network_allowlist": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      },
+      "maxItems": 50,
+      "description": "Authorized network endpoints (empty = no network section)"
+    },
+    "test_command": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Command to run tests (auto-detected from language if omitted)"
+    },
+    "test_coverage_target": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}$",
+      "default": "80",
+      "description": "Required test coverage percentage"
+    },
+    "ci_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "maxItems": 20,
+      "default": ["lint", "test", "sast", "sca", "secrets-scan"],
+      "description": "Required CI/CD checks"
+    },
+    "branch_protection": {
+      "type": "string",
+      "maxLength": 200,
+      "default": "1 review, no force push",
+      "description": "Branch protection rules"
+    },
+    "project_lead": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Project lead contact (name, email)"
+    },
+    "security_contact": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Security contact (name, email)"
+    },
+    "isso_contact": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "ISSO contact (name, email)"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Name and title of reviewer"
+    }
+  },
+  "additionalProperties": false
+}

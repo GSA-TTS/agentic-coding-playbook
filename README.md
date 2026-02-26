@@ -15,7 +15,7 @@ This guidance is designed for **FIPS Moderate** impact level systems using **sin
 ## Who This Is For
 
 Federal employees (typically GS-12 to GS-15) who:
-- Have access to AI coding agents (Claude Code, GitHub Copilot, Cursor, etc.)
+- Have access to AI coding agents (Open Code, GitHub Copilot, Cursor, etc.)
 - Can write basic code but may not be deeply familiar with NIST frameworks
 - Need to build software that meets federal security and compliance requirements
 - Want their AI agents to follow secure-by-default practices
@@ -44,11 +44,29 @@ Every recommendation in this guidance maps to one or more authoritative sources:
 ```
 federal-agentic-ai-guidance/
 ├── README.md                        # This file
-├── INDEX.yaml                       # Document index — agents read this first
+├── CONTEXT-GUIDE.md                 # Agent entry point — read this FIRST for loading instructions
+├── INDEX.yaml                       # Document index with load_priority metadata
 ├── AGENTS.md                        # Master agent behavior rules
 ├── CODING_PRACTICES.md              # Secure coding standards for AI-assisted development
 ├── CONTRIBUTING.md                  # How to contribute to this guidance
 ├── CHANGELOG.md                     # Version history and framework updates
+├── CODEOWNERS                       # Repository ownership
+├── LICENSE                          # CC0 1.0 Universal (public domain)
+├── SECURITY.md                      # Security policy and responsible disclosure
+├── .github/
+│   ├── dependabot.yml               # Automated GitHub Actions updates
+│   ├── ISSUE_TEMPLATE/              # Bug report and improvement request templates
+│   ├── PULL_REQUEST_TEMPLATE.md     # PR checklist for contributors
+│   └── workflows/
+│       ├── ci.yml                   # Markdown lint, link check, ShellCheck, frontmatter + skills validation
+│       └── release.yml              # Automated GitHub releases on version tags
+├── scripts/
+│   ├── config.sh                    # Centralized schema constants (status, tiers, limits)
+│   ├── lib/
+│   │   └── common.sh               # Shared frontmatter extraction and JSON output helpers
+│   ├── generate-index.sh            # Deterministic INDEX.yaml generator (run after doc changes)
+│   ├── validate-docs.sh             # Frontmatter and INDEX.yaml consistency checks
+│   └── validate-skills.sh           # Agent Skills format validation
 ├── docs/
 │   ├── GETTING-STARTED.md           # Repository setup, tooling, environment hardening
 │   ├── SECURITY-CONTROLS.md         # NIST 800-53 control overlay for agentic systems
@@ -59,11 +77,18 @@ federal-agentic-ai-guidance/
 │   └── risk-assessment.md           # AI risk assessment worksheet
 ├── examples/
 │   └── AGENTS.md.example            # Completed example: federal HR portal
-└── checklists/
-    └── pre-deployment.md            # Pre-deployment security checklist
+├── checklists/
+│   └── pre-deployment.md            # Pre-deployment security checklist
+└── skills/                          # Agent Skills — executable compliance procedures
+    ├── federal-agents-config/             # Interactive AGENTS.md generation
+    ├── federal-decision-records/          # MADR decision records with compliance extensions
+    ├── federal-pre-deployment-check/      # Automated pre-deployment checklist
+    ├── federal-repo-setup/                # Repository initialization with compliance defaults
+    ├── federal-risk-assessment/           # Guided risk assessment worksheet
+    └── federal-security-controls-lookup/  # NIST/OWASP control lookup
 ```
 
-> **For AI agents:** Read `INDEX.yaml` first to understand the document inventory, then read `AGENTS.md` for behavioral rules.
+> **For AI agents:** Read `CONTEXT-GUIDE.md` first — it tells you which documents to load for your task. Only load what you need to minimize context usage.
 
 ## Start Here — By Role
 
@@ -89,9 +114,31 @@ federal-agentic-ai-guidance/
 
 ### I'm an **AI Agent** reading this repository
 
-1. Read [INDEX.yaml](./INDEX.yaml) — document inventory and schema
+1. Read [CONTEXT-GUIDE.md](./CONTEXT-GUIDE.md) — tells you what to load for your task
 2. Read [AGENTS.md](./AGENTS.md) — behavioral rules (this is your contract)
-3. Read frontmatter of relevant docs to find cross-references
+3. Load additional docs only when your task matches their keywords (see CONTEXT-GUIDE.md)
+
+## Agent Skills — Executable Compliance Procedures
+
+This repository uses a **dual-layer architecture**:
+
+- **Policy layer** (docs, templates, checklists): Human-readable guidance explaining *what* to do and *why* — unchanged from v0.1.x
+- **Execution layer** (skills): Agent-actionable procedures in [Agent Skills format](https://agentskills.io) explaining *how* — step-by-step workflows agents can follow
+
+Skills are compatible with Open Code, OpenAI Codex CLI, Gemini CLI, Cursor, VS Code, and [25+ other platforms](https://agentskills.io).
+
+<!-- GENERATED:SKILLS_TABLE:START — do not edit, run: bash scripts/generate-index.sh -->
+| Skill | Purpose | Scripts? |
+|-------|---------|----------|
+| `federal-agents-config` | Generate a project-specific AGENTS.md through interactive decision-tree elicitation | Yes |
+| `federal-decision-records` | Create, validate, and index architectural and security decision records using MADR... | Yes |
+| `federal-pre-deployment-check` | Run the federal pre-deployment security checklist against a codebase | Yes |
+| `federal-repo-setup` | Initialize a code repository with federal security compliance defaults including... | Yes |
+| `federal-risk-assessment` | Walk through the AI agent risk assessment worksheet interactively, helping users... | No |
+| `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No |
+<!-- GENERATED:SKILLS_TABLE:END -->
+
+Skills reference policy docs by path and section — they never duplicate policy content. All scripts output structured JSON and are read-only or generative (they never modify git state or install packages).
 
 ## Scope and Limitations
 
@@ -114,6 +161,11 @@ This guidance tracks evolving federal standards. Each document includes version 
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-02-26 | 0.3.0 | LLM context optimization — progressive disclosure, Quick References, tiered loading |
+| 2026-02-25 | 0.2.2 | QA/QC — example §14-§15, traceability matrix, word-splitting fix |
+| 2026-02-25 | 0.2.1 | Centralized config/schema — shared script library, DRY enforcement |
+| 2026-02-25 | 0.2.0 | Agent Skills execution layer — 6 skills, dual-layer architecture |
+| 2026-02-25 | 0.1.1 | Community infrastructure — SECURITY.md, issue templates, Dependabot |
 | 2026-02-25 | 0.1.0 | Initial MVP — 5 core documents, 2 templates, 1 checklist |
 
 ## Contributing

@@ -9,6 +9,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Python
+__pycache__/
+*.pyc
+
 # Environment
 .env
 .env.local

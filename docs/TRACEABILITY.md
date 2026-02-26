@@ -4,13 +4,16 @@ description: "Bidirectional mapping between NIST 800-53 controls, OWASP risks, d
 status: canonical
 tier: 2
 last_updated: "2026-02-25"
-nist_controls: []
+nist_controls: ["AC-2", "AC-3", "AC-5", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3", "AU-6", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-2", "IA-5", "IA-8", "IR-4", "IR-6", "RA-3", "RA-5", "SA-4", "SA-5", "SA-8", "SA-11", "SA-12", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SC-28", "SI-2", "SI-3", "SI-10", "SI-11", "SI-17", "SR-3", "SR-11"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026", "NIST AI RMF 1.0"]
 audience: "isso"
 keywords: ["traceability", "audit", "cross-reference", "control-mapping"]
 related_files: ["AGENTS.md", "CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "checklists/pre-deployment.md"]
+load_priority: "on-demand"
 review_cycle: "quarterly"
 ---
+
+<!-- LOAD: on-demand — Load when performing audit, tracing controls to documents, or preparing ATO evidence. -->
 
 # Control Traceability Matrix
 
@@ -46,23 +49,26 @@ For each control referenced in this guidance, this table shows where implementat
 | AU-2 | Event Logging | §2.2 | §6.2 | §3.2 | §6 | 6.4 |
 | AU-3 | Content of Audit Records | §2.2 | §6.2 | §3.2 | §6 | 6.5 |
 | AU-6 | Audit Review | §2.2 | — | §3.2 | §6 | — |
-| AU-12 | Audit Record Generation | §2.2 | — | §3.2 | §6 | — |
-| CM-2 | Baseline Configuration | §12.1 | — | §3.3 | — | 10.1 |
-| CM-3 | Configuration Change Control | §3.2, §13 | — | §3.3 | — | 1.3, 1.4 |
-| CM-5 | Access Restrictions for Change | §3.2 | — | §3.3 | — | 10.6 |
-| CM-6 | Configuration Settings | §12.1 | — | §3.3 | — | 10.2 |
+| AU-12 | Audit Record Generation | §2.2, §14.3 | — | §3.2 | §6 | — |
+| CM-2 | Baseline Configuration | §12.1, §15.3 | — | §3.3 | — | 10.1 |
+| CM-3 | Configuration Change Control | §3.2, §13, §14.1, §14.2 | — | §3.3 | — | 1.3, 1.4 |
+| CM-5 | Access Restrictions for Change | §3.2, §14.2 | — | §3.3 | — | 10.6 |
+| CM-6 | Configuration Settings | §12.1, §15.3 | — | §3.3 | — | 10.2 |
 | CM-7 | Least Functionality | §3.1, §10 | — | §3.3 | — | — |
 | IA-2 | Identification and Authentication | §2.1 | §3.1 | §3.4 | §2, §3 | 4.1 |
 | IA-5 | Authenticator Management | — | §4 | §3.4 | §3 | 2.1, 2.6 |
 | IA-8 | Non-Org User Identification | §2.1 | — | §3.4 | §2 | — |
 | IR-4 | Incident Handling | §9.1 | — | §3.5 | — | — |
-| IR-6 | Incident Reporting | §9.2 | — | §3.5 | — | — |
+| IR-6 | Incident Reporting | §9.2, §14.5 | — | §3.5 | — | — |
 | RA-3 | Risk Assessment | §1 | — | §3.6 | — | — |
 | RA-5 | Vulnerability Scanning | §9.2 | §5.2 | §3.6 | — | 9.4, 9.5 |
 | SA-4 | Acquisition Process | — | §5.1 | §3.7 | — | — |
-| SA-11 | Developer Testing | §8 | §1.1 | §3.7 | — | 9.1, 9.2, 9.3 |
+| SA-11 | Developer Testing | §8, §14.3, §14.4 | §1.1 | §3.7 | — | 9.1, 9.2, 9.3 |
 | SA-12 | Supply Chain Protection | §7 | §5 | §3.7 | — | 5.1-5.7 |
-| SA-15 | Development Process | — | §1.1 | §3.7 | — | — |
+| SA-15 | Development Process | §15.1, §15.2 | §1.1 | §3.7 | — | — |
+| SA-5 | System Documentation | §15.4 | — | — | — | — |
+| SA-8 | Security Engineering Principles | §15.1, §15.2 | — | §3.7 | — | — |
+| SA-17 | Developer Security Architecture | §15.1 | — | — | — | — |
 | SC-7 | Boundary Protection | §6.1 | §8 | §3.8 | — | 8.3 |
 | SC-8 | Transmission Confidentiality | §6.1 | §8.1 | §3.8 | — | 7.1, 7.2 |
 | SC-13 | Cryptographic Protection | §5.4 | §7 | §3.8 | — | 7.3, 7.4 |
@@ -71,6 +77,7 @@ For each control referenced in this guidance, this table shows where implementat
 | SI-3 | Malicious Code Protection | §10, §11 | — | §3.9 | — | — |
 | SI-10 | Input Validation | §5.1, §11 | §2 | §3.9 | — | 3.1-3.6 |
 | SI-11 | Error Handling | — | §6.1 | §3.9 | — | 6.1, 6.2 |
+| SI-17 | Fail-Safe Procedures | §14.5, §14.6 | — | — | — | — |
 | SR-3 | Supply Chain Controls | §7 | §5.2 | §3.10 | — | 5.1-5.7 |
 | SR-11 | Component Authenticity | §7 | §5.2 | §3.10 | — | 5.5 |
 
@@ -181,14 +188,14 @@ This reverse mapping lets reviewers trace from a failed checklist item back to t
 
 | AI RMF Function | Sub-Function | Primary Documents |
 |----------------|-------------|-------------------|
-| **GOVERN** | GOVERN 1 — Policies | AGENTS.md §1, §10, §12, §13 |
+| **GOVERN** | GOVERN 1 — Policies | AGENTS.md §1, §10, §12, §13, §14, §15 |
 | | GOVERN 6 — Accountability | AGENTS.md §2, AGENT-IDENTITY.md §2, §5, §6 |
 | **MAP** | MAP 1 — Context | GETTING-STARTED.md, risk-assessment template |
 | | MAP 3 — Supply Chain | AGENTS.md §7, CODING_PRACTICES.md §5 |
 | | MAP 5 — Data | AGENTS.md §4, CODING_PRACTICES.md §4 |
 | **MEASURE** | MEASURE 1 — Metrics | AGENTS.md §8, pre-deployment checklist |
-| | MEASURE 2 — Testing | AGENTS.md §8, CODING_PRACTICES.md §1, SECURITY-CONTROLS.md §3.6 |
-| **MANAGE** | MANAGE 1 — Risk Treatment | SECURITY-CONTROLS.md §5, risk-assessment template §6 |
+| | MEASURE 2 — Testing | AGENTS.md §8, §15, CODING_PRACTICES.md §1, SECURITY-CONTROLS.md §3.6 |
+| **MANAGE** | MANAGE 1 — Risk Treatment | AGENTS.md §14, SECURITY-CONTROLS.md §5, risk-assessment template §6 |
 | | MANAGE 2 — Ongoing Monitoring | AGENTS.md §6, §11, SECURITY-CONTROLS.md §3.6 |
 | | MANAGE 4 — Incident Response | AGENTS.md §9, SECURITY-CONTROLS.md §3.5 |
 
