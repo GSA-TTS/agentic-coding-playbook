@@ -19,25 +19,14 @@ scope: "FIPS Moderate | Single-agent | Internal enterprise"
 # Optional: last_updated, nist_controls, frameworks, audience, keywords, related_files, load_priority, review_cycle
 frontmatter_schema:
   required: ["title", "description", "status", "tier"]
-  optional:
-    [
-      "last_updated",
-      "nist_controls",
-      "frameworks",
-      "audience",
-      "keywords",
-      "related_files",
-      "load_priority",
-      "review_cycle",
-    ]
+  optional: ["last_updated", "nist_controls", "frameworks", "audience", "keywords", "related_files", "load_priority", "review_cycle"]
   status_values: ["canonical", "draft", "deprecated"]
   tier_values:
     1: "Core guidance — authoritative rules and control mappings"
     2: "Supporting documentation — how-to guides and setup instructions"
     3: "Templates and checklists — reusable artifacts for projects"
   audience_values: ["developers", "isso", "managers", "all"]
-  load_priority_values:
-    ["always", "task-context", "on-demand", "reference-only"]
+  load_priority_values: ["always", "task-context", "on-demand", "reference-only"]
   review_cycle_values: ["quarterly", "semi-annually", "annually"]
 
 # Document inventory
