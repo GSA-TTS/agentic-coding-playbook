@@ -124,7 +124,7 @@ OUTPUT+="# Last generated: ${TODAY}"$'\n'
 OUTPUT+=""$'\n'
 OUTPUT+="schema_version: \"1.0\""$'\n'
 OUTPUT+="generated: \"${TODAY}\""$'\n'
-OUTPUT+="repo: \"cloud-gov/federal-agentic-ai-guidance\""$'\n'
+OUTPUT+="repo: \"cloud-gov/agentic-ai-guidance\""$'\n'
 OUTPUT+="scope: \"FIPS Moderate | Single-agent | Internal enterprise\""$'\n'
 OUTPUT+=""$'\n'
 # Build schema arrays from config.sh constants

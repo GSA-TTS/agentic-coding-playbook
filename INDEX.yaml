@@ -7,11 +7,11 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-02-26
+# Last generated: 2026-03-23
 
 schema_version: "1.0"
-generated: "2026-02-26"
-repo: "cloud-gov/federal-agentic-ai-guidance"
+generated: "2026-03-23"
+repo: "cloud-gov/agentic-ai-guidance"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
 # Frontmatter schema — all .md content files MUST include at minimum:

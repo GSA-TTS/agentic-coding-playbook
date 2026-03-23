@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034  # Variables are used by scripts that source this file
-# config.sh — Centralized schema constants for federal-agentic-ai-guidance
+# config.sh — Centralized schema constants for agentic-ai-guidance
 #
 # Single source of truth for validation rules, enum values, and limits.
 # All validation and generation scripts SHOULD source this file.
