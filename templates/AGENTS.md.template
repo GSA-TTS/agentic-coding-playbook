@@ -22,7 +22,7 @@ review_cycle: "semi-annually"
   5. Delete this instruction block when finished
 
   Based on: Federal Agentic AI Guidance v0.1.0
-  Source: https://github.com/cloud-gov/federal-agentic-ai-guidance
+  Source: https://github.com/cloud-gov/agentic-ai-guidance
   Framework alignment: NIST SP 800-53 Rev 5.2, AI RMF 1.0, OWASP Top 10 LLM/Agentic
 -->
 

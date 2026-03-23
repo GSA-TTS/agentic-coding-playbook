@@ -15,6 +15,7 @@ This guidance is designed for **FIPS Moderate** impact level systems using **sin
 ## Who This Is For
 
 Federal employees (typically GS-12 to GS-15) who:
+
 - Have access to AI coding agents (Open Code, GitHub Copilot, Cursor, etc.)
 - Can write basic code but may not be deeply familiar with NIST frameworks
 - Need to build software that meets federal security and compliance requirements
@@ -24,25 +25,25 @@ Federal employees (typically GS-12 to GS-15) who:
 
 Every recommendation in this guidance maps to one or more authoritative sources:
 
-| Framework | Version | Description |
-|-----------|---------|-------------|
-| [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework) | 1.0 (Jan 2023) | AI Risk Management Framework — Govern, Map, Measure, Manage |
-| [NIST SP 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | Rev 5.2.0 | Security and Privacy Controls for Information Systems |
-| [NIST COSAiS](https://csrc.nist.gov/projects/cosais) | Draft 2026 | SP 800-53 Control Overlays for Securing AI Systems |
-| [NIST SP 800-218A](https://csrc.nist.gov/pubs/sp/800/218/a/final) | Final | Secure Software Development Practices for Generative AI (SSDF) |
-| [NCCOE Agent Identity](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization) | Concept Paper (Feb 2026) | Software and AI Agent Identity and Authorization |
-| [NIST CAISI](https://www.nist.gov/caisi/ai-agent-standards-initiative) | Initiative (Feb 2026) | AI Agent Standards Initiative |
-| [NIST AI 600-1](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence) | 1.0 (Jul 2024) | Generative AI Profile for AI RMF |
-| [CISA Secure by Design](https://www.cisa.gov/securebydesign) | 2025 | Secure by Design Principles for AI Systems |
-| [OWASP Top 10 LLM](https://genai.owasp.org/llm-top-10/) | 2025 | Top 10 Risks for LLM Applications |
-| [OWASP Agentic AI](https://genai.owasp.org/) | 2025 | Top 10 Risks for Agentic AI Applications |
-| [OMB M-25-21](https://www.whitehouse.gov/) | Apr 2025 | AI Governance (replaces M-24-10) |
-| [FedRAMP 20x](https://www.fedramp.gov/ai/) | 2025 | Cloud/AI Service Authorization |
+| Framework                                                                                                                               | Version                  | Description                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------- |
+| [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework)                                                                    | 1.0 (Jan 2023)           | AI Risk Management Framework — Govern, Map, Measure, Manage    |
+| [NIST SP 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final)                                                                    | Rev 5.2.0                | Security and Privacy Controls for Information Systems          |
+| [NIST COSAiS](https://csrc.nist.gov/projects/cosais)                                                                                    | Draft 2026               | SP 800-53 Control Overlays for Securing AI Systems             |
+| [NIST SP 800-218A](https://csrc.nist.gov/pubs/sp/800/218/a/final)                                                                       | Final                    | Secure Software Development Practices for Generative AI (SSDF) |
+| [NCCOE Agent Identity](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization)                            | Concept Paper (Feb 2026) | Software and AI Agent Identity and Authorization               |
+| [NIST CAISI](https://www.nist.gov/caisi/ai-agent-standards-initiative)                                                                  | Initiative (Feb 2026)    | AI Agent Standards Initiative                                  |
+| [NIST AI 600-1](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence) | 1.0 (Jul 2024)           | Generative AI Profile for AI RMF                               |
+| [CISA Secure by Design](https://www.cisa.gov/securebydesign)                                                                            | 2025                     | Secure by Design Principles for AI Systems                     |
+| [OWASP Top 10 LLM](https://genai.owasp.org/llm-top-10/)                                                                                 | 2025                     | Top 10 Risks for LLM Applications                              |
+| [OWASP Agentic AI](https://genai.owasp.org/)                                                                                            | 2025                     | Top 10 Risks for Agentic AI Applications                       |
+| [OMB M-25-21](https://www.whitehouse.gov/)                                                                                              | Apr 2025                 | AI Governance (replaces M-24-10)                               |
+| [FedRAMP 20x](https://www.fedramp.gov/ai/)                                                                                              | 2025                     | Cloud/AI Service Authorization                                 |
 
 ## Repository Structure
 
 ```
-federal-agentic-ai-guidance/
+agentic-ai-guidance/
 ├── README.md                        # This file
 ├── CONTEXT-GUIDE.md                 # Agent entry point — read this FIRST for loading instructions
 ├── INDEX.yaml                       # Document index with load_priority metadata
@@ -122,20 +123,22 @@ federal-agentic-ai-guidance/
 
 This repository uses a **dual-layer architecture**:
 
-- **Policy layer** (docs, templates, checklists): Human-readable guidance explaining *what* to do and *why* — unchanged from v0.1.x
-- **Execution layer** (skills): Agent-actionable procedures in [Agent Skills format](https://agentskills.io) explaining *how* — step-by-step workflows agents can follow
+- **Policy layer** (docs, templates, checklists): Human-readable guidance explaining _what_ to do and _why_ — unchanged from v0.1.x
+- **Execution layer** (skills): Agent-actionable procedures in [Agent Skills format](https://agentskills.io) explaining _how_ — step-by-step workflows agents can follow
 
 Skills are compatible with Open Code, Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, VS Code, and [25+ other platforms](https://agentskills.io).
 
 <!-- GENERATED:SKILLS_TABLE:START — do not edit, run: bash scripts/generate-index.sh -->
-| Skill | Purpose | Scripts? |
-|-------|---------|----------|
-| `federal-agents-config` | Generate a project-specific AGENTS.md through interactive decision-tree elicitation | Yes |
-| `federal-decision-records` | Create, validate, and index architectural and security decision records using MADR... | Yes |
-| `federal-pre-deployment-check` | Run the federal pre-deployment security checklist against a codebase | Yes |
-| `federal-repo-setup` | Initialize a code repository with federal security compliance defaults including... | Yes |
-| `federal-risk-assessment` | Walk through the AI agent risk assessment worksheet interactively, helping users... | No |
-| `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No |
+
+| Skill                              | Purpose                                                                                   | Scripts? |
+| ---------------------------------- | ----------------------------------------------------------------------------------------- | -------- |
+| `federal-agents-config`            | Generate a project-specific AGENTS.md through interactive decision-tree elicitation       | Yes      |
+| `federal-decision-records`         | Create, validate, and index architectural and security decision records using MADR...     | Yes      |
+| `federal-pre-deployment-check`     | Run the federal pre-deployment security checklist against a codebase                      | Yes      |
+| `federal-repo-setup`               | Initialize a code repository with federal security compliance defaults including...       | Yes      |
+| `federal-risk-assessment`          | Walk through the AI agent risk assessment worksheet interactively, helping users...       | No       |
+| `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No       |
+
 <!-- GENERATED:SKILLS_TABLE:END -->
 
 Skills reference policy docs by path and section — they never duplicate policy content. All scripts output structured JSON and are read-only or generative (they never modify git state or install packages).
@@ -143,12 +146,14 @@ Skills reference policy docs by path and section — they never duplicate policy
 ## Scope and Limitations
 
 **In scope:**
+
 - Single-agent systems (one AI assistant helping one developer)
 - Internal enterprise applications (not public-facing AI services)
 - FIPS Moderate impact level (covers most federal internal systems)
 - Software development lifecycle (design through operations)
 
 **Out of scope (future work):**
+
 - Multi-agent orchestration and coordination
 - FIPS High or classified systems
 - Public-facing AI chatbots or customer service agents
@@ -159,15 +164,15 @@ Skills reference policy docs by path and section — they never duplicate policy
 
 This guidance tracks evolving federal standards. Each document includes version references for the specific NIST publications it aligns with. See [CHANGELOG.md](./CHANGELOG.md) for update history.
 
-| Date | Version | Change |
-|------|---------|--------|
-| 2026-02-26 | 0.3.1 | macOS compatibility fix for frontmatter parsing in generate-index.sh |
-| 2026-02-26 | 0.3.0 | LLM context optimization — progressive disclosure, Quick References, tiered loading |
-| 2026-02-25 | 0.2.2 | QA/QC — example §14-§15, traceability matrix, word-splitting fix |
-| 2026-02-25 | 0.2.1 | Centralized config/schema — shared script library, DRY enforcement |
-| 2026-02-25 | 0.2.0 | Agent Skills execution layer — 6 skills, dual-layer architecture |
-| 2026-02-25 | 0.1.1 | Community infrastructure — SECURITY.md, issue templates, Dependabot |
-| 2026-02-25 | 0.1.0 | Initial MVP — 5 core documents, 2 templates, 1 checklist |
+| Date       | Version | Change                                                                              |
+| ---------- | ------- | ----------------------------------------------------------------------------------- |
+| 2026-02-26 | 0.3.1   | macOS compatibility fix for frontmatter parsing in generate-index.sh                |
+| 2026-02-26 | 0.3.0   | LLM context optimization — progressive disclosure, Quick References, tiered loading |
+| 2026-02-25 | 0.2.2   | QA/QC — example §14-§15, traceability matrix, word-splitting fix                    |
+| 2026-02-25 | 0.2.1   | Centralized config/schema — shared script library, DRY enforcement                  |
+| 2026-02-25 | 0.2.0   | Agent Skills execution layer — 6 skills, dual-layer architecture                    |
+| 2026-02-25 | 0.1.1   | Community infrastructure — SECURITY.md, issue templates, Dependabot                 |
+| 2026-02-25 | 0.1.0   | Initial MVP — 5 core documents, 2 templates, 1 checklist                            |
 
 ## Contributing
 
