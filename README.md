@@ -129,16 +129,14 @@ This repository uses a **dual-layer architecture**:
 Skills are compatible with Open Code, Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, VS Code, and [25+ other platforms](https://agentskills.io).
 
 <!-- GENERATED:SKILLS_TABLE:START — do not edit, run: bash scripts/generate-index.sh -->
-
-| Skill                              | Purpose                                                                                   | Scripts? |
-| ---------------------------------- | ----------------------------------------------------------------------------------------- | -------- |
-| `federal-agents-config`            | Generate a project-specific AGENTS.md through interactive decision-tree elicitation       | Yes      |
-| `federal-decision-records`         | Create, validate, and index architectural and security decision records using MADR...     | Yes      |
-| `federal-pre-deployment-check`     | Run the federal pre-deployment security checklist against a codebase                      | Yes      |
-| `federal-repo-setup`               | Initialize a code repository with federal security compliance defaults including...       | Yes      |
-| `federal-risk-assessment`          | Walk through the AI agent risk assessment worksheet interactively, helping users...       | No       |
-| `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No       |
-
+| Skill | Purpose | Scripts? |
+|-------|---------|----------|
+| `federal-agents-config` | Generate a project-specific AGENTS.md through interactive decision-tree elicitation | Yes |
+| `federal-decision-records` | Create, validate, and index architectural and security decision records using MADR... | Yes |
+| `federal-pre-deployment-check` | Run the federal pre-deployment security checklist against a codebase | Yes |
+| `federal-repo-setup` | Initialize a code repository with federal security compliance defaults including... | Yes |
+| `federal-risk-assessment` | Walk through the AI agent risk assessment worksheet interactively, helping users... | No |
+| `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No |
 <!-- GENERATED:SKILLS_TABLE:END -->
 
 Skills reference policy docs by path and section — they never duplicate policy content. All scripts output structured JSON and are read-only or generative (they never modify git state or install packages).
