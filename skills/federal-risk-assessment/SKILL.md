@@ -16,7 +16,7 @@ metadata:
 
 This skill walks users through the risk assessment template from
 `templates/risk-assessment.md` interactively, helping them complete each
-section with context-appropriate guidance.
+section with context-appropriate playbook.
 
 ## When to Use
 
@@ -171,4 +171,4 @@ signed by the System Owner and ISSO before it becomes part of the ATO documentat
 - Risk scores are based on the user's input — the agent does not override or second-guess ratings.
 - Threat descriptions are pre-filled from OWASP and NIST sources. See `references/THREAT_CATALOG.md`.
 - The full template is at `templates/risk-assessment.md`. This skill makes it interactive, it does not change the template structure.
-- **Policy reference:** `templates/risk-assessment.md` (template), `docs/SECURITY-CONTROLS.md` (control guidance).
+- **Policy reference:** `templates/risk-assessment.md` (template), `docs/SECURITY-CONTROLS.md` (control playbook).

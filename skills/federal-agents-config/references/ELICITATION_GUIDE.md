@@ -40,7 +40,7 @@ and make appropriate security decisions.
 **Why it matters:** The impact level determines the rigor of security controls:
 - **Low:** Minimal controls. Basic security practices.
 - **Moderate:** Standard federal controls. Required for most internal systems.
-  This guidance is primarily designed for FIPS Moderate.
+  This playbook is primarily designed for FIPS Moderate.
 - **High:** Maximum controls. Required for systems where compromise could cause
   severe harm (e.g., law enforcement, financial, health).
 

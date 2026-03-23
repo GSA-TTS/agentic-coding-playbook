@@ -186,7 +186,7 @@ The script checks:
 - Superseded records reference the superseding record
 
 Output is structured JSON. Present results to the user with remediation
-guidance for any failures.
+playbook for any failures.
 
 ## Mode 3: Generate Index
 
@@ -211,7 +211,7 @@ Present the generated index to the user.
   ADRs, install packages, or make network calls.
 - Generated records are **drafts** — they should be reviewed by the decision
   makers listed in the frontmatter before being marked "accepted".
-- NIST control suggestions are guidance only — the user should verify
+- NIST control suggestions are playbook only — the user should verify
   applicability with their ISSO.
 - ADR numbers are sequential and MUST NOT be reused, even for superseded
   records (this preserves the audit trail).
@@ -219,5 +219,5 @@ Present the generated index to the user.
   ato_relevance, risk_treatment) are additions to standard MADR — they do
   not break compatibility with MADR tooling.
 - **Policy references:** `AGENTS.md` (agent decisions), `CODING_PRACTICES.md`
-  (coding decisions), `docs/SECURITY-CONTROLS.md` (control guidance),
+  (coding decisions), `docs/SECURITY-CONTROLS.md` (control playbook),
   `docs/TRACEABILITY.md` (control mappings).

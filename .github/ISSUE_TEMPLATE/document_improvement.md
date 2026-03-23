@@ -1,6 +1,6 @@
 ---
 name: Document Improvement
-about: Suggest an improvement or addition to the guidance
+about: Suggest an improvement or addition to the playbook
 title: "[Improvement] "
 labels: enhancement
 assignees: ''

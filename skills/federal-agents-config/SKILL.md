@@ -101,7 +101,7 @@ Sets: `impact_level`
 Default: `moderate` (covers most federal internal systems)
 
 If "high": add follow-up questions about additional data handling controls and
-note that this guidance primarily targets FIPS Moderate.
+note that this playbook primarily targets FIPS Moderate.
 
 ### Phase 2: Technical Context (required)
 

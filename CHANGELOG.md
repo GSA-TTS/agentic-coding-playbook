@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this guidance will be documented in this file.
+All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
@@ -125,7 +125,7 @@ This project uses [Semantic Versioning](https://semver.org/). Framework alignmen
 
 ### Added
 
-- SECURITY.md — responsible disclosure policy for guidance accuracy and infrastructure issues
+- SECURITY.md — responsible disclosure policy for playbook accuracy and infrastructure issues
 - GitHub issue templates — bug report and document improvement request
 - Pull request template — checklist for frontmatter, INDEX.yaml, and cross-references
 - Dependabot configuration — weekly GitHub Actions version updates
@@ -137,7 +137,7 @@ This project uses [Semantic Versioning](https://semver.org/). Framework alignmen
 - Frontmatter validation: fixed broken pipe error with long YAML arrays
 - Frontmatter validation: exclude .github/ templates and SECURITY.md from content checks
 - Link checker: ignore private repo URLs (404 in unauthenticated CI context)
-- Markdownlint: disabled cosmetic rules that conflict with guidance formatting
+- Markdownlint: disabled cosmetic rules that conflict with playbook formatting
 
 ### Changed
 
@@ -152,7 +152,7 @@ This project uses [Semantic Versioning](https://semver.org/). Framework alignmen
 - CODING_PRACTICES.md — secure coding standards for AI-assisted development (10 sections)
 - docs/GETTING-STARTED.md — repository setup, tooling, and environment hardening
 - docs/SECURITY-CONTROLS.md — NIST 800-53 control overlay (37 controls, 10 families)
-- docs/AGENT-IDENTITY.md — agent identity, authentication, and delegation guidance
+- docs/AGENT-IDENTITY.md — agent identity, authentication, and delegation playbook
 - docs/TRACEABILITY.md — bidirectional control-to-document traceability matrix
 - templates/AGENTS.md.template — copy-paste agent rules for new projects
 - templates/risk-assessment.md — AI risk assessment worksheet (AI RMF aligned)

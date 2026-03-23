@@ -169,7 +169,7 @@ Present the summary:
 
 If any items fail, recommend "Not Approved" and list the remediation steps
 with references to the relevant policy documents (use the
-`federal-security-controls-lookup` skill to find guidance).
+`federal-security-controls-lookup` skill to find playbook).
 
 ## Important Notes
 
