@@ -25,7 +25,7 @@ review_cycle: "semi-annually"
   4. Retain completed checklists as part of your deployment records
   5. The reviewer completing this checklist MUST NOT be the same person who directed the agent
 
-  Based on: Federal Agentic AI Guidance v0.1.0
+  Based on: Federal Agentic AI Playbook v0.1.0
   Aligned with: NIST SP 800-53 Rev 5.2, OWASP Top 10 for LLM/Agentic Applications
 -->
 
@@ -228,5 +228,5 @@ review_cycle: "semi-annually"
 
 ---
 
-*Checklist version 0.1.0 — Based on Federal Agentic AI Guidance*
+*Checklist version 0.1.0 — Based on Federal Agentic AI Playbook*
 *Aligned with NIST SP 800-53 Rev 5.2, OWASP Top 10 LLM 2025, OWASP Top 10 Agentic 2026*

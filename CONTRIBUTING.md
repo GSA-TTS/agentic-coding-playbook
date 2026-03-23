@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in improving federal agentic AI guidance. This project benefits from input by practitioners across agencies.
+Thank you for your interest in improving Federal Agentic AI Playbook. This project benefits from input by practitioners across agencies.
 
 ## How to Contribute
 
@@ -14,16 +14,16 @@ Thank you for your interest in improving federal agentic AI guidance. This proje
 ### Content Standards
 
 - **Every recommendation must cite an authoritative source** (NIST publication, OMB memo, CISA guidance, or OWASP standard)
-- **Keep guidance tool-agnostic** — never recommend a specific vendor or product
+- **Keep playbook tool-agnostic** — never recommend a specific vendor or product
 - **Use plain language** — the audience includes federal employees who may not be NIST specialists
 - **Provide actionable examples** — show what to do, not just what the standard says
 - **Include control mappings** — every section should reference applicable NIST 800-53 controls
 
 ### What We Need
 
-- **Practitioner feedback** — Does this guidance work in your agency's environment?
+- **Practitioner feedback** — Does this playbook work in your agency's environment?
 - **Gap identification** — What security controls or scenarios are missing?
-- **Plain language improvements** — Where is the guidance unclear or too technical?
+- **Plain language improvements** — Where is the playbook unclear or too technical?
 - **Template refinements** — Are the templates practical for real ATO packages?
 - **Framework updates** — Has a referenced NIST publication been updated?
 
@@ -68,8 +68,8 @@ Run `bash scripts/validate-skills.sh` locally before submitting a PR. CI runs th
 
 ## Review Process
 
-All pull requests require review by at least one maintainer. Changes to security controls mapping or compliance guidance require additional scrutiny.
+All pull requests require review by at least one maintainer. Changes to security controls mapping or compliance playbooks require additional scrutiny.
 
 ## Code of Conduct
 
-Be professional, constructive, and respectful. This is guidance that federal employees will rely on — quality and accuracy matter more than speed.
+Be professional, constructive, and respectful. This is playbooks that federal employees will rely on — quality and accuracy matter more than speed.

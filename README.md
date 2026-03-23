@@ -1,8 +1,8 @@
-# Federal Agentic AI Guidance
+# Federal Agentic AI Playbook
 
-Practical, tool-agnostic guidance for US federal employees building with AI coding agents.
+Practical, tool-agnostic playbook for US federal employees building with AI coding agents.
 
-> **Disclaimer:** This guidance is **informational only** and is not authoritative federal policy. Each agency must tailor these recommendations to their specific Authority to Operate (ATO) requirements, organizational policies, risk tolerance, and applicable laws and regulations. This project does not replace official NIST publications, OMB memoranda, or agency-specific guidance.
+> **Disclaimer:** This playbook is **informational only** and is not authoritative federal policy. Each agency must tailor these recommendations to their specific Authority to Operate (ATO) requirements, organizational policies, risk tolerance, and applicable laws and regulations. This project does not replace official NIST publications, OMB memoranda, or agency-specific playbook.
 
 ---
 
@@ -10,7 +10,7 @@ Practical, tool-agnostic guidance for US federal employees building with AI codi
 
 A collection of markdown files that tell AI agents **what to do** and **how to do it** when helping federal employees build software. These files can be placed in any repository to guide agent behavior across the full software development lifecycle — from project setup through deployment and ongoing operations.
 
-This guidance is designed for **FIPS Moderate** impact level systems using **single-agent** architectures in **internal enterprise** environments.
+This playbook is designed for **FIPS Moderate** impact level systems using **single-agent** architectures in **internal enterprise** environments.
 
 ## Who This Is For
 
@@ -23,7 +23,7 @@ Federal employees (typically GS-12 to GS-15) who:
 
 ## Framework Alignment
 
-Every recommendation in this guidance maps to one or more authoritative sources:
+Every recommendation in this playbook maps to one or more authoritative sources:
 
 | Framework                                                                                                                               | Version                  | Description                                                    |
 | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------- |
@@ -43,13 +43,13 @@ Every recommendation in this guidance maps to one or more authoritative sources:
 ## Repository Structure
 
 ```
-agentic-ai-guidance/
+agentic-ai-playbook/
 ├── README.md                        # This file
 ├── CONTEXT-GUIDE.md                 # Agent entry point — read this FIRST for loading instructions
 ├── INDEX.yaml                       # Document index with load_priority metadata
 ├── AGENTS.md                        # Master agent behavior rules
 ├── CODING_PRACTICES.md              # Secure coding standards for AI-assisted development
-├── CONTRIBUTING.md                  # How to contribute to this guidance
+├── CONTRIBUTING.md                  # How to contribute to this playbook
 ├── CHANGELOG.md                     # Version history and framework updates
 ├── CODEOWNERS                       # Repository ownership
 ├── LICENSE                          # CC0 1.0 Universal (public domain)
@@ -123,7 +123,7 @@ agentic-ai-guidance/
 
 This repository uses a **dual-layer architecture**:
 
-- **Policy layer** (docs, templates, checklists): Human-readable guidance explaining _what_ to do and _why_ — unchanged from v0.1.x
+- **Policy layer** (docs, templates, checklists): Human-readable playbook explaining _what_ to do and _why_ — unchanged from v0.1.x
 - **Execution layer** (skills): Agent-actionable procedures in [Agent Skills format](https://agentskills.io) explaining _how_ — step-by-step workflows agents can follow
 
 Skills are compatible with Open Code, Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, VS Code, and [25+ other platforms](https://agentskills.io).
@@ -156,11 +156,11 @@ Skills reference policy docs by path and section — they never duplicate policy
 - FIPS High or classified systems
 - Public-facing AI chatbots or customer service agents
 - AI model training, fine-tuning, or ML pipeline operations
-- Procurement guidance (see OMB M-24-18 directly)
+- Procurement playbook (see OMB M-24-18 directly)
 
 ## Versioning
 
-This guidance tracks evolving federal standards. Each document includes version references for the specific NIST publications it aligns with. See [CHANGELOG.md](./CHANGELOG.md) for update history.
+This playbook tracks evolving federal standards. Each document includes version references for the specific NIST publications it aligns with. See [CHANGELOG.md](./CHANGELOG.md) for update history.
 
 | Date       | Version | Change                                                                              |
 | ---------- | ------- | ----------------------------------------------------------------------------------- |
@@ -178,4 +178,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to contribute. This is a commun
 
 ## License
 
-This work is dedicated to the public domain under [CC0 1.0 Universal](./LICENSE). Federal employees may freely use, modify, and distribute this guidance without restriction.
+This work is dedicated to the public domain under [CC0 1.0 Universal](./LICENSE). Federal employees may freely use, modify, and distribute this playbook without restriction.

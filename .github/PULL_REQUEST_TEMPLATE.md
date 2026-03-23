@@ -4,9 +4,9 @@
 
 ## Type of Change
 
-- [ ] Bug fix (incorrect guidance, broken links, wrong control mappings)
+- [ ] Bug fix (incorrect playbook, broken links, wrong control mappings)
 - [ ] New content (new document, template, or checklist)
-- [ ] Content update (updated guidance, new framework version alignment)
+- [ ] Content update (updated playbook, new framework version alignment)
 - [ ] Infrastructure (CI, tooling, repository configuration)
 
 ## Pre-Merge Checklist

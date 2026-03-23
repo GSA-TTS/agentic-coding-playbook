@@ -38,7 +38,7 @@ review_cycle: "quarterly"
 
 ---
 
-> **Disclaimer:** This guidance is informational only and is not authoritative federal policy. Each agency must tailor these rules to their specific ATO requirements, organizational policies, and risk tolerance.
+> **Disclaimer:** This playbook is informational only and is not authoritative federal policy. Each agency must tailor these rules to their specific ATO requirements, organizational policies, and risk tolerance.
 
 This document defines the behavioral rules that AI coding agents MUST follow when assisting federal employees with software development. Place this file (or a customized copy from `templates/AGENTS.md.template`) in the root of your repository.
 
@@ -228,7 +228,7 @@ The agent MUST:
 The agent SHOULD:
 - Prefer memory-safe languages (Rust, Go, Python, Java, C#, JavaScript/TypeScript) for new projects
 - When using memory-unsafe languages (C, C++), use compiler hardening flags and static analysis
-- Follow CISA memory safety guidance for language selection
+- Follow CISA memory safety playbook for language selection
 
 > **Control Mapping:** SI-10 (Input Validation), SA-11 (Developer Testing), SC-13 (Cryptographic Protection), SA-15 (Development Process)
 
@@ -452,7 +452,7 @@ All `.md` content files in this repository MUST include YAML frontmatter with at
 - `title` — Document title
 - `description` — One-line summary
 - `status` — `canonical`, `draft`, or `deprecated`
-- `tier` — `1` (core guidance), `2` (supporting), or `3` (templates/checklists)
+- `tier` — `1` (core playbook), `2` (supporting), or `3` (templates/checklists)
 
 When updating a document, the agent SHOULD update `last_updated` in the frontmatter.
 

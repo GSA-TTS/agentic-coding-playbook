@@ -31,15 +31,15 @@ review_cycle: "quarterly"
 | Audit | Log every action with: agent ID, delegating user, timestamp, action, outcome |
 | Revocation | Immediate credential revocation capability, break-glass procedures documented |
 
-> **Full guidance with NCCOE alignment and implementation patterns in sections below.**
+> **Full playbook with NCCOE alignment and implementation patterns in sections below.**
 
 ---
 
-> **Disclaimer:** This guidance is informational only and is not authoritative federal policy. Each agency must tailor these recommendations to their specific ATO requirements, organizational policies, and risk tolerance.
+> **Disclaimer:** This playbook is informational only and is not authoritative federal policy. Each agency must tailor these recommendations to their specific ATO requirements, organizational policies, and risk tolerance.
 
-This document provides practical guidance for managing AI coding agent identities within federal systems. It covers how agents are identified, how they authenticate, what they are authorized to do, how user identity delegates to agent identity, and how all of it gets logged for audit.
+This document provides practical playbook for managing AI coding agent identities within federal systems. It covers how agents are identified, how they authenticate, what they are authorized to do, how user identity delegates to agent identity, and how all of it gets logged for audit.
 
-**Alignment:** This guidance aligns with:
+**Alignment:** This playbook aligns with:
 - **NCCOE** — [Accelerating the Adoption of Software and AI Agent Identity and Authorization](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization) Concept Paper (February 2026)
 - **NIST CAISI** — [AI Agent Standards Initiative](https://www.nist.gov/caisi/ai-agent-standards-initiative) (February 2026)
 
@@ -79,7 +79,7 @@ The NCCOE concept paper (February 2026) identifies four focus areas for managing
 | 3 | **Access Delegation** — Linking user identities to AI agents for accountability | [Section 5](#5-delegation-model) |
 | 4 | **Logging and Transparency** — Linking agent actions to their non-human entity for audit | [Section 6](#6-audit-and-non-repudiation) |
 
-The NIST CAISI initiative is developing standards for AI agent behavior more broadly. While those standards are still emerging, this document provides actionable guidance you can implement now.
+The NIST CAISI initiative is developing standards for AI agent behavior more broadly. While those standards are still emerging, this document provides actionable playbook you can implement now.
 
 **Who should read this:** Federal developers, DevOps engineers, and system administrators who deploy or manage AI coding agents. You do not need deep IAM expertise — this document explains concepts as it goes.
 

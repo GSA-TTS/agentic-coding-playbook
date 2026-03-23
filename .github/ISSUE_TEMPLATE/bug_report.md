@@ -15,11 +15,11 @@ assignees: ''
 
 ## Expected Content
 
-<!-- What should the guidance say? Cite authoritative sources. -->
+<!-- What should the playbook say? Cite authoritative sources. -->
 
 ## Authoritative Source
 
-<!-- Link to the NIST publication, OMB memo, OWASP reference, etc. that the guidance should align with. -->
+<!-- Link to the NIST publication, OMB memo, OWASP reference, etc. that the playbook should align with. -->
 
 ## Additional Context
 

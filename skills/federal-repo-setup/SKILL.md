@@ -14,7 +14,7 @@ metadata:
 
 # Federal Repository Setup
 
-This skill converts the guidance in `docs/GETTING-STARTED.md` into an executable
+This skill converts the playbook in `docs/GETTING-STARTED.md` into an executable
 workflow for initializing a repository with federal security compliance defaults.
 
 ## When to Use

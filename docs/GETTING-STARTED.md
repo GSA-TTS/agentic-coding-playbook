@@ -43,7 +43,7 @@ Setup steps in order (each maps to an 800-53 control family):
 
 ---
 
-> **Disclaimer:** This guidance is informational only and is not authoritative federal policy. Each agency must tailor these steps to their specific ATO requirements, organizational policies, and risk tolerance.
+> **Disclaimer:** This playbook is informational only and is not authoritative federal policy. Each agency must tailor these steps to their specific ATO requirements, organizational policies, and risk tolerance.
 
 This document walks through setting up a development repository with security controls appropriate for AI-assisted federal software development. Every step maps to a NIST SP 800-53 control family so your work is traceable to your System Security Plan (SSP).
 
@@ -234,7 +234,7 @@ The file defines:
 1. Copy the template from this repository into your project root:
 
    ```bash
-   # From the agentic-ai-guidance repository
+   # From the agentic-ai-playbook repository
    cp templates/AGENTS.md.template /path/to/your-project/AGENTS.md
    ```
 
