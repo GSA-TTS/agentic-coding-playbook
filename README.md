@@ -1,3 +1,7 @@
+
+## `README.md`
+
+```md
 # Federal Agentic AI Playbook
 
 [![CI — Documentation Quality](https://github.com/GSA-TTS/agentic-ai-playbook/actions/workflows/ci.yml/badge.svg)](https://github.com/GSA-TTS/agentic-ai-playbook/actions/workflows/ci.yml)
