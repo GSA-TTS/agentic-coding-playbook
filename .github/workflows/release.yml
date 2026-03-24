@@ -4,52 +4,60 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release (for manual runs)"
+        required: false
+        type: string
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-${{ github.ref_name || inputs.tag }}
+  cancel-in-progress: false
 
 jobs:
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Determine tag
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            TAG="${{ inputs.tag }}"
+            if [[ -z "${TAG}" ]]; then
+              echo "Error: workflow_dispatch requires an existing tag input."
+              exit 1
+            fi
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
-      - name: Generate release notes
-        id: notes
+      - name: Verify tag exists
+        shell: bash
         run: |
-          # Get the previous tag (or first commit if no previous tag)
-          PREV_TAG=$(git tag --sort=-version:refname | head -2 | tail -1)
-          if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" = "${{ github.ref_name }}" ]; then
-            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
-          fi
-
-          # Generate changelog from commits
-          {
-            echo "notes<<RELEASE_EOF"
-            echo "## What's Changed"
-            echo ""
-            git log "${PREV_TAG}..HEAD" --pretty=format:"- %s (%h)" --no-merges
-            echo ""
-            echo ""
-            echo "## Documents"
-            echo ""
-            echo "| Document | Description |"
-            echo "|----------|-------------|"
-            # Extract from INDEX.yaml
-            grep -A2 'path:' INDEX.yaml | grep -E '(path|description)' | paste - - | sed 's/.*path: "\(.*\)".*description: "\(.*\)"/| \1 | \2 |/'
-            echo ""
-            echo "---"
-            echo ""
-            echo "**Full Changelog:** https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ github.ref_name }}"
-            echo "RELEASE_EOF"
-          } >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          git fetch --tags --force
+          git rev-parse "${{ steps.vars.outputs.tag }}" >/dev/null 2>&1
 
       - name: Create release
         uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
-          body: ${{ steps.notes.outputs.notes }}
-          generate_release_notes: false
-          make_latest: "true"
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: ${{ steps.vars.outputs.tag }}
+          generate_release_notes: true
+          make_latest: true

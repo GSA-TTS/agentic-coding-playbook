@@ -1,173 +1,196 @@
 # Changelog
 
-All notable changes to this playbook will be documented in this file.
+All notable changes to this playbook are documented in this file.
 
-This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
+This project follows [Semantic Versioning](https://semver.org/).
+GitHub Releases are generated from labeled pull requests.
+This changelog is the curated, long-term record of notable changes.
+
+---
+
+## [Unreleased]
+
+### Added
+
+### Changed
+
+### Fixed
+
+### Documentation
+
+### Internal
+
+## [0.4.0] - 2026-03-24
+
+### Added
+
+- Agent bundle export workflow for local-first and sandboxed agent use
+- `scripts/export-agent-bundle.sh` for deterministic, offline-safe exports
+- `.agent-skills/docs/CODING-PRACTICES.md` included in exported bundles
+- `make export-dry-run` to preview bundle exports without writing files
+- `make doctor` to validate local tooling and script readiness
+
+### Changed
+
+- `make verify` is now the primary validation command (replaces `make check`)
+- Export workflow standardized around `EXPORT_TARGET`
+- `make export` help output streamlined for common usage
+- Repository language clarified to reinforce non-authoritative positioning
+
+### Fixed
+
+- macOS compatibility in `scripts/export-agent-bundle.sh` (removed bash-specific features)
+- Broken references to `docs/CODING-PRACTICES.md`
+- Documentation inconsistencies across contributor workflows
+
+### Documentation
+
+- README, CONTRIBUTING, and setup docs aligned with current command surface
+- Maintainer release guidance added to `CONTRIBUTING.md`
+
+### Internal
+
+- Added maintainer-only release targets (`make release-check`, `make release-tag`)
+- Formalized release readiness checks and tagging process
+- Replaced shell-based release parsing with Python implementation
+
+---
+
+## [0.3.2] - 2026-03-23
+
+### Changed
+
+- Repository migrated from **cloud-gov** to **GSA-TTS**
+- Repository renamed to **agentic-ai-playbook**
+- Documentation updated to reflect non-authoritative positioning
+- README improved with quick start, badges, and clearer structure
+- Generated content split into dedicated scripts (INDEX, README sections, changelog)
+- CI and pre-commit updated to enforce generated content consistency
+
+### Fixed
+
+- Regenerated `INDEX.yaml` to reflect current repository structure
+
+---
 
 ## [0.3.1] - 2026-02-26
 
 ### Fixed
 
-- `scripts/lib/common.sh` — replaced `head -n -1` with `sed '$ d'` for macOS/BSD compatibility; the negative line count syntax is GNU-specific and caused "head: illegal line count -- -1" errors on macOS
-- `scripts/validate-docs.sh` — same fix for frontmatter extraction (2 occurrences)
-- `scripts/validate-skills.sh` — same fix for frontmatter extraction
-- INDEX.yaml — regenerated with corrected frontmatter parsing (now correctly shows 47 unique NIST controls and 14 frameworks)
+- macOS/BSD compatibility in frontmatter parsing (`head -n -1` → `sed '$ d'`)
+- Validation scripts updated to use portable parsing logic
+- `INDEX.yaml` regenerated with corrected parsing
 
 ### Changed
 
-- README.md — added Claude Code to list of compatible AI coding agents
+- README updated to include Claude Code support
+
+---
 
 ## [0.3.0] - 2026-02-26
 
 ### Added
 
-- **LLM context optimization — progressive disclosure architecture**:
-  - `CONTEXT-GUIDE.md` — compact agent entry point (~500 words) with tiered loading instructions, keyword triggers, and typical task profiles
-  - `load_priority` frontmatter field on all 11 content documents: `always`, `task-context`, `on-demand`, `reference-only`
-  - `<!-- LOAD: ... -->` HTML comment directives after frontmatter in every document
-  - `load_priority_values` in INDEX.yaml schema and `DOC_LOAD_PRIORITY_VALUES`/`DOC_LOAD_PRIORITY_REGEX` in `scripts/config.sh`
-  - `load_priority` validation in `scripts/validate-docs.sh`
-  - `load_priority` field emitted in INDEX.yaml document entries via `scripts/generate-index.sh`
-- **Quick Reference sections** at the top of 5 core docs (AGENTS.md, CODING_PRACTICES.md, SECURITY-CONTROLS.md, AGENT-IDENTITY.md, GETTING-STARTED.md) — actionable summaries in table format for LLM-efficient scanning
+- Progressive disclosure architecture for LLM context optimization:
+  - `CONTEXT-GUIDE.md`
+  - `load_priority` frontmatter field
+  - HTML `<!-- LOAD: ... -->` directives
+  - Validation + schema support
+- Quick reference sections for efficient LLM scanning
 
 ### Changed
 
-- AGENTS.md: replaced 15-row NIST Control Cross-Reference Matrix (~340 words) with a pointer to `docs/TRACEABILITY.md` (single source of truth for traceability)
-- README.md: updated agent instructions to point to `CONTEXT-GUIDE.md` as entry point, updated repo structure tree
-- INDEX.yaml: now includes `load_priority` for each document and `load_priority_values` in schema
+- AGENTS.md now references `docs/TRACEABILITY.md` instead of inline mappings
+- README updated to use `CONTEXT-GUIDE.md` as entry point
+- INDEX.yaml schema expanded with `load_priority`
 
-### Token Impact
+### Performance Impact
 
-| Scenario | Words | Tokens | Reduction |
-|----------|-------|--------|-----------|
-| Load everything | 44,596 | ~58K | baseline |
-| Typical code task (CONTEXT-GUIDE + Tier 1) | 8,950 | ~12K | -80% |
-| Security assessment (+ SECURITY-CONTROLS) | 16,162 | ~21K | -64% |
-| Full compliance audit (Tiers 1-3) | 28,909 | ~38K | -35% |
+| Scenario | Tokens | Reduction |
+|----------|--------|-----------|
+| Full load | ~58K | baseline |
+| Typical code task | ~12K | -80% |
+| Security assessment | ~21K | -64% |
+| Full audit | ~38K | -35% |
+
+---
 
 ## [0.2.2] - 2026-02-25
 
 ### Added
 
-- `examples/AGENTS.md.example` — added §14 Agent Meta-Constraints and §15 Engineering Discipline sections with HR Benefits Portal-specific values
-- `docs/TRACEABILITY.md` — added §14-§15 control mappings: 4 new controls (SA-5, SA-8, SA-17, SI-17) and updated 8 existing controls (AU-12, CM-2, CM-3, CM-5, CM-6, IR-6, SA-11, SA-15) with §14-§15 section references
-- `docs/TRACEABILITY.md` — updated AI RMF function mappings for GOVERN 1, MANAGE 1, MEASURE 2
+- Expanded agent example (`examples/AGENTS.md.example`)
+- Extended `docs/TRACEABILITY.md` control mappings
 
 ### Fixed
 
-- `scripts/validate-docs.sh` — replaced unsafe word-splitting `for file in $CONTENT_FILES` with NUL-delimited `mapfile` + `while IFS= read -r` for safe handling of filenames with spaces
-- `scripts/validate-docs.sh` — replaced unsafe `for path in $INDEX_PATHS` with `while IFS= read -r` loop
+- Safer filename handling in validation scripts (removed unsafe word-splitting)
+
+---
 
 ## [0.2.1] - 2026-02-25
 
 ### Added
 
-- **Centralized config and shared script library** — eliminates duplication across 5 scripts:
-  - `scripts/config.sh` — single source of truth for schema constants (status values, tier values, required fields, NIST control regex, skill limits, size/complexity limits, framework versions)
-  - `scripts/lib/common.sh` — shared frontmatter extraction (`get_field()`, `get_array_field()`) and JSON output helpers (`json_init()`, `json_add_result()`, `json_output()`)
+- Centralized configuration and shared script library:
+  - `scripts/config.sh`
+  - `scripts/lib/common.sh`
 
 ### Changed
 
-- All 5 shell scripts now source `scripts/config.sh` and/or `scripts/lib/common.sh` instead of duplicating helpers
-- CI: ShellCheck now uses `-x` flag and `-e SC1091` to support cross-file sourcing
-- `validate-docs.sh`: uses `REQUIRED_FRONTMATTER_FIELDS`, `DOC_STATUS_REGEX`, `DOC_TIER_REGEX` from config.sh
-- `validate-skills.sh`: uses `SKILL_MAX_LINES`, `SKILL_NAME_MAX_LENGTH`, `SKILL_NAME_INVALID_CHARS_REGEX` from config.sh
-- `generate-index.sh`: uses `REQUIRED_FRONTMATTER_FIELDS`, `OPTIONAL_FRONTMATTER_FIELDS`, `DOC_STATUS_VALUES`, `DOC_AUDIENCE_VALUES`, `DOC_REVIEW_CYCLE_VALUES` from config.sh; uses `get_field()`, `get_array_field()` from lib/common.sh
-- `validate-adrs.sh`: uses `REQUIRED_ADR_FIELDS`, `ADR_STATUS_REGEX`, `NIST_CONTROL_REGEX`, `ADR_FILENAME_REGEX` from config.sh; uses `json_init()`, `json_add_result()`, `json_output()` from lib/common.sh
-- `generate-adr-index.sh`: uses `get_field()`, `get_array_field()` from lib/common.sh
+- Scripts refactored to use shared config (DRY enforcement)
+- CI updated for cross-file sourcing
+- Validation logic centralized
+
+---
 
 ## [0.2.0] - 2026-02-25
 
 ### Added
 
-- **Engineering discipline sections in CODING_PRACTICES.md** — 3 new sections (§11-§13):
-  - §11 Architecture Discipline — ADR usage policy, Design by Contract, Interfaces before implementations, Separation of Concerns, Conway's Law awareness
-  - §12 Change Safety and Verification — TDD (red-green-refactor), property-based testing, regression test rule, snapshot/golden tests, idempotent operations, explicit error signaling
-  - §13 Scope, Simplicity, and Maintainability — KISS/YAGNI/DRY, Rule of Three, size/complexity guidelines (≤50 lines/function, ≤400 lines/file, ≤10 cyclomatic complexity), SOLID principles, module boundaries
-- **Agent meta-constraint sections in AGENTS.md** — 2 new sections (§14-§15):
-  - §14 Agent Meta-Constraints — Plan before executing, PR discipline (5 required sections), verification transcript, run-and-verify loop, no silent failures, risk modes
-  - §15 Engineering Discipline Enforcement — ADR trigger conditions, discipline enforcement in review, one-command bootstrap/verify, docs-as-code, why-before-what
-- AGENTS.md.template updated with Agent Meta-Constraints and Engineering Discipline template stubs
-- **Agent Skills execution layer** — 6 skills in [Agent Skills format](https://agentskills.io) for cross-platform agent compatibility
-  - `federal-security-controls-lookup` — NIST/OWASP control and keyword lookup across all policy documents
-  - `federal-repo-setup` — Repository initialization with federal security compliance defaults (+ audit script)
-  - `federal-agents-config` — Interactive AGENTS.md generation via decision-tree elicitation (+ generation and validation scripts)
-  - `federal-pre-deployment-check` — Automated + manual execution of the pre-deployment checklist (+ check runner and report generator)
-  - `federal-risk-assessment` — Guided risk assessment worksheet completion (+ pre-filled threat catalog)
-  - `federal-decision-records` — MADR-based decision records with federal compliance extensions (+ index generator and validator scripts)
-- `scripts/validate-skills.sh` — CI validation for skill format (frontmatter, line count, ShellCheck, py_compile)
-- `skills-validation` CI job in GitHub Actions
-- Skills section in INDEX.yaml with inventory of all 6 skills
-- Agent Skills section in README.md explaining dual-layer architecture
-- Skill contribution guidelines in CONTRIBUTING.md
-- Reference documents: TOOL_MATRIX.md, PLACEHOLDER_SCHEMA.json, ELICITATION_GUIDE.md, CHECK_AUTOMATION.md, THREAT_CATALOG.md, ADR_TEMPLATE.md, DECISION_CATEGORIES.md
-- `scripts/generate-index.sh` — Deterministic INDEX.yaml generator (derives all metadata from frontmatter)
-- INDEX.yaml drift detection in CI (`generate-index.sh --check`)
-- Cross-validation: skills on disk must appear in INDEX.yaml
-
-### Fixed
-
-- INDEX.yaml `total_nist_controls_referenced` was 42 (correct: 40 unique controls from frontmatter)
-- INDEX.yaml `frameworks_covered` was 12 (correct: 14 unique frameworks from frontmatter)
-- `docs/SECURITY-CONTROLS.md` description said "37 controls" (correct: 36 controls in overlay)
-- README.md version table only showed 0.1.0 (added 0.1.1, 0.2.0)
-- Skill `federal-security-controls-lookup` document inventory was hardcoded (now references INDEX.yaml)
+- Engineering discipline sections in `CODING_PRACTICES.md`
+- Agent meta-constraints in `AGENTS.md`
+- Agent Skills execution layer
+- Skill validation scripts and CI integration
+- Deterministic `INDEX.yaml` generation
 
 ### Changed
 
-- CI: ShellCheck now also checks skill scripts in `skills/*/scripts/*.sh`
-- `scripts/validate-docs.sh`: excludes `skills/` directory (skills have their own validation)
-- `scripts/validate-docs.sh`: INDEX.yaml path validation excludes skill paths (validated by validate-skills.sh)
-- README.md: updated repository structure tree to include skills directory
-- CONTRIBUTING.md: added skill contribution requirements and structure guide
+- CI expanded to validate skill scripts
+- Repository structure updated for skills architecture
+
+### Fixed
+
+- Metadata accuracy in `INDEX.yaml`
+- Documentation inconsistencies in control coverage
+
+---
 
 ## [0.1.1] - 2026-02-25
 
 ### Added
 
-- SECURITY.md — responsible disclosure policy for playbook accuracy and infrastructure issues
-- GitHub issue templates — bug report and document improvement request
-- Pull request template — checklist for frontmatter, INDEX.yaml, and cross-references
-- Dependabot configuration — weekly GitHub Actions version updates
-- ShellCheck linting in CI pipeline for shell scripts
+- SECURITY.md, issue templates, Dependabot config
+- ShellCheck integration in CI
 
 ### Fixed
 
-- CI pipeline: corrected markdownlint-cli2-action SHA and version (v18 → v22)
-- Frontmatter validation: fixed broken pipe error with long YAML arrays
-- Frontmatter validation: exclude .github/ templates and SECURITY.md from content checks
-- Link checker: ignore private repo URLs (404 in unauthenticated CI context)
-- Markdownlint: disabled cosmetic rules that conflict with playbook formatting
+- CI pipeline issues and validation edge cases
 
 ### Changed
 
-- Updated all GitHub Actions to latest versions via Dependabot (checkout v6, markdownlint v22, link-check v1.0.17, gh-release v2.5)
+- GitHub Actions updated via Dependabot
+
+---
 
 ## [0.1.0] - 2026-02-25
 
 ### Added
 
-- Initial repository structure and scaffolding
-- AGENTS.md — master agent behavior rules (13 sections, 19+ NIST control mappings)
-- CODING_PRACTICES.md — secure coding standards for AI-assisted development (10 sections)
-- docs/GETTING-STARTED.md — repository setup, tooling, and environment hardening
-- docs/SECURITY-CONTROLS.md — NIST 800-53 control overlay (37 controls, 10 families)
-- docs/AGENT-IDENTITY.md — agent identity, authentication, and delegation playbook
-- docs/TRACEABILITY.md — bidirectional control-to-document traceability matrix
-- templates/AGENTS.md.template — copy-paste agent rules for new projects
-- templates/risk-assessment.md — AI risk assessment worksheet (AI RMF aligned)
-- checklists/pre-deployment.md — pre-deployment security checklist
-- examples/AGENTS.md.example — completed example for federal HR portal
-- INDEX.yaml — machine-readable document index with schema definition
-- YAML frontmatter on all content documents (title, description, status, tier)
-
-### Infrastructure
-
-- GitHub Actions CI pipeline (markdown lint, link check, frontmatter validation)
-- Automated release workflow (triggered by semver tags)
-- Frontmatter and INDEX.yaml consistency validation script
-- Markdownlint and markdown-link-check configuration
-- CODEOWNERS and CONTRIBUTING.md
+- Initial repository structure and documentation
+- AGENTS.md, CODING_PRACTICES.md, templates, and checklists
+- INDEX.yaml with validation
+- CI pipeline and release workflow
 
 ### Framework Versions Referenced
 

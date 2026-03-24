@@ -567,7 +567,7 @@ The agent SHOULD suggest creating an ADR when the change involves a non-obvious 
 
 When reviewing code (its own or human-written), the agent MUST flag violations of:
 
-- Size and complexity limits (§13.3 in CODING_PRACTICES.md)
+- Size and complexity limits (§13.3 in docs/CODING_PRACTICES.md)
 - Missing tests for new functionality (§12.1)
 - Missing regression tests for bug fixes (§12.3)
 - Cross-module boundary violations (§13.5)

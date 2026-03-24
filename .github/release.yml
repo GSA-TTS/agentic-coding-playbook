@@ -1,0 +1,34 @@
+changelog:
+  exclude:
+    labels:
+      - release:skip
+      - no-changelog
+      - dependencies
+    authors:
+      - dependabot
+      - github-actions
+
+  categories:
+    - title: Added
+      labels:
+        - release:added
+
+    - title: Changed
+      labels:
+        - release:changed
+
+    - title: Fixed
+      labels:
+        - release:fixed
+
+    - title: Documentation
+      labels:
+        - release:docs
+
+    - title: Internal
+      labels:
+        - release:internal
+
+    - title: Other
+      labels:
+        - "*"

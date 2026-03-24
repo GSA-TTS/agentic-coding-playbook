@@ -2,6 +2,19 @@
 
 <!-- Brief description of changes. Reference the issue number if applicable: Closes #XX -->
 
+## Release Label
+
+<!-- Apply exactly one of these labels to the PR:
+- release:added
+- release:changed
+- release:fixed
+- release:docs
+- release:internal
+- release:skip
+-->
+
+- [ ] I applied exactly one `release:*` label to this PR
+
 ## Type of Change
 
 - [ ] Bug fix (incorrect playbook, broken links, wrong control mappings)
@@ -24,7 +37,7 @@
 - [ ] Cross-references (`related_files` in frontmatter) point to existing files
 - [ ] NIST control mappings verified against SP 800-53 Rev 5.2
 - [ ] OWASP cross-references verified (LLM Top 10 and/or Agentic Top 10)
-- [ ] CHANGELOG.md updated under `[Unreleased]`
+- [ ] CHANGELOG.md updated under `[Unreleased]` unless this PR is labeled `release:skip`
 
 ### Required for New Documents
 
