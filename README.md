@@ -1,134 +1,314 @@
+
+## `README.md`
+
+```md
 # Federal Agentic AI Playbook
 
-Practical, tool-agnostic playbook for US federal employees building with AI coding agents.
+[![CI — Documentation Quality](https://github.com/GSA-TTS/agentic-ai-playbook/actions/workflows/ci.yml/badge.svg)](https://github.com/GSA-TTS/agentic-ai-playbook/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/GSA-TTS/agentic-ai-playbook?display_name=tag)](https://github.com/GSA-TTS/agentic-ai-playbook/releases)
+[![License: CC0 1.0](https://img.shields.io/badge/license-CC0%201.0-blue.svg)](./LICENSE)
+[![Status: Reference Material](https://img.shields.io/badge/status-reference%20material-informational)](#what-this-is-not)
 
-> **Disclaimer:** This playbook is **informational only** and is not authoritative federal policy. Each agency must tailor these recommendations to their specific Authority to Operate (ATO) requirements, organizational policies, risk tolerance, and applicable laws and regulations. This project does not replace official NIST publications, OMB memoranda, or agency-specific playbook.
+Practical, tool-agnostic **reference material and implementation patterns** for US federal employees building with AI coding agents.
+
+> **Important:** This repository provides **non-binding reference material, examples, and implementation patterns**.
+> It does **not** establish policy, requirements, or official guidance.
+> It is not a substitute for agency counsel, security review, authorizing officials, or authoritative federal sources.
+> Each agency is responsible for determining its own compliance obligations, risk posture, and approval processes.
+
+---
+
+## Quick Start (5 min)
+
+### For most contributors
+
+```bash
+make bootstrap
+make fix
+make verify
+````
+
+What that does:
+
+* `make bootstrap` installs hooks and prepares local script permissions
+* `make fix` regenerates derived content and runs local hooks
+* `make verify` runs the CI-like validation flow before you push
+
+### First-time manual setup
+
+If you are not using the `Makefile` yet:
+
+```bash
+brew install pre-commit shellcheck
+pre-commit install
+bash scripts/sync-generated-content.sh
+prek run --all-files
+```
+
+### Typical workflow
+
+1. Read [docs/GETTING-STARTED.md](./docs/GETTING-STARTED.md).
+2. Copy [templates/AGENTS.md.template](./templates/AGENTS.md.template) into your repository as `AGENTS.md`.
+3. Read [docs/CODING-PRACTICES.md](./docs/CODING-PRACTICES.md) and align your repo defaults.
+4. Before shipping, complete [checklists/pre-deployment.md](./checklists/pre-deployment.md).
+
+> **Commit note:** hooks may regenerate or fix derived files such as `INDEX.yaml` or generated README sections. If that happens, stage the updated files and run `git commit` again.
 
 ---
 
 ## What This Is
 
-A collection of markdown files that tell AI agents **what to do** and **how to do it** when helping federal employees build software. These files can be placed in any repository to guide agent behavior across the full software development lifecycle — from project setup through deployment and ongoing operations.
+A collection of markdown files, templates, and executable skills that **demonstrate patterns and approaches** for guiding AI agent behavior across the software development lifecycle — from project setup through deployment and ongoing operations.
 
-This playbook is designed for **FIPS Moderate** impact level systems using **single-agent** architectures in **internal enterprise** environments.
+These materials are intended for:
+
+* **FIPS Moderate** impact level systems
+* **Single-agent architectures**
+* **Internal enterprise environments**
+
+## What This Is Not
+
+* Not federal policy, directive, or official guidance
+* Not a substitute for NIST, OMB, FedRAMP, CISA, or agency-specific requirements
+* Not an approved architecture or reference implementation
+* Not sufficient for ATO authorization without agency review
+* Not a source of binding control interpretations or legal determinations
+
+This repository supports **learning, experimentation, internal development, and repeatable implementation patterns**.
+
+---
 
 ## Who This Is For
 
 Federal employees (typically GS-12 to GS-15) who:
 
-- Have access to AI coding agents (Open Code, GitHub Copilot, Cursor, etc.)
-- Can write basic code but may not be deeply familiar with NIST frameworks
-- Need to build software that meets federal security and compliance requirements
-- Want their AI agents to follow secure-by-default practices
+* Use AI coding agents (Open Code, GitHub Copilot, Cursor, Claude Code, etc.)
+* Can write basic code but are not deeply familiar with NIST frameworks
+* Need to build software aligned with federal security expectations
+* Want AI-assisted workflows that are secure-by-default
+
+---
 
 ## Framework Alignment
 
-Every recommendation in this playbook maps to one or more authoritative sources:
+Examples and patterns in this playbook map to authoritative sources, including NIST AI RMF, NIST SP 800-53, NIST SP 800-218A, OWASP guidance for LLM and agentic systems, CISA Secure by Design, and relevant OMB and FedRAMP materials.
 
-| Framework                                                                                                                               | Version                  | Description                                                    |
-| --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------- |
-| [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework)                                                                    | 1.0 (Jan 2023)           | AI Risk Management Framework — Govern, Map, Measure, Manage    |
-| [NIST SP 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final)                                                                    | Rev 5.2.0                | Security and Privacy Controls for Information Systems          |
-| [NIST COSAiS](https://csrc.nist.gov/projects/cosais)                                                                                    | Draft 2026               | SP 800-53 Control Overlays for Securing AI Systems             |
-| [NIST SP 800-218A](https://csrc.nist.gov/pubs/sp/800/218/a/final)                                                                       | Final                    | Secure Software Development Practices for Generative AI (SSDF) |
-| [NCCOE Agent Identity](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization)                            | Concept Paper (Feb 2026) | Software and AI Agent Identity and Authorization               |
-| [NIST CAISI](https://www.nist.gov/caisi/ai-agent-standards-initiative)                                                                  | Initiative (Feb 2026)    | AI Agent Standards Initiative                                  |
-| [NIST AI 600-1](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence) | 1.0 (Jul 2024)           | Generative AI Profile for AI RMF                               |
-| [CISA Secure by Design](https://www.cisa.gov/securebydesign)                                                                            | 2025                     | Secure by Design Principles for AI Systems                     |
-| [OWASP Top 10 LLM](https://genai.owasp.org/llm-top-10/)                                                                                 | 2025                     | Top 10 Risks for LLM Applications                              |
-| [OWASP Agentic AI](https://genai.owasp.org/)                                                                                            | 2025                     | Top 10 Risks for Agentic AI Applications                       |
-| [OMB M-25-21](https://www.whitehouse.gov/)                                                                                              | Apr 2025                 | AI Governance (replaces M-24-10)                               |
-| [FedRAMP 20x](https://www.fedramp.gov/ai/)                                                                                              | 2025                     | Cloud/AI Service Authorization                                 |
+Where this repository cites or derives patterns from authoritative sources, those sources remain authoritative. This repository packages reference material and executable skills for practical internal use; it does not replace the underlying source material.
+
+See individual documents for detailed traceability and control mappings.
+
+---
 
 ## Repository Structure
 
-```
+<!-- GENERATED:REPO_STRUCTURE:START -->
+<!-- source: scripts/generate-readme-structure.sh -->
+<!-- do not edit manually -->
+```text
 agentic-ai-playbook/
-├── README.md                        # This file
-├── CONTEXT-GUIDE.md                 # Agent entry point — read this FIRST for loading instructions
-├── INDEX.yaml                       # Document index with load_priority metadata
-├── AGENTS.md                        # Master agent behavior rules
-├── CODING_PRACTICES.md              # Secure coding standards for AI-assisted development
-├── CONTRIBUTING.md                  # How to contribute to this playbook
-├── CHANGELOG.md                     # Version history and framework updates
-├── CODEOWNERS                       # Repository ownership
-├── LICENSE                          # CC0 1.0 Universal (public domain)
-├── SECURITY.md                      # Security policy and responsible disclosure
-├── .github/
-│   ├── dependabot.yml               # Automated GitHub Actions updates
-│   ├── ISSUE_TEMPLATE/              # Bug report and improvement request templates
-│   ├── PULL_REQUEST_TEMPLATE.md     # PR checklist for contributors
-│   └── workflows/
-│       ├── ci.yml                   # Markdown lint, link check, ShellCheck, frontmatter + skills validation
-│       └── release.yml              # Automated GitHub releases on version tags
+├── README.md
+├── CONTEXT-GUIDE.md
+├── INDEX.yaml
+├── AGENTS.md
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── CODEOWNERS
+├── LICENSE
+├── .pre-commit-config.yaml
+├── .github/workflows/
 ├── scripts/
-│   ├── config.sh                    # Centralized schema constants (status, tiers, limits)
-│   ├── lib/
-│   │   └── common.sh               # Shared frontmatter extraction and JSON output helpers
-│   ├── generate-index.sh            # Deterministic INDEX.yaml generator (run after doc changes)
-│   ├── validate-docs.sh             # Frontmatter and INDEX.yaml consistency checks
-│   └── validate-skills.sh           # Agent Skills format validation
+│   ├── check-executables.sh
+│   ├── config.sh
+│   ├── export-agent-bundle.sh
+│   ├── generate-index.sh
+│   ├── generate-readme-changelog.sh
+│   ├── generate-readme-skills.sh
+│   ├── generate-readme-structure.sh
+│   ├── run-shellcheck.sh
+│   ├── sync-generated-content.sh
+│   ├── validate-docs.sh
+│   ├── validate-skills.sh
+│   └── lib/common.sh
 ├── docs/
-│   ├── GETTING-STARTED.md           # Repository setup, tooling, environment hardening
-│   ├── SECURITY-CONTROLS.md         # NIST 800-53 control overlay for agentic systems
-│   ├── AGENT-IDENTITY.md            # Agent identity, auth, and delegation (NCCOE aligned)
-│   └── TRACEABILITY.md              # Control → document → checklist traceability matrix
+│   └── CODING-PRACTICES.md
 ├── templates/
-│   ├── AGENTS.md.template           # Copy-paste AGENTS.md for any new project
-│   └── risk-assessment.md           # AI risk assessment worksheet
+│   └── agent-bundle/
 ├── examples/
-│   └── AGENTS.md.example            # Completed example: federal HR portal
 ├── checklists/
-│   └── pre-deployment.md            # Pre-deployment security checklist
-└── skills/                          # Agent Skills — executable compliance procedures
-    ├── federal-agents-config/             # Interactive AGENTS.md generation
-    ├── federal-decision-records/          # MADR decision records with compliance extensions
-    ├── federal-pre-deployment-check/      # Automated pre-deployment checklist
-    ├── federal-repo-setup/                # Repository initialization with compliance defaults
-    ├── federal-risk-assessment/           # Guided risk assessment worksheet
-    └── federal-security-controls-lookup/  # NIST/OWASP control lookup
+└── skills/
+    ├── federal-agents-config/
+    ├── federal-decision-records/
+    ├── federal-pre-deployment-check/
+    ├── federal-repo-setup/
+    ├── federal-risk-assessment/
+    └── federal-security-controls-lookup/
 ```
+<!-- GENERATED:REPO_STRUCTURE:END -->
 
-> **For AI agents:** Read `CONTEXT-GUIDE.md` first — it tells you which documents to load for your task. Only load what you need to minimize context usage.
+> **For AI agents:** Read `CONTEXT-GUIDE.md` first. Load only what is required.
+
+---
 
 ## Start Here — By Role
 
-### I'm a **Developer** using an AI coding agent
+### Developer
 
-1. Read [docs/GETTING-STARTED.md](./docs/GETTING-STARTED.md) — set up your repo with security defaults
-2. Copy [templates/AGENTS.md.template](./templates/AGENTS.md.template) into your project
-3. Read [CODING_PRACTICES.md](./CODING_PRACTICES.md) — secure coding standards to follow
-4. Before deploying, complete [checklists/pre-deployment.md](./checklists/pre-deployment.md)
+1. Read [docs/GETTING-STARTED.md](./docs/GETTING-STARTED.md).
+2. Copy [templates/AGENTS.md.template](./templates/AGENTS.md.template).
+3. Follow [docs/CODING-PRACTICES.md](./docs/CODING-PRACTICES.md).
+4. Complete [checklists/pre-deployment.md](./checklists/pre-deployment.md).
 
-### I'm an **ISSO/Security Officer** evaluating AI agent use
+### Security / ISSO
 
-1. Read [docs/SECURITY-CONTROLS.md](./docs/SECURITY-CONTROLS.md) — 800-53 control overlay for agents
-2. Complete [templates/risk-assessment.md](./templates/risk-assessment.md) for the system
-3. Read [docs/AGENT-IDENTITY.md](./docs/AGENT-IDENTITY.md) — identity and authorization model
-4. Review [checklists/pre-deployment.md](./checklists/pre-deployment.md) — sign-off checklist
+1. Review [docs/SECURITY-CONTROLS.md](./docs/SECURITY-CONTROLS.md).
+2. Complete [templates/risk-assessment.md](./templates/risk-assessment.md).
+3. Validate the identity and authorization model in [docs/AGENT-IDENTITY.md](./docs/AGENT-IDENTITY.md).
 
-### I'm a **Manager** approving AI agent adoption
+### Manager
 
-1. Read [AGENTS.md](./AGENTS.md) Sections 1-3 — core principles, identity, and authorization
-2. Review [templates/risk-assessment.md](./templates/risk-assessment.md) — understand what your team will assess
-3. Skim [docs/SECURITY-CONTROLS.md](./docs/SECURITY-CONTROLS.md) Section 5 — implementation roadmap
+1. Review [AGENTS.md](./AGENTS.md) (Sections 1–3).
+2. Understand risk and adoption considerations via [templates/risk-assessment.md](./templates/risk-assessment.md).
+3. Review the implementation approach in [docs/SECURITY-CONTROLS.md](./docs/SECURITY-CONTROLS.md).
 
-### I'm an **AI Agent** reading this repository
+### AI Agent
 
-1. Read [CONTEXT-GUIDE.md](./CONTEXT-GUIDE.md) — tells you what to load for your task
-2. Read [AGENTS.md](./AGENTS.md) — behavioral rules (this is your contract)
-3. Load additional docs only when your task matches their keywords (see CONTEXT-GUIDE.md)
+1. Read [CONTEXT-GUIDE.md](./CONTEXT-GUIDE.md).
+2. Follow [AGENTS.md](./AGENTS.md).
+3. For coding tasks, load project-local coding standards first, then `.agent-skills/docs/CODING-PRACTICES.md` if present, then the canonical [docs/CODING-PRACTICES.md](./docs/CODING-PRACTICES.md).
+4. Load additional documents only when required.
 
-## Agent Skills — Executable Compliance Procedures
+---
+
+## Contributor Workflow
+
+For routine local work:
+
+```bash
+make fix
+make verify
+```
+
+If you are working without `make`, the equivalent flow is:
+
+```bash
+bash scripts/sync-generated-content.sh
+prek run --all-files
+```
+
+Use the CI-like validation flow before pushing changes:
+
+```bash
+bash scripts/sync-generated-content.sh --check
+bash scripts/validate-docs.sh
+bash scripts/validate-skills.sh
+bash scripts/run-shellcheck.sh
+prek run --all-files
+```
+
+> **Note:** generated content is intentional in this repository. A failed first commit is normal if hooks update `INDEX.yaml` or README-generated sections.
+
+---
+
+## Exporting an Agent Bundle
+
+This repository can export a portable bundle for use in local repositories or sandboxed agent environments.
+
+The export is intended to package **non-binding reference material, templates, and selected executable skills** into a deterministic, local-first structure. It is a portability mechanism for internal use. It does **not** convert this repository into official guidance or change the non-binding status of its contents.
+
+### Most common export flow
+
+Preview the export first:
+
+```bash
+make export-dry-run EXPORT_TARGET=../my-repo
+```
+
+Then export into the target repository:
+
+```bash
+make export EXPORT_TARGET=../my-repo EXPORT_OVERWRITE=true
+```
+
+### What gets exported
+
+An exported bundle can include:
+
+* `AGENTS.md` generated from `templates/AGENTS.md.template`
+* `.agent-skills/skills/` with selected skills
+* `.agent-skills/docs/CODING-PRACTICES.md` as a compact coding reference companion for local and sandboxed agent use
+* optional supporting files from `templates/` and `checklists/`
+* `.agent-skills/manifest.json` describing what was exported
+* `.agent-skills/README.md` with usage notes for local or sandboxed environments
+
+### Common examples
+
+Export the recommended default profile into another repository:
+
+```bash
+make export EXPORT_TARGET=../my-repo EXPORT_OVERWRITE=true
+```
+
+Preview an export into another repository:
+
+```bash
+make export-dry-run EXPORT_TARGET=../my-repo
+```
+
+Export all available bundled skills:
+
+```bash
+make export EXPORT_TARGET=../my-repo EXPORT_PROFILE=all EXPORT_OVERWRITE=true
+```
+
+Export to a standalone bundle directory instead of directly into another repository:
+
+```bash
+make export EXPORT_OUTPUT=./dist/agent-bundle EXPORT_OVERWRITE=true
+```
+
+Advanced custom example:
+
+```bash
+make export \
+  EXPORT_TARGET=../my-repo \
+  EXPORT_PROJECT_NAME="Internal API" \
+  EXPORT_SKILLS="federal-agents-config federal-pre-deployment-check" \
+  EXPORT_INCLUDES="templates/risk-assessment.md checklists/pre-deployment.md" \
+  EXPORT_OVERWRITE=true
+```
+
+To see available skills:
+
+```bash
+bash scripts/export-agent-bundle.sh --list-skills
+```
+
+### Profiles
+
+* `minimal` — `AGENTS.md` plus the exported coding practices companion
+* `core` — recommended default bundle for most internal teams
+* `all` — every available skill plus common supporting files
+
+### Notes for sandboxed agent environments
+
+* The bundle does not require network access.
+* Exported files are copied, not symlinked.
+* The manifest provides a machine-readable inventory for sandbox loaders.
+* The bundle can be mounted read-only in a restricted environment.
+* Skills remain scoped operational procedures and reference-derived implementation helpers, not unrestricted code execution entrypoints.
+
+---
+
+## Agent Skills — Executable Procedures
 
 This repository uses a **dual-layer architecture**:
 
-- **Policy layer** (docs, templates, checklists): Human-readable playbook explaining _what_ to do and _why_ — unchanged from v0.1.x
-- **Execution layer** (skills): Agent-actionable procedures in [Agent Skills format](https://agentskills.io) explaining _how_ — step-by-step workflows agents can follow
+* **Reference layer:** explains *what* and *why*
+* **Execution layer (skills):** defines *how*
 
-Skills are compatible with Open Code, Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, VS Code, and [25+ other platforms](https://agentskills.io).
-
-<!-- GENERATED:SKILLS_TABLE:START — do not edit, run: bash scripts/generate-index.sh -->
+<!-- GENERATED:SKILLS_TABLE:START -->
+<!-- do not edit manually; run: sh scripts/generate-readme-skills.sh -->
 | Skill | Purpose | Scripts? |
 |-------|---------|----------|
 | `federal-agents-config` | Generate a project-specific AGENTS.md through interactive decision-tree elicitation | Yes |
@@ -139,43 +319,83 @@ Skills are compatible with Open Code, Claude Code, OpenAI Codex CLI, Gemini CLI,
 | `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No |
 <!-- GENERATED:SKILLS_TABLE:END -->
 
-Skills reference policy docs by path and section — they never duplicate policy content. All scripts output structured JSON and are read-only or generative (they never modify git state or install packages).
+Skills reference supporting documents by path and section rather than duplicating policy content. Scripts are read-only or generative and do not install packages or silently modify git history.
+
+---
 
 ## Scope and Limitations
 
-**In scope:**
+### In Scope
 
-- Single-agent systems (one AI assistant helping one developer)
-- Internal enterprise applications (not public-facing AI services)
-- FIPS Moderate impact level (covers most federal internal systems)
-- Software development lifecycle (design through operations)
+* Single-agent systems
+* Internal enterprise applications
+* FIPS Moderate environments
+* Software development lifecycle activities
 
-**Out of scope (future work):**
+### Out of Scope
 
-- Multi-agent orchestration and coordination
-- FIPS High or classified systems
-- Public-facing AI chatbots or customer service agents
-- AI model training, fine-tuning, or ML pipeline operations
-- Procurement playbook (see OMB M-24-18 directly)
+* Multi-agent orchestration
+* FIPS High or classified systems
+* Public-facing AI services
+* Model training or fine-tuning pipelines
+* Procurement policy
+
+---
 
 ## Versioning
 
-This playbook tracks evolving federal standards. Each document includes version references for the specific NIST publications it aligns with. See [CHANGELOG.md](./CHANGELOG.md) for update history.
+This playbook tracks evolving federal standards.
+See [CHANGELOG.md](./CHANGELOG.md) for full history.
 
-| Date       | Version | Change                                                                              |
-| ---------- | ------- | ----------------------------------------------------------------------------------- |
-| 2026-02-26 | 0.3.1   | macOS compatibility fix for frontmatter parsing in generate-index.sh                |
-| 2026-02-26 | 0.3.0   | LLM context optimization — progressive disclosure, Quick References, tiered loading |
-| 2026-02-25 | 0.2.2   | QA/QC — example §14-§15, traceability matrix, word-splitting fix                    |
-| 2026-02-25 | 0.2.1   | Centralized config/schema — shared script library, DRY enforcement                  |
-| 2026-02-25 | 0.2.0   | Agent Skills execution layer — 6 skills, dual-layer architecture                    |
-| 2026-02-25 | 0.1.1   | Community infrastructure — SECURITY.md, issue templates, Dependabot                 |
-| 2026-02-25 | 0.1.0   | Initial MVP — 5 core documents, 2 templates, 1 checklist                            |
+<!-- GENERATED:CHANGELOG_SUMMARY:START -->
+<!-- do not edit manually; run: sh scripts/generate-readme-changelog.sh -->
+
+## Recent Changes
+
+## [Unreleased]
+
+### Added
+
+- Portable agent bundle export workflow for local-first and sandboxed agent use
+- `scripts/export-agent-bundle.sh` to generate deterministic offline-safe exports
+- compact exported `.agent-skills/docs/CODING-PRACTICES.md` companion for coding tasks in local and sandboxed agent environments
+- `make export-dry-run` to preview bundle exports without writing files
+- `make doctor` to check local tooling and script readiness
+- hidden maintainer targets `make release-check` and `make release-tag` for release operations without polluting the default contributor UX
+- maintainer release guidance in `CONTRIBUTING.md`
+
+### Changed
+
+- `make verify` is now the primary local validation command, replacing contributor-facing references to `make check`
+- export workflow UX simplified around `EXPORT_TARGET` as the primary way to populate another repository
+- `make export` help output tightened around the most common copy-paste examples
+- README, CONTRIBUTING, and setup guidance updated to align with the current command surface and file locations
+- README wording refined to reinforce that this repository is reference material and implementation patterns, not official guidance or policy
+- release process clarified around explicit readiness checks, versioned changelog entries, annotated tags, and tag-push driven GitHub releases
+- release notes generation uses safer Python-based document table parsing instead of brittle shell-only parsing
+
+### Fixed
+
+- macOS bash compatibility in `scripts/export-agent-bundle.sh` by removing unsupported bash nameref usage
+- stale path references to `CODING_PRACTICES.md` after the move to `docs/CODING-PRACTICES.md`
+- contributor and maintainer command drift across repo documentation
+- reduced ambiguity in repository language where “playbook,” “guidance,” and “reference material” could otherwise be conflated
+- improved release note generation resilience when `INDEX.yaml` formatting changes
+- improved operator safety around release tagging by adding local cleanliness and duplicate-tag checks
+
+
+[View full changelog](./CHANGELOG.md)
+
+<!-- GENERATED:CHANGELOG_SUMMARY:END -->
+
+---
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to contribute. This is a community effort — feedback from federal practitioners is especially valuable.
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+---
 
 ## License
 
-This work is dedicated to the public domain under [CC0 1.0 Universal](./LICENSE). Federal employees may freely use, modify, and distribute this playbook without restriction.
+This work is dedicated to the public domain under [CC0 1.0 Universal](./LICENSE).

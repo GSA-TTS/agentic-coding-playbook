@@ -3,7 +3,7 @@ title: "Getting Started: Repository Setup and Environment Hardening"
 description: "Step-by-step guide for setting up a development repository with security controls for AI coding agents"
 status: canonical
 tier: 2
-last_updated: "2026-02-25"
+last_updated: "2026-03-24"
 nist_controls: ["CM-2", "CM-6", "SA-10", "PO.1"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218"]
 audience: "developers"
@@ -17,7 +17,7 @@ keywords:
     "CI-CD",
   ]
 related_files:
-  ["AGENTS.md", "CODING_PRACTICES.md", "templates/AGENTS.md.template"]
+  ["AGENTS.md", "docs/CODING-PRACTICES.md", "templates/AGENTS.md.template"]
 load_priority: "on-demand"
 review_cycle: "semi-annually"
 ---
@@ -26,7 +26,7 @@ review_cycle: "semi-annually"
 
 # Getting Started: Repository Setup and Environment Hardening
 
-> **Version:** 0.1.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
+> **Version:** 0.2.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
 
 ## Quick Reference
 
@@ -158,7 +158,7 @@ obj/
 
 # Agent-specific working files (if your agent creates temp files)
 .agent-temp/
-```
+````
 
 ### 2.3 Set Up .editorconfig
 
@@ -192,7 +192,7 @@ Adjust `indent_size` and other values to match your team's coding standards. The
 
 You SHOULD establish a standard directory layout early. The exact structure depends on your language and framework, but the following skeleton is common across most projects:
 
-```
+```text
 your-project/
 ├── .editorconfig
 ├── .gitignore
@@ -214,7 +214,9 @@ your-project/
 ## 3. Agent Configuration
 
 <!-- NIST SP 800-53: PL-4 (Rules of Behavior), CM-6 (Configuration Settings) -->
+
 <!-- NIST AI RMF: GOVERN 1 (Policies), GOVERN 6 (Accountability) -->
+
 <!-- NCCOE Agent Identity: Identification -->
 
 ### 3.1 What Is AGENTS.md?
@@ -231,16 +233,20 @@ The file defines:
 
 ### 3.2 Setting Up AGENTS.md
 
+You can either copy the template directly or export a portable agent bundle from this repository.
+
+**Option A — direct copy:**
+
 1. Copy the template from this repository into your project root:
 
    ```bash
-   # From the agentic-ai-playbook repository
    cp templates/AGENTS.md.template /path/to/your-project/AGENTS.md
    ```
 
    See [templates/AGENTS.md.template](../templates/AGENTS.md.template) for the full template.
 
 2. Customize the template for your project:
+
    - Replace placeholder values (agency name, system name, impact level) with your specifics
    - Review each section and remove anything not applicable to your project
    - Add project-specific rules (e.g., required frameworks, coding conventions, approved libraries)
@@ -251,6 +257,28 @@ The file defines:
    git add AGENTS.md
    git commit -m "Add agent behavior rules"
    ```
+
+**Option B — export a bundle from the playbook:**
+
+From the playbook repository, preview the export first:
+
+```bash
+make export-dry-run EXPORT_TARGET=../your-project
+```
+
+Then export the bundle into your target repository:
+
+```bash
+make export EXPORT_TARGET=../your-project EXPORT_OVERWRITE=true
+```
+
+This will generate:
+
+- `AGENTS.md`
+- `.agent-skills/README.md`
+- `.agent-skills/docs/CODING-PRACTICES.md`
+- `.agent-skills/manifest.json`
+- selected skills and optional supporting files
 
 ### 3.3 How Agents Read the File
 
@@ -277,6 +305,7 @@ You SHOULD verify that your agent is following the rules by:
 ## 4. Secrets Scanning Setup
 
 <!-- NIST SP 800-53: IA-5 (Authenticator Management), SC-28 (Protection of Information at Rest) -->
+
 <!-- NIST SP 800-218A: PS.1 (Protect All Forms of Code from Unauthorized Access) -->
 
 Secrets scanning prevents credentials, API keys, tokens, and private keys from being committed to version control. This is one of the most important controls for AI-assisted development — AI agents can inadvertently generate code containing placeholder secrets or copy patterns that include real credentials.
@@ -364,6 +393,7 @@ You MUST NOT disable the scanner globally to work around false positives. Addres
 ## 5. Branch Protection
 
 <!-- NIST SP 800-53: CM-5 (Access Restrictions for Change), CM-3 (Configuration Change Control) -->
+
 <!-- NIST SP 800-218A: PO.3 (Define and Use Criteria for Checks) -->
 
 Branch protection rules ensure that no code — human-written or AI-generated — reaches production without proper review and automated validation. This is a critical compensating control for AI-assisted development.
@@ -504,13 +534,14 @@ You SHOULD instruct your AI agent (via AGENTS.md) to:
 ## 7. CI/CD Security Baseline
 
 <!-- NIST SP 800-53: SA-11 (Developer Testing), SA-15 (Development Process), RA-5 (Vulnerability Monitoring) -->
+
 <!-- NIST SP 800-218A: PW.6 (Configure the Build Process), PW.7 (Review and Test Code), PW.9 (Test Executable Code) -->
 
 Your CI/CD (Continuous Integration / Continuous Delivery) pipeline is the automated gatekeeper that validates every change before it reaches production. At minimum, the pipeline MUST include the five checks below.
 
 ### 7.1 Minimum Pipeline Stages
 
-```
+```text
 ┌─────────┐    ┌──────────┐    ┌───────────┐    ┌─────────────┐    ┌──────────────┐
 │  Lint   │───>│   Test   │───>│   SAST    │───>│ Dependency  │───>│   Secrets    │
 │         │    │          │    │   Scan    │    │ Vuln Scan   │    │    Scan      │
@@ -590,6 +621,7 @@ Beyond the five required stages, you SHOULD consider adding:
 ## 8. IDE/Editor Hardening
 
 <!-- NIST SP 800-53: CM-7 (Least Functionality), SC-7 (Boundary Protection), AU-2 (Audit Events) -->
+
 <!-- NIST AI 600-1: GAI Risk — Data Privacy -->
 
 Your Integrated Development Environment (IDE) or code editor is the primary interface between you, your AI agent, and your code. Configuring it securely reduces the risk of accidental data exposure.
@@ -610,7 +642,7 @@ AI agents should not read or suggest changes to files that contain secrets or se
 
 **Files to exclude from AI agent context:**
 
-```
+```text
 .env
 .env.*
 *.key
@@ -652,7 +684,9 @@ You SHOULD restrict your AI agent's file access to the project directory:
 ## 9. Tooling Selection Criteria
 
 <!-- NIST SP 800-53: SA-4 (Acquisition Process), SA-9 (External Information System Services) -->
+
 <!-- FedRAMP 20x -->
+
 <!-- OMB M-25-21 (AI Governance) -->
 
 When selecting development tools — AI agents, CI/CD platforms, security scanners, cloud services — federal teams MUST evaluate them against security and compliance criteria, not just developer convenience. This section provides a tool-agnostic evaluation framework.
@@ -716,11 +750,12 @@ With the controls in this guide implemented, your repository has a security base
 | Document                                                        | What It Covers                                                  | When to Read                                      |
 | --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------- |
 | [AGENTS.md](../AGENTS.md)                                       | Complete agent behavior rules — the rules your AI agent follows | Before your first AI-assisted coding session      |
-| [CODING_PRACTICES.md](../CODING_PRACTICES.md)                   | Secure coding standards for AI-generated and human-written code | Before writing or reviewing any code              |
+| [docs/CODING-PRACTICES.md](./CODING-PRACTICES.md)               | Secure coding standards for AI-generated and human-written code | Before writing or reviewing any code              |
 | [docs/SECURITY-CONTROLS.md](./SECURITY-CONTROLS.md)             | NIST 800-53 control overlay specific to agentic AI systems      | When building your SSP or preparing for ATO       |
 | [docs/AGENT-IDENTITY.md](./AGENT-IDENTITY.md)                   | Agent identity, authentication, and delegation (NCCOE-aligned)  | When configuring agent service accounts or tokens |
 | [templates/AGENTS.md.template](../templates/AGENTS.md.template) | Copy-paste AGENTS.md for new projects                           | When starting a new repository                    |
 | [checklists/pre-deployment.md](../checklists/pre-deployment.md) | Pre-deployment security checklist                               | Before deploying to staging or production         |
+| [CONTRIBUTING.md](../CONTRIBUTING.md)                           | Contributor workflow and maintainer release process             | When contributing to or maintaining this repo     |
 
 ### Summary Checklist
 
@@ -759,9 +794,10 @@ Before moving on, verify you have completed:
 
 ## Version History
 
-| Date       | Version | Change          |
-| ---------- | ------- | --------------- |
-| 2026-02-25 | 0.1.0   | Initial release |
+| Date       | Version | Change                                                                                    |
+| ---------- | ------- | ----------------------------------------------------------------------------------------- |
+| 2026-03-24 | 0.2.0   | Updated for export workflow, command surface changes, and coding practices path alignment |
+| 2026-02-25 | 0.1.0   | Initial release                                                                           |
 
 ## Framework References
 

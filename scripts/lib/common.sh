@@ -1,140 +1,290 @@
-#!/usr/bin/env bash
-# common.sh — Shared functions for frontmatter extraction and JSON output
+#!/bin/sh
+# common.sh — Shared functions for shell scripts in this repository
 #
-# All validation and generation scripts SHOULD source this file to avoid
-# duplicating frontmatter parsing logic.
+# This file is intentionally POSIX sh compatible.
+# It defines helper functions only and should be sourced by other scripts.
 #
-# Usage: source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
-#        or: source "${REPO_ROOT}/scripts/lib/common.sh"
-#
-# Prerequisites: None. This file defines ONLY functions. It has no side effects.
+# Usage:
+#   . "${SCRIPT_DIR}/lib/common.sh"
+
+# ── Basic Logging / Errors ───────────────────────────────────────────
+
+log() {
+	printf '%s\n' "$*"
+}
+
+warn() {
+	printf 'Warning: %s\n' "$*" >&2
+}
+
+die() {
+	printf 'Error: %s\n' "$*" >&2
+	exit 1
+}
+
+need_cmd() {
+	command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
+}
+
+# ── Path Helpers ─────────────────────────────────────────────────────
+
+resolve_script_dir() {
+	CDPATH='' cd -- "$(dirname -- "$1")" && pwd -P
+}
+
+resolve_repo_root_from_script() {
+	CDPATH='' cd -- "$(dirname -- "$1")/.." && pwd -P
+}
+
+# ── Temp Directory Helpers ───────────────────────────────────────────
+
+create_temp_dir() {
+	if command -v mktemp >/dev/null 2>&1; then
+		tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/repo-scripts.XXXXXX" 2>/dev/null) && {
+			printf '%s\n' "$tmp_dir"
+			return 0
+		}
+	fi
+
+	tmp_dir="${TMPDIR:-/tmp}/repo-scripts.$$.$(date +%s)"
+	(umask 077 && mkdir -p "$tmp_dir") || die "Failed to create temporary directory"
+	printf '%s\n' "$tmp_dir"
+}
+
+# ── File List Helpers ────────────────────────────────────────────────
+
+append_unique_line() {
+	target_file=$1
+	value=$2
+
+	[ -n "$value" ] || return 0
+
+	if [ -f "$target_file" ] && grep -F -x -q -- "$value" "$target_file"; then
+		return 0
+	fi
+
+	printf '%s\n' "$value" >> "$target_file"
+}
+
+sort_unique_file() {
+	input_file=$1
+	output_file=$2
+
+	if [ ! -s "$input_file" ]; then
+		: > "$output_file"
+		return 0
+	fi
+
+	LC_ALL=C sort -u "$input_file" > "$output_file"
+}
+
+count_lines() {
+	if [ ! -s "$1" ]; then
+		printf '0\n'
+	else
+		wc -l < "$1" | tr -d '[:space:]'
+	fi
+}
+
+# ── String / JSON Helpers ────────────────────────────────────────────
+
+trim_quotes() {
+	printf '%s' "$1" | sed 's/^"//' | sed 's/"$//'
+}
+
+json_escape() {
+	printf '%s' "$1" | awk '
+	BEGIN { ORS="" }
+	{
+		gsub(/\\/,"\\\\")
+		gsub(/"/,"\\\"")
+		gsub(/\t/,"\\t")
+		gsub(/\r/,"\\r")
+		gsub(/\n/,"\\n")
+		printf "%s", $0
+	}
+	'
+}
 
 # ── Frontmatter Extraction ───────────────────────────────────────────
 
-# Extract a single frontmatter field value from a .md file
-# Usage: get_field <file> <field>
-# Returns: The field value with quotes stripped, or empty string
-get_field() {
-	local file="$1"
-	local field="$2"
-	local fm
-	fm=$(sed -n '/^---$/,/^---$/p' "$file" | tail -n +2 | sed '$ d')
+frontmatter_content() {
+	file=$1
+	awk '
+	BEGIN { count = 0 }
+	/^---$/ {
+		count++
+		if (count == 1) next
+		if (count == 2) exit
+	}
+	count == 1 { print }
+	' "$file"
+}
 
-	# Handle multiline description (> continuation)
+frontmatter_has_field() {
+	file=$1
+	field=$2
+
+	frontmatter_content "$file" | grep -q "^${field}:"
+}
+
+get_field() {
+	file=$1
+	field=$2
+	fm=$(frontmatter_content "$file")
+
 	if [ "$field" = "description" ]; then
-		local val
-		val=$(grep "^${field}:" <<<"$fm" | head -1 | sed "s/^${field}:[[:space:]]*//" | sed 's/^>//' | sed 's/^[[:space:]]*//' | sed 's/"//g')
-		if [ -z "$val" ]; then
-			# Try multiline: field followed by indented lines
-			val=$(awk "/^${field}:/{found=1; sub(/^${field}:[[:space:]]*>[[:space:]]*/, \"\"); if(\$0) print; next} found && /^[[:space:]]/{sub(/^[[:space:]]+/,\"\"); printf \" %s\", \$0; next} found{exit}" <<<"$fm" | sed 's/^[[:space:]]*//' | sed 's/"//g')
-		fi
-		printf '%s' "$val"
+		printf '%s\n' "$fm" | awk -v field="$field" '
+		BEGIN {
+			found = 0
+			first = 1
+		}
+		$0 ~ ("^" field ":") {
+			found = 1
+			line = $0
+			sub("^" field ":[[:space:]]*", "", line)
+			sub(/^>[[:space:]]*/, "", line)
+			gsub(/"/, "", line)
+			if (length(line) > 0) {
+				printf "%s", line
+				first = 0
+			}
+			next
+		}
+		found && /^[[:space:]]+/ {
+			line = $0
+			sub(/^[[:space:]]+/, "", line)
+			gsub(/"/, "", line)
+			if (!first) {
+				printf " "
+			}
+			printf "%s", line
+			first = 0
+			next
+		}
+		found {
+			exit
+		}
+		'
 	elif [ "$field" = "nist_controls" ]; then
-		# Return comma-separated list from YAML array (for display)
-		local line
-		line=$(grep "^${field}:" <<<"$fm" | head -1 || true)
+		line=$(printf '%s\n' "$fm" | grep "^${field}:" | head -n 1 || true)
 		if [ -n "$line" ]; then
 			printf '%s' "$line" | sed "s/^${field}:[[:space:]]*//" | tr -d '[]"' | sed 's/,  */, /g'
 		fi
 	else
-		grep "^${field}:" <<<"$fm" | head -1 | sed "s/^${field}:[[:space:]]*//" | sed 's/"//g' || true
+		printf '%s\n' "$fm" | grep "^${field}:" | head -n 1 | sed "s/^${field}:[[:space:]]*//" | sed 's/"//g' || true
 	fi
 }
 
-# Extract YAML array field as newline-separated values
-# Usage: get_array_field <file> <field>
-# Returns: One value per line, with quotes and brackets stripped
 get_array_field() {
-	local file="$1"
-	local field="$2"
-	local fm
-	fm=$(sed -n '/^---$/,/^---$/p' "$file" | tail -n +2 | sed '$ d')
-	# Handle inline array: field: ["val1", "val2"]
-	local line
-	line=$(grep "^${field}:" <<<"$fm" | head -1 || true)
-	if [ -z "$line" ]; then
-		return
-	fi
-	# Extract values from ["a", "b", "c"] format
-	printf '%s' "$line" | sed "s/^${field}:[[:space:]]*//" | tr -d '[]"' | tr ',' '\n' | sed 's/^[[:space:]]*//' | sed '/^$/d'
+	file=$1
+	field=$2
+	fm=$(frontmatter_content "$file")
+	line=$(printf '%s\n' "$fm" | grep "^${field}:" | head -n 1 || true)
+
+	[ -n "$line" ] || return 0
+
+	printf '%s' "$line" |
+		sed "s/^${field}:[[:space:]]*//" |
+		tr -d '[]"' |
+		tr ',' '\n' |
+		sed 's/^[[:space:]]*//' |
+		sed '/^$/d'
 }
 
-# ── JSON Output Helpers ──────────────────────────────────────────────
+# ── Validation Helpers ───────────────────────────────────────────────
 
-# Initialize JSON result arrays (call at start of script)
-# Usage: json_init
-json_init() {
-	_JSON_RESULTS=()
-	_JSON_WARNINGS=()
-	_JSON_ERRORS=()
-	_JSON_PASS_COUNT=0
-	_JSON_FAIL_COUNT=0
+value_in_list() {
+	needle=$1
+	list_values=$2
+
+	printf '%s\n' "$list_values" | grep -F -x -q -- "$needle"
 }
 
-# Add a check result
-# Usage: json_add_result <file> <check> <pass:true|false> [note]
-json_add_result() {
-	local file="$1"
-	local check="$2"
-	local pass="$3"
-	local note="${4:-}"
+ensure_safe_rel_path() {
+	case "$1" in
+		""|/*|../*|*/../*|..|*/..)
+			return 1
+			;;
+		*)
+			return 0
+			;;
+	esac
+}
 
-	local filename
-	filename=$(basename "$file")
+# ── README Marker Block Helpers ──────────────────────────────────────
 
-	if [ "$pass" = "true" ]; then
-		_JSON_PASS_COUNT=$((_JSON_PASS_COUNT + 1))
-		_JSON_RESULTS+=("{\"file\":\"${filename}\",\"check\":\"${check}\",\"pass\":true}")
-	else
-		_JSON_FAIL_COUNT=$((_JSON_FAIL_COUNT + 1))
-		if [ -n "$note" ]; then
-			_JSON_RESULTS+=("{\"file\":\"${filename}\",\"check\":\"${check}\",\"pass\":false,\"note\":\"${note}\"}")
-		else
-			_JSON_RESULTS+=("{\"file\":\"${filename}\",\"check\":\"${check}\",\"pass\":false}")
+require_marker_file() {
+	file=$1
+	start_marker=$2
+	end_marker=$3
+
+	[ -f "$file" ] || die "File not found: $file"
+	grep -F -q "$start_marker" "$file" || die "Missing start marker in $file: $start_marker"
+	grep -F -q "$end_marker" "$file" || die "Missing end marker in $file: $end_marker"
+}
+
+replace_marker_block() {
+	target_file=$1
+	start_marker=$2
+	end_marker=$3
+	block_file=$4
+	output_file=$5
+
+	awk -v blockfile="$block_file" -v start="$start_marker" -v end="$end_marker" '
+	BEGIN { skip = 0 }
+	$0 == start {
+		skip = 1
+		while ((getline line < blockfile) > 0) print line
+		close(blockfile)
+		next
+	}
+	$0 == end {
+		skip = 0
+		next
+	}
+	!skip { print }
+	' "$target_file" > "$output_file" || die "Failed to update $target_file"
+}
+
+check_or_update_file() {
+	check_mode=$1
+	current_file=$2
+	updated_file=$3
+	error_message=$4
+	ok_message=$5
+	success_message=$6
+
+	if [ "$check_mode" = "true" ]; then
+		if ! diff -u "$current_file" "$updated_file" >/dev/null 2>&1; then
+			printf 'Error: %s\n' "$error_message" >&2
+			diff -u "$current_file" "$updated_file" || true
+			exit 1
 		fi
-	fi
-}
-
-# Add a warning message
-# Usage: json_add_warning <message>
-json_add_warning() {
-	_JSON_WARNINGS+=("\"$1\"")
-}
-
-# Add an error message
-# Usage: json_add_error <message>
-json_add_error() {
-	_JSON_ERRORS+=("\"$1\"")
-}
-
-# Print final JSON output
-# Usage: json_output [extra_fields]
-#   extra_fields: Optional key:value pairs to include (e.g., "total_adrs:5")
-json_output() {
-	local status
-	if [ "$_JSON_FAIL_COUNT" -eq 0 ]; then
-		status="success"
-	elif [ "$_JSON_PASS_COUNT" -gt 0 ]; then
-		status="partial"
-	else
-		status="failure"
+		log "$ok_message"
+		return 0
 	fi
 
-	local results_json warnings_json errors_json
-	results_json=$(printf '%s,' "${_JSON_RESULTS[@]}" 2>/dev/null | sed 's/,$//')
-	warnings_json=$(printf '%s,' "${_JSON_WARNINGS[@]}" 2>/dev/null | sed 's/,$//')
-	errors_json=$(printf '%s,' "${_JSON_ERRORS[@]}" 2>/dev/null | sed 's/,$//')
+	mv "$updated_file" "$current_file" || die "Failed to update $current_file"
+	log "$success_message"
+}
 
-	# Build extra fields string
-	local extra=""
-	for arg in "$@"; do
-		local key="${arg%%:*}"
-		local val="${arg#*:}"
-		extra="${extra},\"${key}\":${val}"
-	done
+# ── Template Rendering ───────────────────────────────────────────────
 
-	printf '{"status":"%s","checks_passed":%d,"checks_failed":%d%s,"results":[%s],"warnings":[%s],"errors":[%s]}\n' \
-		"$status" "$_JSON_PASS_COUNT" "$_JSON_FAIL_COUNT" \
-		"${extra}" \
-		"${results_json:-}" "${warnings_json:-}" "${errors_json:-}"
+render_template_file() {
+	template_path=$1
+	output_path=$2
+	project_name=$3
+
+	[ -f "$template_path" ] || die "Missing template: $template_path"
+
+	output_dir=$(dirname -- "$output_path")
+	mkdir -p "$output_dir" || die "Failed to create directory: $output_dir"
+
+	PROJECT_NAME_ENV=$project_name awk '
+	{
+		gsub(/\[Your Project Name\]/, ENVIRON["PROJECT_NAME_ENV"])
+		print
+	}
+	' "$template_path" > "$output_path" || die "Failed to render template: $template_path"
 }

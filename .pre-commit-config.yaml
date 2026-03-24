@@ -1,0 +1,58 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: trailing-whitespace
+        args: ["--markdown-linebreak-ext=md"]
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+      - id: check-json
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  - repo: local
+    hooks:
+      - id: sync-generated-content
+        name: sync generated content
+        entry: bash scripts/sync-generated-content.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+
+      - id: validate-docs
+        name: validate docs
+        entry: bash scripts/validate-docs.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+
+      - id: validate-skills
+        name: validate skills
+        entry: bash scripts/validate-skills.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+
+      - id: shellcheck-repo-scripts
+        name: shellcheck repo shell scripts
+        entry: bash scripts/run-shellcheck.sh
+        language: system
+        pass_filenames: false
+        require_serial: true
+
+      - id: executable-shell-scripts
+        name: ensure shell scripts are executable
+        entry: bash scripts/check-executables.sh
+        language: system
+        pass_filenames: false
+        require_serial: true

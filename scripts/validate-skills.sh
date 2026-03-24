@@ -1,184 +1,213 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # validate-skills.sh — Validate Agent Skills format and structure
-# Runs in CI to catch skill quality issues.
-set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=config.sh
-source "${SCRIPT_DIR}/config.sh"
+set -eu
+
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
+REPO_ROOT=$(CDPATH='' cd -- "${SCRIPT_DIR}/.." && pwd -P)
+
+# shellcheck source=scripts/lib/common.sh
+# shellcheck disable=SC1091
+. "${SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=scripts/config.sh
+# shellcheck disable=SC1091
+. "${SCRIPT_DIR}/config.sh"
 
 ERRORS=0
 WARNINGS=0
-SKILLS_DIR="skills"
+SKILLS_DIR="${REPO_ROOT}/skills"
 
-echo "=== Agent Skills Validation ==="
+TMP_DIR=$(create_temp_dir)
+SKILL_DIRS="${TMP_DIR}/skill-dirs.list"
+SHELL_SCRIPTS="${TMP_DIR}/shell-scripts.list"
+PYTHON_SCRIPTS="${TMP_DIR}/python-scripts.list"
+REFERENCE_FILES="${TMP_DIR}/reference-files.list"
+
+cleanup() {
+	rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT HUP INT TERM
+
+printf '%s\n' '=== Agent Skills Validation ==='
 
 if [ ! -d "$SKILLS_DIR" ]; then
-	echo "No skills/ directory found — skipping skills validation."
+	printf '%s\n' 'No skills/ directory found — skipping skills validation.'
 	exit 0
 fi
 
-SKILL_DIRS=$(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
+find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort > "$SKILL_DIRS"
 
-if [ -z "$SKILL_DIRS" ]; then
-	echo "No skill directories found in $SKILLS_DIR/"
+if [ ! -s "$SKILL_DIRS" ]; then
+	printf 'No skill directories found in %s/\n' "$SKILLS_DIR"
 	exit 0
 fi
 
-for skill_dir in $SKILL_DIRS; do
-	SKILL_NAME=$(basename "$skill_dir")
-	echo ""
-	echo "--- Validating skill: $SKILL_NAME ---"
+while IFS= read -r skill_dir || [ -n "$skill_dir" ]; do
+	[ -n "$skill_dir" ] || continue
 
-	# Check 1: SKILL.md exists
-	SKILL_FILE="$skill_dir/SKILL.md"
+	SKILL_NAME=$(basename -- "$skill_dir")
+	SKILL_FILE="${skill_dir}/SKILL.md"
+
+	printf '\n--- Validating skill: %s ---\n' "$SKILL_NAME"
+
 	if [ ! -f "$SKILL_FILE" ]; then
-		echo "ERROR: $skill_dir — missing SKILL.md"
+		printf 'ERROR: %s — missing SKILL.md\n' "$skill_dir"
 		ERRORS=$((ERRORS + 1))
 		continue
 	fi
 
-	# Check 2: SKILL.md has YAML frontmatter
-	if ! head -1 "$SKILL_FILE" | grep -q '^---$'; then
-		echo "ERROR: $SKILL_FILE — missing YAML frontmatter (no opening ---)"
+	if ! head -n 1 "$SKILL_FILE" | grep -q '^---$'; then
+		printf 'ERROR: %s — missing YAML frontmatter (no opening ---)\n' "$SKILL_FILE"
 		ERRORS=$((ERRORS + 1))
 		continue
 	fi
 
-	FRONTMATTER=$(sed -n '/^---$/,/^---$/p' "$SKILL_FILE" | tail -n +2 | sed '$ d')
-
-	# Check 3: Required frontmatter fields (Agent Skills spec)
-	if ! grep -q '^name:' <<<"$FRONTMATTER"; then
-		echo "ERROR: $SKILL_FILE — missing required frontmatter field: name"
+	if ! frontmatter_has_field "$SKILL_FILE" "name"; then
+		printf 'ERROR: %s — missing required frontmatter field: name\n' "$SKILL_FILE"
 		ERRORS=$((ERRORS + 1))
 	fi
 
-	if ! grep -q '^description:' <<<"$FRONTMATTER"; then
-		echo "ERROR: $SKILL_FILE — missing required frontmatter field: description"
+	if ! frontmatter_has_field "$SKILL_FILE" "description"; then
+		printf 'ERROR: %s — missing required frontmatter field: description\n' "$SKILL_FILE"
 		ERRORS=$((ERRORS + 1))
 	fi
 
-	# Check 4: name matches directory name
-	SKILL_NAME_FIELD=$(grep '^name:' <<<"$FRONTMATTER" | sed 's/name: *//' || true)
+	SKILL_NAME_FIELD=$(trim_quotes "$(get_field "$SKILL_FILE" "name" || true)")
 	if [ -n "$SKILL_NAME_FIELD" ] && [ "$SKILL_NAME_FIELD" != "$SKILL_NAME" ]; then
-		echo "ERROR: $SKILL_FILE — name field '$SKILL_NAME_FIELD' does not match directory name '$SKILL_NAME'"
+		printf "ERROR: %s — name field '%s' does not match directory name '%s'\n" \
+			"$SKILL_FILE" "$SKILL_NAME_FIELD" "$SKILL_NAME"
 		ERRORS=$((ERRORS + 1))
 	fi
 
-	# Check 5: name format (lowercase, hyphens only, no consecutive hyphens)
 	if [ -n "$SKILL_NAME_FIELD" ]; then
-		if [[ "$SKILL_NAME_FIELD" =~ $SKILL_NAME_INVALID_CHARS_REGEX ]]; then
-			echo "ERROR: $SKILL_FILE — name contains invalid characters (must be lowercase alphanumeric and hyphens)"
+		printf '%s' "$SKILL_NAME_FIELD" | grep -Eq "$SKILL_NAME_INVALID_CHARS_REGEX" && {
+			printf 'ERROR: %s — name contains invalid characters\n' "$SKILL_FILE"
 			ERRORS=$((ERRORS + 1))
-		fi
-		if [[ "$SKILL_NAME_FIELD" =~ ^- ]] || [[ "$SKILL_NAME_FIELD" =~ -$ ]]; then
-			echo "ERROR: $SKILL_FILE — name must not start or end with a hyphen"
-			ERRORS=$((ERRORS + 1))
-		fi
-		if [[ "$SKILL_NAME_FIELD" =~ -- ]]; then
-			echo "ERROR: $SKILL_FILE — name must not contain consecutive hyphens"
-			ERRORS=$((ERRORS + 1))
-		fi
-		if [ ${#SKILL_NAME_FIELD} -gt "$SKILL_NAME_MAX_LENGTH" ]; then
-			echo "ERROR: $SKILL_FILE — name exceeds ${SKILL_NAME_MAX_LENGTH} characters"
+		}
+
+		case "$SKILL_NAME_FIELD" in
+			-*|*-)
+				printf 'ERROR: %s — name must not start or end with a hyphen\n' "$SKILL_FILE"
+				ERRORS=$((ERRORS + 1))
+				;;
+		esac
+
+		case "$SKILL_NAME_FIELD" in
+			*--*)
+				printf 'ERROR: %s — name must not contain consecutive hyphens\n' "$SKILL_FILE"
+				ERRORS=$((ERRORS + 1))
+				;;
+		esac
+
+		name_len=$(printf '%s' "$SKILL_NAME_FIELD" | wc -c | tr -d '[:space:]')
+		if [ "$name_len" -gt "$SKILL_NAME_MAX_LENGTH" ]; then
+			printf 'ERROR: %s — name exceeds %s characters\n' "$SKILL_FILE" "$SKILL_NAME_MAX_LENGTH"
 			ERRORS=$((ERRORS + 1))
 		fi
 	fi
 
-	# Check 6: Line count < 500
-	LINE_COUNT=$(wc -l <"$SKILL_FILE")
+	LINE_COUNT=$(wc -l < "$SKILL_FILE" | tr -d '[:space:]')
 	if [ "$LINE_COUNT" -gt "$SKILL_MAX_LINES" ]; then
-		echo "WARNING: $SKILL_FILE — $LINE_COUNT lines (recommended: <${SKILL_MAX_LINES})"
+		printf 'WARNING: %s — %s lines (recommended: <%s)\n' "$SKILL_FILE" "$LINE_COUNT" "$SKILL_MAX_LINES"
 		WARNINGS=$((WARNINGS + 1))
 	fi
 
-	echo "  OK: $SKILL_FILE ($LINE_COUNT lines)"
+	printf '  OK: %s (%s lines)\n' "$SKILL_FILE" "$LINE_COUNT"
 
-	# Check 7: ShellCheck on scripts/*.sh
+	: > "$SHELL_SCRIPTS"
+	: > "$PYTHON_SCRIPTS"
+	: > "$REFERENCE_FILES"
+
 	if [ -d "$skill_dir/scripts" ]; then
-		for script in "$skill_dir"/scripts/*.sh; do
-			[ -f "$script" ] || continue
-			echo "  Checking script: $script"
-			if command -v shellcheck >/dev/null 2>&1; then
-				if ! shellcheck -x -e SC1091 "$script"; then
-					echo "ERROR: $script — ShellCheck failed"
-					ERRORS=$((ERRORS + 1))
+		find "$skill_dir/scripts" -type f -name '*.sh' | LC_ALL=C sort > "$SHELL_SCRIPTS"
+		find "$skill_dir/scripts" -type f -name '*.py' | LC_ALL=C sort > "$PYTHON_SCRIPTS"
+
+		if [ -s "$SHELL_SCRIPTS" ]; then
+			while IFS= read -r script || [ -n "$script" ]; do
+				[ -n "$script" ] || continue
+				printf '  Checking script: %s\n' "$script"
+				if command -v shellcheck >/dev/null 2>&1; then
+					if ! shellcheck -x -e SC1091 "$script"; then
+						printf 'ERROR: %s — ShellCheck failed\n' "$script"
+						ERRORS=$((ERRORS + 1))
+					else
+						printf '    OK: %s (ShellCheck passed)\n' "$script"
+					fi
 				else
-					echo "    OK: $script (ShellCheck passed)"
+					printf '%s\n' '    SKIP: shellcheck not installed'
 				fi
-			else
-				echo "    SKIP: shellcheck not installed"
-			fi
-		done
+			done < "$SHELL_SCRIPTS"
+		fi
+
+		if [ -s "$PYTHON_SCRIPTS" ]; then
+			while IFS= read -r script || [ -n "$script" ]; do
+				[ -n "$script" ] || continue
+				printf '  Checking script: %s\n' "$script"
+				if command -v python3 >/dev/null 2>&1; then
+					if ! python3 -m py_compile "$script"; then
+						printf 'ERROR: %s — Python syntax check failed\n' "$script"
+						ERRORS=$((ERRORS + 1))
+					else
+						printf '    OK: %s (py_compile passed)\n' "$script"
+					fi
+				else
+					printf '%s\n' '    SKIP: python3 not installed'
+				fi
+			done < "$PYTHON_SCRIPTS"
+		fi
 	fi
 
-	# Check 8: Python syntax check on scripts/*.py
-	if [ -d "$skill_dir/scripts" ]; then
-		for script in "$skill_dir"/scripts/*.py; do
-			[ -f "$script" ] || continue
-			echo "  Checking script: $script"
-			if command -v python3 >/dev/null 2>&1; then
-				if ! python3 -m py_compile "$script"; then
-					echo "ERROR: $script — Python syntax check failed"
-					ERRORS=$((ERRORS + 1))
-				else
-					echo "    OK: $script (py_compile passed)"
-				fi
-			else
-				echo "    SKIP: python3 not installed"
-			fi
-		done
-	fi
-
-	# Check 9: References files have frontmatter (if they are .md)
 	if [ -d "$skill_dir/references" ]; then
-		for ref_file in "$skill_dir"/references/*.md; do
-			[ -f "$ref_file" ] || continue
-			if ! head -1 "$ref_file" | grep -q '^---$'; then
-				echo "WARNING: $ref_file — reference .md file missing frontmatter"
-				WARNINGS=$((WARNINGS + 1))
-			else
-				echo "  OK: $ref_file"
-			fi
-		done
+		find "$skill_dir/references" -type f -name '*.md' | LC_ALL=C sort > "$REFERENCE_FILES"
+		if [ -s "$REFERENCE_FILES" ]; then
+			while IFS= read -r ref_file || [ -n "$ref_file" ]; do
+				[ -n "$ref_file" ] || continue
+				if ! head -n 1 "$ref_file" | grep -q '^---$'; then
+					printf 'WARNING: %s — reference .md file missing frontmatter\n' "$ref_file"
+					WARNINGS=$((WARNINGS + 1))
+				else
+					printf '  OK: %s\n' "$ref_file"
+				fi
+			done < "$REFERENCE_FILES"
+		fi
 	fi
-done
+done < "$SKILL_DIRS"
 
-# ── Cross-validation: skills on disk must appear in INDEX.yaml ────
+printf '\n%s\n' '=== INDEX.yaml Cross-Validation ==='
 
-echo ""
-echo "=== INDEX.yaml Cross-Validation ==="
+cd "$REPO_ROOT" || die "Failed to enter repo root"
 
 if [ -f "INDEX.yaml" ]; then
-	for skill_dir in $SKILL_DIRS; do
-		SKILL_NAME=$(basename "$skill_dir")
-		if ! grep -q "name: ${SKILL_NAME}$" INDEX.yaml; then
-			echo "ERROR: skill '$SKILL_NAME' exists on disk but is missing from INDEX.yaml"
-			echo "  Run: bash scripts/generate-index.sh"
+	while IFS= read -r skill_dir || [ -n "$skill_dir" ]; do
+		[ -n "$skill_dir" ] || continue
+		SKILL_NAME=$(basename -- "$skill_dir")
+		if ! grep -Eq "^[[:space:]]*-[[:space:]]+name:[[:space:]]+\"${SKILL_NAME}\"$" INDEX.yaml; then
+			printf "ERROR: skill '%s' exists on disk but is missing from INDEX.yaml\n" "$SKILL_NAME"
+			printf '%s\n' '  Run: sh scripts/generate-index.sh'
 			ERRORS=$((ERRORS + 1))
 		else
-			echo "  OK: $SKILL_NAME listed in INDEX.yaml"
+			printf '  OK: %s listed in INDEX.yaml\n' "$SKILL_NAME"
 		fi
-	done
+	done < "$SKILL_DIRS"
 else
-	echo "WARNING: INDEX.yaml not found — cannot cross-validate skills"
+	printf '%s\n' 'WARNING: INDEX.yaml not found — cannot cross-validate skills'
 	WARNINGS=$((WARNINGS + 1))
 fi
 
-echo ""
-echo "=== Skills Validation Summary ==="
-SKILL_COUNT=$(echo "$SKILL_DIRS" | wc -l)
-echo "Skills found: $SKILL_COUNT"
-echo "Errors:       $ERRORS"
-echo "Warnings:     $WARNINGS"
+SKILL_COUNT=$(count_lines "$SKILL_DIRS")
+
+printf '\n%s\n' '=== Skills Validation Summary ==='
+printf 'Skills checked: %s\n' "$SKILL_COUNT"
+printf 'Errors:         %s\n' "$ERRORS"
+printf 'Warnings:       %s\n' "$WARNINGS"
 
 if [ "$ERRORS" -gt 0 ]; then
-	echo "FAILED — $ERRORS error(s) found"
+	printf 'FAILED — %s error(s) found\n' "$ERRORS"
 	exit 1
 fi
 
 if [ "$WARNINGS" -gt 0 ]; then
-	echo "PASSED with $WARNINGS warning(s)"
+	printf 'PASSED with %s warning(s)\n' "$WARNINGS"
 else
-	echo "All skills validations passed."
+	printf '%s\n' 'All skills validations passed.'
 fi

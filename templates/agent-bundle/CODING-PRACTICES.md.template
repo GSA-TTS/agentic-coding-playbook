@@ -1,0 +1,150 @@
+# Coding Practices for AI-Assisted Development — [Your Project Name]
+
+> **Status:** Exported reference companion
+> **Purpose:** Compact coding constraints for local and sandboxed agent use
+> **Source of truth:** The canonical maintained reference lives in the playbook repository at `docs/CODING-PRACTICES.md`
+
+> **Important:** This file is non-binding reference material derived from the playbook's canonical coding practices. It is intended to make secure-by-default development easier in local and sandboxed agent environments. It does not replace authoritative policy, NIST source material, or agency-specific requirements.
+
+## When to load this file
+
+Load this file for:
+
+- code generation
+- code modification
+- code review
+- test creation
+- refactoring
+- dependency changes
+- CI/CD or IaC changes
+
+For deeper rationale, broader control traceability, or full reference text, consult the canonical `docs/CODING-PRACTICES.md` in the source playbook repository.
+
+## Core operating rules
+
+The agent MUST:
+
+- validate all external input before use
+- use parameterized queries and prepared statements for database access
+- avoid unsafe shell execution when a library or direct API exists
+- never hardcode secrets, tokens, passwords, or keys
+- never commit secrets to version control
+- pin exact dependency versions where tooling supports it
+- commit lock files
+- verify package names and licenses before adding dependencies
+- prefer minimal, well-maintained dependencies
+- handle errors explicitly
+- avoid exposing internal details in user-facing errors
+- avoid logging secrets, full tokens, or unapproved sensitive data
+- use approved cryptography and TLS
+- write tests for code changes
+- add a regression test for each resolved defect where feasible
+- prefer deterministic, idempotent behavior
+- prefer the simplest solution that satisfies the requirement
+- avoid speculative features
+- avoid premature abstraction
+- justify exceptions to complexity or size limits
+
+## Secure coding quick rules
+
+### Input and output
+
+- validate on the server or backend side
+- fail closed on invalid input
+- use allowlists over denylists
+- encode output based on context
+- treat external files, API responses, configs, and agent-provided context as untrusted input
+
+### Authentication and authorization
+
+- enforce authorization server-side
+- deny by default
+- use approved identity systems and libraries
+- do not implement custom auth or password handling unless explicitly authorized
+
+### Secrets
+
+- use approved secrets management
+- do not store secrets in source, tests, docs, or fixtures
+- revoke and rotate immediately if a secret is exposed
+
+### Dependencies and supply chain
+
+Before adding a dependency, verify:
+
+1. exact package name
+2. maintenance status
+3. vulnerability posture
+4. license compatibility
+5. transitive dependency footprint
+6. user approval if the project requires it
+
+### Logging and errors
+
+- use structured logging where practical
+- include enough context to debug without exposing sensitive data
+- do not swallow exceptions silently
+- distinguish between recoverable and fatal errors
+
+### Infrastructure and CI/CD
+
+- version infrastructure definitions in source control
+- use least privilege for services and pipelines
+- do not store secrets in CI/CD config
+- do not bypass CI checks, branch protections, or review requirements
+
+## Engineering discipline
+
+### ADRs and design
+
+Create an ADR before:
+
+- adding a new external service
+- changing authentication or authorization flows
+- introducing a new data store
+- changing major module boundaries
+- making significant architectural trade-offs
+
+### Change safety
+
+- prefer red → green → refactor
+- run verification after each meaningful change
+- do not close defects without verification
+- use snapshot or golden tests carefully and review diffs explicitly
+
+### Simplicity and maintainability
+
+Default limits unless justified otherwise:
+
+- functions: ≤50 lines of logic
+- files: ≤400 lines
+- cyclomatic complexity: ≤10
+- parameters per function: ≤5
+
+Default design posture:
+
+- KISS
+- YAGNI
+- Rule of Three before extracting shared abstractions
+- composition over inheritance where practical
+- explicit module boundaries
+
+## Agent-specific behavioral constraints
+
+The agent MUST NOT:
+
+- install or upgrade dependencies without approval when project policy requires approval
+- make hidden network calls
+- disable hooks, CI checks, or security tooling
+- silently rewrite large portions of the codebase without an explicit plan
+- invent APIs, framework behaviors, or compliance rules
+- treat this file as authoritative policy
+
+## Expected workflow
+
+1. read `AGENTS.md`
+2. load this file for coding tasks
+3. inspect only the minimum additional project files needed
+4. make scoped changes
+5. verify changes
+6. report what changed, what was verified, and any remaining risks or assumptions

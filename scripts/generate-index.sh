@@ -1,404 +1,285 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # generate-index.sh — Deterministically generate INDEX.yaml from source files
-#
-# Reads YAML frontmatter from all content .md files and scans skill
-# directories to produce a consistent INDEX.yaml. This prevents drift
-# by deriving ALL metadata from source files.
-#
-# Usage: bash scripts/generate-index.sh [--check]
-#   --check: Compare generated output to existing INDEX.yaml and fail if different
-#
-# This script is READ-ONLY (except for INDEX.yaml itself when not in --check mode).
-# It does not install packages or make network calls.
 
-set -euo pipefail
+set -eu
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CHECK_MODE=false
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
+REPO_ROOT=$(CDPATH='' cd -- "${SCRIPT_DIR}/.." && pwd -P)
 
-if [ "${1:-}" = "--check" ]; then
-    CHECK_MODE=true
+# shellcheck source=scripts/lib/common.sh
+. "${SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=scripts/config.sh
+. "${SCRIPT_DIR}/config.sh"
+
+CHECK_MODE="false"
+TMP_DIR=$(create_temp_dir)
+CONTENT_FILES="${TMP_DIR}/content-files.list"
+TIER1_FILES="${TMP_DIR}/tier1.list"
+TIER2_FILES="${TMP_DIR}/tier2.list"
+TIER3_FILES="${TMP_DIR}/tier3.list"
+SKILL_DIRS="${TMP_DIR}/skill-dirs.list"
+OUTPUT_FILE="${TMP_DIR}/INDEX.yaml"
+ALL_CONTROLS="${TMP_DIR}/controls.list"
+ALL_FRAMEWORKS="${TMP_DIR}/frameworks.list"
+
+cleanup() {
+	rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT HUP INT TERM
+
+[ "${1:-}" = "--check" ] && CHECK_MODE="true"
+
+array_values_to_yaml_list() {
+	indent=$1
+	values=$2
+
+	printf '%s\n' "$values" | sed '/^$/d' | while IFS= read -r item; do
+		printf '%s- "%s"\n' "$indent" "$item"
+	done
+}
+
+append_doc_block() {
+	file=$1
+
+	path=${file#./}
+	title=$(trim_quotes "$(get_field "$file" "title" || true)")
+	desc=$(trim_quotes "$(get_field "$file" "description" || true)")
+	status=$(trim_quotes "$(get_field "$file" "status" || true)")
+	tier=$(trim_quotes "$(get_field "$file" "tier" || true)")
+	last_updated=$(trim_quotes "$(get_field "$file" "last_updated" || true)")
+	audience=$(trim_quotes "$(get_field "$file" "audience" || true)")
+	load_priority=$(trim_quotes "$(get_field "$file" "load_priority" || true)")
+	review_cycle=$(trim_quotes "$(get_field "$file" "review_cycle" || true)")
+	controls=$(get_array_field "$file" "nist_controls" || true)
+	frameworks=$(get_array_field "$file" "frameworks" || true)
+
+	{
+		printf '  - path: "%s"\n' "$path"
+		printf '    title: "%s"\n' "$title"
+		printf '    description: "%s"\n' "$desc"
+		printf '    status: "%s"\n' "$status"
+		printf '    tier: "%s"\n' "$tier"
+
+		[ -n "$load_priority" ] && printf '    load_priority: "%s"\n' "$load_priority"
+		[ -n "$last_updated" ] && printf '    last_updated: "%s"\n' "$last_updated"
+		[ -n "$audience" ] && printf '    audience: "%s"\n' "$audience"
+		[ -n "$review_cycle" ] && printf '    review_cycle: "%s"\n' "$review_cycle"
+
+		if [ -n "$controls" ]; then
+			printf '    nist_controls:\n'
+			printf '%s\n' "$controls" | while IFS= read -r control; do
+				[ -n "$control" ] || continue
+				printf '      - "%s"\n' "$(trim_quotes "$(printf '%s' "$control" | sed 's/^[[:space:]]*//')")"
+			done
+		else
+			printf '    nist_controls: []\n'
+		fi
+
+		if [ -n "$frameworks" ]; then
+			printf '    frameworks:\n'
+			printf '%s\n' "$frameworks" | while IFS= read -r framework; do
+				[ -n "$framework" ] || continue
+				printf '      - "%s"\n' "$(trim_quotes "$(printf '%s' "$framework" | sed 's/^[[:space:]]*//')")"
+			done
+		else
+			printf '    frameworks: []\n'
+		fi
+
+		printf '\n'
+	} >> "$OUTPUT_FILE"
+}
+
+count_unique_from_listed_frontmatter_field() {
+	input_list=$1
+	field_name=$2
+	output_list=$3
+
+	: > "$output_list"
+
+	if [ -s "$input_list" ]; then
+		while IFS= read -r file || [ -n "$file" ]; do
+			[ -n "$file" ] || continue
+			get_array_field "$file" "$field_name" || true
+		done < "$input_list" >> "$output_list"
+	fi
+
+	if [ -s "$output_list" ]; then
+		sed 's/^[[:space:]]*//' "$output_list" | sed '/^$/d' | LC_ALL=C sort -u | grep -c .
+	else
+		printf '0\n'
+	fi
+}
+
+cd "$REPO_ROOT" || die "Failed to enter repo root"
+
+find . \
+	\( -name '*.md' -o -name '*.md.template' -o -name '*.md.example' \) \
+	-not -path './.git/*' \
+	-not -path './.github/*' \
+	-not -path './node_modules/*' \
+	-not -path './skills/*' \
+	-not -name 'CONTRIBUTING.md' \
+	-not -name 'CHANGELOG.md' \
+	-not -name 'README.md' \
+	-not -name 'SECURITY.md' \
+	-not -name 'LICENSE' \
+	| LC_ALL=C sort > "$CONTENT_FILES"
+
+: > "$TIER1_FILES"
+: > "$TIER2_FILES"
+: > "$TIER3_FILES"
+
+if [ -s "$CONTENT_FILES" ]; then
+	while IFS= read -r file || [ -n "$file" ]; do
+		[ -n "$file" ] || continue
+		tier=$(trim_quotes "$(get_field "$file" "tier" || true)")
+		case "$tier" in
+			1) printf '%s\n' "$file" >> "$TIER1_FILES" ;;
+			2) printf '%s\n' "$file" >> "$TIER2_FILES" ;;
+			3) printf '%s\n' "$file" >> "$TIER3_FILES" ;;
+		esac
+	done < "$CONTENT_FILES"
 fi
 
-# Source shared libraries
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=lib/common.sh
-source "${SCRIPT_DIR}/lib/common.sh"
-# shellcheck source=config.sh
-source "${SCRIPT_DIR}/config.sh"
-
-# Count unique NIST controls from frontmatter across all documents
-count_unique_nist_controls() {
-    local all_controls=""
-    for file in "$@"; do
-        local controls
-        controls=$(get_array_field "$file" "nist_controls")
-        if [ -n "$controls" ]; then
-            all_controls="${all_controls}${controls}"$'\n'
-        fi
-    done
-    printf '%s' "$all_controls" | sort -u | grep -c '^[A-Z]' || echo "0"
-}
-
-# Count unique frameworks across all documents
-count_unique_frameworks() {
-    local all_frameworks=""
-    for file in "$@"; do
-        local frameworks
-        frameworks=$(get_array_field "$file" "frameworks")
-        if [ -n "$frameworks" ]; then
-            all_frameworks="${all_frameworks}${frameworks}"$'\n'
-        fi
-    done
-    printf '%s' "$all_frameworks" | sed 's/^[[:space:]]*//' | sort -u | grep -c '.' || echo "0"
-}
-
-# ── Collect content files (same find as validate-docs.sh) ───────────
-
-cd "$REPO_ROOT"
-
-CONTENT_FILES=()
-while IFS= read -r f; do
-    CONTENT_FILES+=("$f")
-done < <(find . \( -name '*.md' -o -name '*.md.template' -o -name '*.md.example' \) \
-    -not -path './.git/*' \
-    -not -path './.github/*' \
-    -not -path './node_modules/*' \
-    -not -path './skills/*' \
-    -not -name 'CONTRIBUTING.md' \
-    -not -name 'CHANGELOG.md' \
-    -not -name 'README.md' \
-    -not -name 'SECURITY.md' \
-    -not -name 'LICENSE' \
-    | sort)
-
-# ── Classify documents by tier ──────────────────────────────────────
-
-TIER1_FILES=()
-TIER2_FILES=()
-TIER3_FILES=()
-
-for file in "${CONTENT_FILES[@]}"; do
-    tier=$(get_field "$file" "tier")
-    case "$tier" in
-        1) TIER1_FILES+=("$file") ;;
-        2) TIER2_FILES+=("$file") ;;
-        3) TIER3_FILES+=("$file") ;;
-    esac
-done
-
-# ── Collect skill directories ───────────────────────────────────────
-
-SKILL_DIRS=()
 if [ -d "skills" ]; then
-    while IFS= read -r d; do
-        SKILL_DIRS+=("$d")
-    done < <(find skills -mindepth 1 -maxdepth 1 -type d | sort)
+	find skills -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort > "$SKILL_DIRS"
+else
+	: > "$SKILL_DIRS"
 fi
 
-# ── Compute stats ───────────────────────────────────────────────────
-
-TOTAL_DOCS=${#CONTENT_FILES[@]}
-TOTAL_SKILLS=${#SKILL_DIRS[@]}
-TIER1_COUNT=${#TIER1_FILES[@]}
-TIER2_COUNT=${#TIER2_FILES[@]}
-TIER3_COUNT=${#TIER3_FILES[@]}
-UNIQUE_CONTROLS=$(count_unique_nist_controls "${CONTENT_FILES[@]}")
-UNIQUE_FRAMEWORKS=$(count_unique_frameworks "${CONTENT_FILES[@]}")
-
-# ── Generate YAML ───────────────────────────────────────────────────
-
+TOTAL_DOCS=$(count_lines "$CONTENT_FILES")
+TOTAL_SKILLS=$(count_lines "$SKILL_DIRS")
+TIER1_COUNT=$(count_lines "$TIER1_FILES")
+TIER2_COUNT=$(count_lines "$TIER2_FILES")
+TIER3_COUNT=$(count_lines "$TIER3_FILES")
+UNIQUE_CONTROLS=$(count_unique_from_listed_frontmatter_field "$CONTENT_FILES" "nist_controls" "$ALL_CONTROLS")
+UNIQUE_FRAMEWORKS=$(count_unique_from_listed_frontmatter_field "$CONTENT_FILES" "frameworks" "$ALL_FRAMEWORKS")
 TODAY=$(date +%Y-%m-%d)
 
-OUTPUT=""
-OUTPUT+="# Federal Agentic AI Playbook — Document Index"$'\n'
-OUTPUT+="#"$'\n'
-OUTPUT+="# AUTO-GENERATED by scripts/generate-index.sh"$'\n'
-OUTPUT+="# Do NOT edit manually — run: bash scripts/generate-index.sh"$'\n'
-OUTPUT+="#"$'\n'
-OUTPUT+="# Agents SHOULD read this file to understand the repository structure"$'\n'
-OUTPUT+="# before making changes that span multiple documents."$'\n'
-OUTPUT+="#"$'\n'
-OUTPUT+="# Schema version: 1.0"$'\n'
-OUTPUT+="# Last generated: ${TODAY}"$'\n'
-OUTPUT+=""$'\n'
-OUTPUT+="schema_version: \"1.0\""$'\n'
-OUTPUT+="generated: \"${TODAY}\""$'\n'
-OUTPUT+="repo: \"cloud-gov/agentic-ai-playbook\""$'\n'
-OUTPUT+="scope: \"FIPS Moderate | Single-agent | Internal enterprise\""$'\n'
-OUTPUT+=""$'\n'
-# Build schema arrays from config.sh constants
-REQUIRED_QUOTED=$(printf ', "%s"' "${REQUIRED_FRONTMATTER_FIELDS[@]}")
-REQUIRED_QUOTED="[${REQUIRED_QUOTED:2}]"
-OPTIONAL_QUOTED=$(printf ', "%s"' "${OPTIONAL_FRONTMATTER_FIELDS[@]}")
-OPTIONAL_QUOTED="[${OPTIONAL_QUOTED:2}]"
-STATUS_QUOTED=$(printf ', "%s"' "${DOC_STATUS_VALUES[@]}")
-STATUS_QUOTED="[${STATUS_QUOTED:2}]"
-AUDIENCE_QUOTED=$(printf ', "%s"' "${DOC_AUDIENCE_VALUES[@]}")
-AUDIENCE_QUOTED="[${AUDIENCE_QUOTED:2}]"
-REVIEW_QUOTED=$(printf ', "%s"' "${DOC_REVIEW_CYCLE_VALUES[@]}")
-REVIEW_QUOTED="[${REVIEW_QUOTED:2}]"
-LOAD_PRIORITY_QUOTED=$(printf ', "%s"' "${DOC_LOAD_PRIORITY_VALUES[@]}")
-LOAD_PRIORITY_QUOTED="[${LOAD_PRIORITY_QUOTED:2}]"
+{
+	printf '# Federal Agentic AI Playbook — Document Index\n'
+	printf '#\n'
+	printf '# AUTO-GENERATED by scripts/generate-index.sh\n'
+	printf '# Do NOT edit manually — run: sh scripts/generate-index.sh\n'
+	printf '#\n'
+	printf '# Schema version: 1.0\n'
+	printf '# Last generated: %s\n' "$TODAY"
+	printf '\n'
+	printf 'schema_version: "1.0"\n'
+	printf 'generated: "%s"\n' "$TODAY"
+	printf 'repo: "GSA-TTS/agentic-ai-playbook"\n'
+	printf 'scope: "FIPS Moderate | Single-agent | Internal enterprise"\n'
+	printf '\n'
+	printf 'frontmatter_schema:\n'
+	printf '  required:\n'
+	array_values_to_yaml_list "    " "$REQUIRED_FRONTMATTER_FIELDS"
+	printf '  optional:\n'
+	array_values_to_yaml_list "    " "$OPTIONAL_FRONTMATTER_FIELDS"
+	printf '  status_values:\n'
+	array_values_to_yaml_list "    " "$DOC_STATUS_VALUES"
+	printf '  tier_values:\n'
+	array_values_to_yaml_list "    " "$DOC_TIER_VALUES"
+	printf '  audience_values:\n'
+	array_values_to_yaml_list "    " "$DOC_AUDIENCE_VALUES"
+	printf '  load_priority_values:\n'
+	array_values_to_yaml_list "    " "$DOC_LOAD_PRIORITY_VALUES"
+	printf '  review_cycle_values:\n'
+	array_values_to_yaml_list "    " "$DOC_REVIEW_CYCLE_VALUES"
+	printf 'documents:\n'
+} > "$OUTPUT_FILE"
 
-OUTPUT+="# Frontmatter schema — all .md content files MUST include at minimum:"$'\n'
-OUTPUT+="#   $(printf '%s (required), ' "${REQUIRED_FRONTMATTER_FIELDS[@]}" | sed 's/, $//')"$'\n'
-OUTPUT+="# Optional: $(printf '%s, ' "${OPTIONAL_FRONTMATTER_FIELDS[@]}" | sed 's/, $//')"$'\n'
-OUTPUT+="frontmatter_schema:"$'\n'
-OUTPUT+="  required: ${REQUIRED_QUOTED}"$'\n'
-OUTPUT+="  optional: ${OPTIONAL_QUOTED}"$'\n'
-OUTPUT+="  status_values: ${STATUS_QUOTED}"$'\n'
-OUTPUT+="  tier_values:"$'\n'
-OUTPUT+="    1: \"Core playbook — authoritative rules and control mappings\""$'\n'
-OUTPUT+="    2: \"Supporting documentation — how-to guides and setup instructions\""$'\n'
-OUTPUT+="    3: \"Templates and checklists — reusable artifacts for projects\""$'\n'
-OUTPUT+="  audience_values: ${AUDIENCE_QUOTED}"$'\n'
-OUTPUT+="  load_priority_values: ${LOAD_PRIORITY_QUOTED}"$'\n'
-OUTPUT+="  review_cycle_values: ${REVIEW_QUOTED}"$'\n'
-OUTPUT+=""$'\n'
-OUTPUT+="# Document inventory"$'\n'
-OUTPUT+="documents:"$'\n'
-
-# Helper to emit a document entry
-emit_doc() {
-    local file="$1"
-    local path="${file#./}"
-    local title desc status tier last_updated audience load_priority review_cycle
-    title=$(get_field "$file" "title")
-    desc=$(get_field "$file" "description")
-    status=$(get_field "$file" "status")
-    tier=$(get_field "$file" "tier")
-    last_updated=$(get_field "$file" "last_updated")
-    audience=$(get_field "$file" "audience")
-    load_priority=$(get_field "$file" "load_priority")
-    review_cycle=$(get_field "$file" "review_cycle")
-
-    OUTPUT+="  - path: \"${path}\""$'\n'
-    OUTPUT+="    title: \"${title}\""$'\n'
-    OUTPUT+="    description: \"${desc}\""$'\n'
-    OUTPUT+="    status: ${status}"$'\n'
-    OUTPUT+="    tier: ${tier}"$'\n'
-    if [ -n "$load_priority" ]; then
-        OUTPUT+="    load_priority: ${load_priority}"$'\n'
-    fi
-    if [ -n "$last_updated" ]; then
-        OUTPUT+="    last_updated: \"${last_updated}\""$'\n'
-    fi
-    if [ -n "$audience" ]; then
-        OUTPUT+="    audience: ${audience}"$'\n'
-    fi
-
-    # Count nist_controls from frontmatter
-    local controls
-    controls=$(get_array_field "$file" "nist_controls")
-    if [ -n "$controls" ]; then
-        local count
-        count=$(printf '%s\n' "$controls" | grep -c '^[A-Z]' || echo "0")
-        OUTPUT+="    nist_controls_count: ${count}"$'\n'
-    fi
-
-    if [ -n "$review_cycle" ]; then
-        OUTPUT+="    review_cycle: ${review_cycle}"$'\n'
-    fi
-    OUTPUT+=""$'\n'
-}
-
-# Emit Tier 1
-if [ ${#TIER1_FILES[@]} -gt 0 ]; then
-    OUTPUT+="  # ── Tier 1: Core Playbook ────────────────────────────────────────"$'\n'
-    for file in "${TIER1_FILES[@]}"; do
-        emit_doc "$file"
-    done
+if [ -s "$TIER1_FILES" ]; then
+	printf '  # Tier 1 — Core playbook\n' >> "$OUTPUT_FILE"
+	while IFS= read -r file || [ -n "$file" ]; do
+		[ -n "$file" ] || continue
+		append_doc_block "$file"
+	done < "$TIER1_FILES"
 fi
 
-# Emit Tier 2
-if [ ${#TIER2_FILES[@]} -gt 0 ]; then
-    OUTPUT+="  # ── Tier 2: Supporting Documentation ─────────────────────────────"$'\n'
-    for file in "${TIER2_FILES[@]}"; do
-        emit_doc "$file"
-    done
+if [ -s "$TIER2_FILES" ]; then
+	printf '  # Tier 2 — Supporting documentation\n' >> "$OUTPUT_FILE"
+	while IFS= read -r file || [ -n "$file" ]; do
+		[ -n "$file" ] || continue
+		append_doc_block "$file"
+	done < "$TIER2_FILES"
 fi
 
-# Emit Tier 3
-if [ ${#TIER3_FILES[@]} -gt 0 ]; then
-    OUTPUT+="  # ── Tier 3: Templates, Checklists, and Examples ──────────────────"$'\n'
-    for file in "${TIER3_FILES[@]}"; do
-        emit_doc "$file"
-    done
+if [ -s "$TIER3_FILES" ]; then
+	printf '  # Tier 3 — Templates, checklists, examples\n' >> "$OUTPUT_FILE"
+	while IFS= read -r file || [ -n "$file" ]; do
+		[ -n "$file" ] || continue
+		append_doc_block "$file"
+	done < "$TIER3_FILES"
 fi
 
-# ── Skills section ──────────────────────────────────────────────────
+printf 'skills:\n' >> "$OUTPUT_FILE"
 
-if [ ${#SKILL_DIRS[@]} -gt 0 ]; then
-    OUTPUT+="# Agent Skills — executable compliance procedures (Agent Skills format)"$'\n'
-    OUTPUT+="# Skills provide step-by-step workflows agents can follow."$'\n'
-    OUTPUT+="# They reference policy docs by path+section — no policy duplication."$'\n'
-    OUTPUT+="# Format: https://agentskills.io/specification"$'\n'
-    OUTPUT+="skills:"$'\n'
+if [ -s "$SKILL_DIRS" ]; then
+	while IFS= read -r skill_dir || [ -n "$skill_dir" ]; do
+		[ -n "$skill_dir" ] || continue
 
-    for skill_dir in "${SKILL_DIRS[@]}"; do
-        local_name=$(basename "$skill_dir")
-        skill_file="${skill_dir}/SKILL.md"
+		skill_name=$(basename -- "$skill_dir")
+		skill_file="${skill_dir}/SKILL.md"
+		[ -f "$skill_file" ] || continue
 
-        if [ ! -f "$skill_file" ]; then
-            continue
-        fi
+		skill_desc=$(trim_quotes "$(get_field "$skill_file" "description" || true)")
+		printf '  - name: "%s"\n' "$skill_name" >> "$OUTPUT_FILE"
+		printf '    path: "%s"\n' "$skill_file" >> "$OUTPUT_FILE"
+		[ -n "$skill_desc" ] && printf '    description: "%s"\n' "$skill_desc" >> "$OUTPUT_FILE"
 
-        # Read skill frontmatter
-        local_desc=$(get_field "$skill_file" "description")
+		if [ -d "${skill_dir}/scripts" ]; then
+			script_list="${TMP_DIR}/skill-scripts.$$.list"
+			find "${skill_dir}/scripts" -type f \( -name '*.sh' -o -name '*.py' \) | LC_ALL=C sort > "$script_list"
+			if [ -s "$script_list" ]; then
+				printf '    has_scripts: true\n' >> "$OUTPUT_FILE"
+				printf '    scripts:\n' >> "$OUTPUT_FILE"
+				while IFS= read -r script_path || [ -n "$script_path" ]; do
+					[ -n "$script_path" ] || continue
+					printf '      - "%s"\n' "$script_path" >> "$OUTPUT_FILE"
+				done < "$script_list"
+			else
+				printf '    has_scripts: false\n' >> "$OUTPUT_FILE"
+				printf '    scripts: []\n' >> "$OUTPUT_FILE"
+			fi
+			rm -f "$script_list"
+		else
+			printf '    has_scripts: false\n' >> "$OUTPUT_FILE"
+			printf '    scripts: []\n' >> "$OUTPUT_FILE"
+		fi
 
-        OUTPUT+="  - name: ${local_name}"$'\n'
-        OUTPUT+="    path: \"${skill_file}\""$'\n'
-        OUTPUT+="    description: \"${local_desc}\""$'\n'
-
-        # Check for scripts
-        if [ -d "${skill_dir}/scripts" ]; then
-            local_scripts=()
-            while IFS= read -r s; do
-                local_scripts+=("$s")
-            done < <(find "${skill_dir}/scripts" -type f \( -name '*.sh' -o -name '*.py' \) | sort)
-
-            if [ ${#local_scripts[@]} -gt 0 ]; then
-                OUTPUT+="    has_scripts: true"$'\n'
-                OUTPUT+="    scripts:"$'\n'
-                for script in "${local_scripts[@]}"; do
-                    OUTPUT+="      - \"${script}\""$'\n'
-                done
-            else
-                OUTPUT+="    has_scripts: false"$'\n'
-            fi
-        else
-            OUTPUT+="    has_scripts: false"$'\n'
-        fi
-        OUTPUT+=""$'\n'
-    done
+		printf '\n' >> "$OUTPUT_FILE"
+	done < "$SKILL_DIRS"
 fi
 
-# ── Stats section ───────────────────────────────────────────────────
+{
+	printf 'stats:\n'
+	printf '  total_documents: %s\n' "$TOTAL_DOCS"
+	printf '  total_skills: %s\n' "$TOTAL_SKILLS"
+	printf '  tier_1_core: %s\n' "$TIER1_COUNT"
+	printf '  tier_2_supporting: %s\n' "$TIER2_COUNT"
+	printf '  tier_3_templates: %s\n' "$TIER3_COUNT"
+	printf '  total_nist_controls_referenced: %s\n' "$UNIQUE_CONTROLS"
+	printf '  frameworks_covered: %s\n' "$UNIQUE_FRAMEWORKS"
+} >> "$OUTPUT_FILE"
 
-OUTPUT+="stats:"$'\n'
-OUTPUT+="  total_documents: ${TOTAL_DOCS}"$'\n'
-OUTPUT+="  total_skills: ${TOTAL_SKILLS}"$'\n'
-OUTPUT+="  tier_1_core: ${TIER1_COUNT}"$'\n'
-OUTPUT+="  tier_2_supporting: ${TIER2_COUNT}"$'\n'
-OUTPUT+="  tier_3_templates: ${TIER3_COUNT}"$'\n'
-OUTPUT+="  total_nist_controls_referenced: ${UNIQUE_CONTROLS}"$'\n'
-OUTPUT+="  frameworks_covered: ${UNIQUE_FRAMEWORKS}"$'\n'
+if [ "$CHECK_MODE" = "true" ]; then
+	[ -f "${REPO_ROOT}/INDEX.yaml" ] || die "INDEX.yaml not found"
 
-# ── Output or check ─────────────────────────────────────────────────
+	generated_normalized="${TMP_DIR}/generated.normalized"
+	existing_normalized="${TMP_DIR}/existing.normalized"
 
-if [ "$CHECK_MODE" = true ]; then
-    # Compare generated output with existing INDEX.yaml (ignoring generated date)
-    EXISTING="${REPO_ROOT}/INDEX.yaml"
-    if [ ! -f "$EXISTING" ]; then
-        echo "ERROR: INDEX.yaml not found"
-        exit 1
-    fi
+	grep -v '^generated:' "$OUTPUT_FILE" | grep -v '^# Last generated:' > "$generated_normalized"
+	grep -v '^generated:' "${REPO_ROOT}/INDEX.yaml" | grep -v '^# Last generated:' > "$existing_normalized"
 
-    # Normalize: strip the generated date line for comparison (it changes daily)
-    GENERATED_NORMALIZED=$(printf '%s' "$OUTPUT" | grep -v '^generated:' | grep -v '^# Last generated:')
-    EXISTING_NORMALIZED=$(grep -v '^generated:' "$EXISTING" | grep -v '^# Last generated:')
+	if ! cmp -s "$generated_normalized" "$existing_normalized"; then
+		printf 'Error: INDEX.yaml is out of date. Run: sh scripts/generate-index.sh\n' >&2
+		diff -u "$existing_normalized" "$generated_normalized" || true
+		exit 1
+	fi
 
-    if [ "$GENERATED_NORMALIZED" != "$EXISTING_NORMALIZED" ]; then
-        echo "ERROR: INDEX.yaml is out of date. Run: bash scripts/generate-index.sh"
-        echo ""
-        echo "Diff:"
-        diff <(printf '%s\n' "$EXISTING_NORMALIZED") <(printf '%s\n' "$GENERATED_NORMALIZED") || true
-        exit 1
-    fi
-
-    echo "OK: INDEX.yaml is up to date"
-
-    # Also check README.md skills table if markers exist
-    README="${REPO_ROOT}/README.md"
-    if [ -f "$README" ] && grep -q "GENERATED:SKILLS_TABLE:START" "$README"; then
-        # Build expected table
-        EXPECTED_TABLE="| Skill | Purpose | Scripts? |"$'\n'
-        EXPECTED_TABLE+="|-------|---------|----------|"
-
-        for skill_dir in "${SKILL_DIRS[@]}"; do
-            local_name=$(basename "$skill_dir")
-            skill_file="${skill_dir}/SKILL.md"
-            [ -f "$skill_file" ] || continue
-            local_desc=$(get_field "$skill_file" "description")
-            short_desc=$(printf '%s' "$local_desc" | sed 's/\. [A-Z].*//')
-            if [ ${#short_desc} -gt 90 ]; then
-                short_desc=$(printf '%s' "$short_desc" | head -c 87 | sed 's/ [^ ]*$//')...
-            fi
-            if [ -d "${skill_dir}/scripts" ] && find "${skill_dir}/scripts" -type f \( -name '*.sh' -o -name '*.py' \) 2>/dev/null | grep -q .; then
-                has_scripts="Yes"
-            else
-                has_scripts="No"
-            fi
-            EXPECTED_TABLE+=$'\n'"| \`${local_name}\` | ${short_desc} | ${has_scripts} |"
-        done
-
-        # Extract current table from README (between markers)
-        CURRENT_TABLE=$(sed -n '/GENERATED:SKILLS_TABLE:START/,/GENERATED:SKILLS_TABLE:END/p' "$README" | grep '|')
-
-        if [ "$CURRENT_TABLE" != "$EXPECTED_TABLE" ]; then
-            echo "ERROR: README.md skills table is out of date. Run: bash scripts/generate-index.sh"
-            exit 1
-        fi
-        echo "OK: README.md skills table is up to date"
-    fi
-
-    exit 0
+	log "OK: INDEX.yaml is up to date"
+	exit 0
 fi
 
-# Write INDEX.yaml
-printf '%s' "$OUTPUT" > "${REPO_ROOT}/INDEX.yaml"
-echo "Generated INDEX.yaml (${TOTAL_DOCS} documents, ${TOTAL_SKILLS} skills, ${UNIQUE_CONTROLS} unique NIST controls)"
-
-# ── Inject skills table into README.md ─────────────────────────────
-
-README="${REPO_ROOT}/README.md"
-START_MARKER="<!-- GENERATED:SKILLS_TABLE:START"
-END_MARKER="<!-- GENERATED:SKILLS_TABLE:END -->"
-
-if [ -f "$README" ] && grep -q "$START_MARKER" "$README"; then
-    # Build skills table from collected skill data
-    SKILLS_TABLE="<!-- GENERATED:SKILLS_TABLE:START — do not edit, run: bash scripts/generate-index.sh -->"$'\n'
-    SKILLS_TABLE+="| Skill | Purpose | Scripts? |"$'\n'
-    SKILLS_TABLE+="|-------|---------|----------|"$'\n'
-
-    for skill_dir in "${SKILL_DIRS[@]}"; do
-        local_name=$(basename "$skill_dir")
-        skill_file="${skill_dir}/SKILL.md"
-        [ -f "$skill_file" ] || continue
-
-        # Get short description for table: first sentence (split on ". [A-Z]" to
-        # avoid splitting filenames like AGENTS.md), then truncate at word boundary
-        local_desc=$(get_field "$skill_file" "description")
-        short_desc=$(printf '%s' "$local_desc" | sed 's/\. [A-Z].*//')
-        # If still > 90 chars, truncate at word boundary
-        if [ ${#short_desc} -gt 90 ]; then
-            short_desc=$(printf '%s' "$short_desc" | head -c 87 | sed 's/ [^ ]*$//')...
-        fi
-
-        # Check for scripts
-        if [ -d "${skill_dir}/scripts" ] && find "${skill_dir}/scripts" -type f \( -name '*.sh' -o -name '*.py' \) 2>/dev/null | grep -q .; then
-            has_scripts="Yes"
-        else
-            has_scripts="No"
-        fi
-
-        SKILLS_TABLE+="| \`${local_name}\` | ${short_desc} | ${has_scripts} |"$'\n'
-    done
-
-    SKILLS_TABLE+="$END_MARKER"
-
-    # Replace content between markers
-    # Write table to temp file, then use awk to inject
-    TABLE_FILE=$(mktemp)
-    printf '%s\n' "$SKILLS_TABLE" > "$TABLE_FILE"
-
-    awk -v tablefile="$TABLE_FILE" '
-        /GENERATED:SKILLS_TABLE:START/ { skip=1; while ((getline line < tablefile) > 0) print line; close(tablefile); next }
-        /GENERATED:SKILLS_TABLE:END/ { skip=0; next }
-        !skip { print }
-    ' "$README" > "${README}.tmp" && mv "${README}.tmp" "$README"
-
-    rm -f "$TABLE_FILE"
-    echo "Injected skills table into README.md"
-fi
+mv "$OUTPUT_FILE" "${REPO_ROOT}/INDEX.yaml" || die "Failed to write INDEX.yaml"
+log "Generated INDEX.yaml (${TOTAL_DOCS} documents, ${TOTAL_SKILLS} skills, ${UNIQUE_CONTROLS} unique NIST controls)"
