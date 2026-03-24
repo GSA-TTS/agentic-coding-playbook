@@ -364,7 +364,6 @@ See [CHANGELOG.md](./CHANGELOG.md) for full history.
 
 ### Internal
 
-
 [View full changelog](./CHANGELOG.md)
 
 <!-- GENERATED:CHANGELOG_SUMMARY:END -->

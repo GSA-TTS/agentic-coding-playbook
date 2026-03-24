@@ -76,7 +76,6 @@ in_release {
 	printf '## Recent Changes\n'
 	printf '\n'
 	cat "$EXTRACTED"
-	printf '\n'
 	printf '[View full changelog](./CHANGELOG.md)\n'
 	printf '\n'
 	printf '%s\n' "$END_MARKER"
