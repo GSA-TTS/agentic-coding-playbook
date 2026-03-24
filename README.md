@@ -356,32 +356,13 @@ See [CHANGELOG.md](./CHANGELOG.md) for full history.
 
 ### Added
 
-- Portable agent bundle export workflow for local-first and sandboxed agent use
-- `scripts/export-agent-bundle.sh` to generate deterministic offline-safe exports
-- compact exported `.agent-skills/docs/CODING-PRACTICES.md` companion for coding tasks in local and sandboxed agent environments
-- `make export-dry-run` to preview bundle exports without writing files
-- `make doctor` to check local tooling and script readiness
-- hidden maintainer targets `make release-check` and `make release-tag` for release operations without polluting the default contributor UX
-- maintainer release guidance in `CONTRIBUTING.md`
-
 ### Changed
-
-- `make verify` is now the primary local validation command, replacing contributor-facing references to `make check`
-- export workflow UX simplified around `EXPORT_TARGET` as the primary way to populate another repository
-- `make export` help output tightened around the most common copy-paste examples
-- README, CONTRIBUTING, and setup guidance updated to align with the current command surface and file locations
-- README wording refined to reinforce that this repository is reference material and implementation patterns, not official guidance or policy
-- release process clarified around explicit readiness checks, versioned changelog entries, annotated tags, and tag-push driven GitHub releases
-- release notes generation uses safer Python-based document table parsing instead of brittle shell-only parsing
 
 ### Fixed
 
-- macOS bash compatibility in `scripts/export-agent-bundle.sh` by removing unsupported bash nameref usage
-- stale path references to `CODING_PRACTICES.md` after the move to `docs/CODING-PRACTICES.md`
-- contributor and maintainer command drift across repo documentation
-- reduced ambiguity in repository language where “playbook,” “guidance,” and “reference material” could otherwise be conflated
-- improved release note generation resilience when `INDEX.yaml` formatting changes
-- improved operator safety around release tagging by adding local cleanliness and duplicate-tag checks
+### Documentation
+
+### Internal
 
 
 [View full changelog](./CHANGELOG.md)

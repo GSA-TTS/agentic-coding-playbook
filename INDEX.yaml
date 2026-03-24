@@ -220,24 +220,6 @@ documents:
       - "FedRAMP Moderate"
 
   # Tier 2 — Supporting documentation
-  - path: "dist/repomix-review/docs/GETTING-STARTED.md"
-    title: "Getting Started: Repository Setup and Environment Hardening"
-    description: "Step-by-step guide for setting up a development repository with security controls for AI coding agents"
-    status: "canonical"
-    tier: "2"
-    load_priority: "on-demand"
-    last_updated: "2026-02-25"
-    audience: "developers"
-    review_cycle: "semi-annually"
-    nist_controls:
-      - "CM-2"
-      - "CM-6"
-      - "SA-10"
-      - "PO.1"
-    frameworks:
-      - "NIST SP 800-53 Rev 5.2"
-      - "NIST SP 800-218"
-
   - path: "docs/GETTING-STARTED.md"
     title: "Getting Started: Repository Setup and Environment Hardening"
     description: "Step-by-step guide for setting up a development repository with security controls for AI coding agents"
@@ -421,10 +403,10 @@ skills:
     scripts: []
 
 stats:
-  total_documents: 14
+  total_documents: 13
   total_skills: 6
   tier_1_core: 5
-  tier_2_supporting: 3
+  tier_2_supporting: 2
   tier_3_templates: 4
   total_nist_controls_referenced: 52
   frameworks_covered: 16

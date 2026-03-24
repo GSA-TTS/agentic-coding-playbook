@@ -2,90 +2,109 @@
 
 All notable changes to this playbook are documented in this file.
 
-This project follows [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline within individual documents.
+This project follows [Semantic Versioning](https://semver.org/).
+GitHub Releases are generated from labeled pull requests.
+This changelog is the curated, long-term record of notable changes.
+
+---
 
 ## [Unreleased]
 
 ### Added
 
-- Portable agent bundle export workflow for local-first and sandboxed agent use
-- `scripts/export-agent-bundle.sh` to generate deterministic offline-safe exports
-- compact exported `.agent-skills/docs/CODING-PRACTICES.md` companion for coding tasks in local and sandboxed agent environments
-- `make export-dry-run` to preview bundle exports without writing files
-- `make doctor` to check local tooling and script readiness
-- hidden maintainer targets `make release-check` and `make release-tag` for release operations without polluting the default contributor UX
-- maintainer release guidance in `CONTRIBUTING.md`
-
 ### Changed
-
-- `make verify` is now the primary local validation command, replacing contributor-facing references to `make check`
-- export workflow UX simplified around `EXPORT_TARGET` as the primary way to populate another repository
-- `make export` help output tightened around the most common copy-paste examples
-- README, CONTRIBUTING, and setup guidance updated to align with the current command surface and file locations
-- README wording refined to reinforce that this repository is reference material and implementation patterns, not official guidance or policy
-- release process clarified around explicit readiness checks, versioned changelog entries, annotated tags, and tag-push driven GitHub releases
-- release notes generation uses safer Python-based document table parsing instead of brittle shell-only parsing
 
 ### Fixed
 
-- macOS bash compatibility in `scripts/export-agent-bundle.sh` by removing unsupported bash nameref usage
-- stale path references to `CODING_PRACTICES.md` after the move to `docs/CODING-PRACTICES.md`
-- contributor and maintainer command drift across repo documentation
-- reduced ambiguity in repository language where “playbook,” “guidance,” and “reference material” could otherwise be conflated
-- improved release note generation resilience when `INDEX.yaml` formatting changes
-- improved operator safety around release tagging by adding local cleanliness and duplicate-tag checks
+### Documentation
+
+### Internal
+
+## [0.4.0] - 2026-03-24
+
+### Added
+
+- Agent bundle export workflow for local-first and sandboxed agent use
+- `scripts/export-agent-bundle.sh` for deterministic, offline-safe exports
+- `.agent-skills/docs/CODING-PRACTICES.md` included in exported bundles
+- `make export-dry-run` to preview bundle exports without writing files
+- `make doctor` to validate local tooling and script readiness
+
+### Changed
+
+- `make verify` is now the primary validation command (replaces `make check`)
+- Export workflow standardized around `EXPORT_TARGET`
+- `make export` help output streamlined for common usage
+- Repository language clarified to reinforce non-authoritative positioning
+
+### Fixed
+
+- macOS compatibility in `scripts/export-agent-bundle.sh` (removed bash-specific features)
+- Broken references to `docs/CODING-PRACTICES.md`
+- Documentation inconsistencies across contributor workflows
+
+### Documentation
+
+- README, CONTRIBUTING, and setup docs aligned with current command surface
+- Maintainer release guidance added to `CONTRIBUTING.md`
+
+### Internal
+
+- Added maintainer-only release targets (`make release-check`, `make release-tag`)
+- Formalized release readiness checks and tagging process
+- Replaced shell-based release parsing with Python implementation
+
+---
 
 ## [0.3.2] - 2026-03-23
 
 ### Changed
 
 - Repository migrated from **cloud-gov** to **GSA-TTS**
-- Repository renamed from **federal-agentic-ai-guidance** to **agentic-ai-playbook** to better reflect its non-authoritative, reference-oriented positioning
-- Documentation updated to align with the new repository name, structure, and positioning as non-binding reference material
-- Language refined across the repository to reduce ambiguity between policy, guidance, and reference content
-- README updated with a 5-minute quick start, badges, stronger non-binding framing, and clearer generated-content markers
-- Generated-content synchronization split into dedicated scripts for `INDEX.yaml`, the README repository structure block, the README skills table, and the README changelog summary
-- README repository structure moved from a manually maintained tree to a generated block sourced from the current filesystem
-- CI and pre-commit updated to validate all generated README content through the shared sync script
-- Contributor guidance now explicitly notes that a commit may need to be run more than once when generated content is refreshed during pre-commit
+- Repository renamed to **agentic-ai-playbook**
+- Documentation updated to reflect non-authoritative positioning
+- README improved with quick start, badges, and clearer structure
+- Generated content split into dedicated scripts (INDEX, README sections, changelog)
+- CI and pre-commit updated to enforce generated content consistency
 
 ### Fixed
 
-- Regenerated `INDEX.yaml` to reflect current repository structure and content
+- Regenerated `INDEX.yaml` to reflect current repository structure
+
+---
 
 ## [0.3.1] - 2026-02-26
 
 ### Fixed
 
-- `scripts/lib/common.sh` — replaced `head -n -1` with `sed '$ d'` for macOS/BSD compatibility (GNU-specific syntax caused failures)
-- `scripts/validate-docs.sh` — applied same fix for frontmatter extraction (2 locations)
-- `scripts/validate-skills.sh` — applied same fix for frontmatter extraction
-- `INDEX.yaml` — regenerated with corrected frontmatter parsing (47 unique NIST controls, 14 frameworks)
+- macOS/BSD compatibility in frontmatter parsing (`head -n -1` → `sed '$ d'`)
+- Validation scripts updated to use portable parsing logic
+- `INDEX.yaml` regenerated with corrected parsing
 
 ### Changed
 
-- `README.md` — added Claude Code to supported AI coding agents
+- README updated to include Claude Code support
+
+---
 
 ## [0.3.0] - 2026-02-26
 
 ### Added
 
-- **LLM context optimization (progressive disclosure architecture):**
-  - `CONTEXT-GUIDE.md` — agent entry point with tiered loading instructions and task-based triggers
-  - `load_priority` frontmatter field (`always`, `task-context`, `on-demand`, `reference-only`)
-  - HTML `<!-- LOAD: ... -->` directives in all content documents
-  - Schema + validation support in `scripts/config.sh`, `validate-docs.sh`, and `generate-index.sh`
-  - INDEX.yaml now includes `load_priority` metadata
-
-- **Quick Reference sections** in core documents for efficient LLM scanning
+- Progressive disclosure architecture for LLM context optimization:
+  - `CONTEXT-GUIDE.md`
+  - `load_priority` frontmatter field
+  - HTML `<!-- LOAD: ... -->` directives
+  - Validation + schema support
+- Quick reference sections for efficient LLM scanning
 
 ### Changed
 
-- AGENTS.md — replaced inline NIST control matrix with reference to `docs/TRACEABILITY.md`
-- README.md — updated agent workflow to use `CONTEXT-GUIDE.md` as entry point
-- INDEX.yaml — expanded schema to include `load_priority`
+- AGENTS.md now references `docs/TRACEABILITY.md` instead of inline mappings
+- README updated to use `CONTEXT-GUIDE.md` as entry point
+- INDEX.yaml schema expanded with `load_priority`
 
-### Token Impact
+### Performance Impact
 
 | Scenario | Tokens | Reduction |
 |----------|--------|-----------|
@@ -94,82 +113,84 @@ This project follows [Semantic Versioning](https://semver.org/). Framework align
 | Security assessment | ~21K | -64% |
 | Full audit | ~38K | -35% |
 
+---
+
 ## [0.2.2] - 2026-02-25
 
 ### Added
 
-- `examples/AGENTS.md.example` — expanded with Agent Meta-Constraints and Engineering Discipline sections
-- `docs/TRACEABILITY.md` — extended control mappings (+4 new controls, updates to 8 existing controls)
-- Updated AI RMF mappings (GOVERN 1, MANAGE 1, MEASURE 2)
+- Expanded agent example (`examples/AGENTS.md.example`)
+- Extended `docs/TRACEABILITY.md` control mappings
 
 ### Fixed
 
-- `scripts/validate-docs.sh` — replaced unsafe word-splitting with NUL-delimited handling for filenames
+- Safer filename handling in validation scripts (removed unsafe word-splitting)
+
+---
 
 ## [0.2.1] - 2026-02-25
 
 ### Added
 
 - Centralized configuration and shared script library:
-  - `scripts/config.sh` — schema constants and validation rules
-  - `scripts/lib/common.sh` — shared parsing and JSON helpers
+  - `scripts/config.sh`
+  - `scripts/lib/common.sh`
 
 ### Changed
 
-- All scripts refactored to use shared config and helpers (DRY enforcement)
-- CI updated to support cross-file sourcing (`shellcheck -x`)
-- Validation scripts now reference centralized schema definitions
+- Scripts refactored to use shared config (DRY enforcement)
+- CI updated for cross-file sourcing
+- Validation logic centralized
+
+---
 
 ## [0.2.0] - 2026-02-25
 
 ### Added
 
-- Engineering discipline sections in `CODING_PRACTICES.md` (architecture, testing, maintainability)
-- Agent meta-constraints in `AGENTS.md` (planning, PR discipline, verification loops)
-- Agent Skills execution layer (6 skills, cross-platform compatible)
-- `scripts/validate-skills.sh` and CI integration
-- Deterministic `INDEX.yaml` generation (`generate-index.sh`)
-- Cross-validation between filesystem and INDEX.yaml
-- Expanded README and CONTRIBUTING guidance
-- Reference materials supporting skills
-
-### Fixed
-
-- INDEX.yaml metadata accuracy (control counts, framework counts)
-- Documentation inconsistencies in control coverage and version tracking
+- Engineering discipline sections in `CODING_PRACTICES.md`
+- Agent meta-constraints in `AGENTS.md`
+- Agent Skills execution layer
+- Skill validation scripts and CI integration
+- Deterministic `INDEX.yaml` generation
 
 ### Changed
 
 - CI expanded to validate skill scripts
-- Validation scope clarified between docs and skills
-- Repository structure updated to reflect skills architecture
+- Repository structure updated for skills architecture
+
+### Fixed
+
+- Metadata accuracy in `INDEX.yaml`
+- Documentation inconsistencies in control coverage
+
+---
 
 ## [0.1.1] - 2026-02-25
 
 ### Added
 
-- SECURITY.md (responsible disclosure)
-- Issue and PR templates
-- Dependabot configuration
+- SECURITY.md, issue templates, Dependabot config
 - ShellCheck integration in CI
 
 ### Fixed
 
-- CI pipeline issues (markdownlint, link checker, frontmatter validation)
-- Validation edge cases (long YAML arrays, private links)
+- CI pipeline issues and validation edge cases
 
 ### Changed
 
-- Updated GitHub Actions versions via Dependabot
+- GitHub Actions updated via Dependabot
+
+---
 
 ## [0.1.0] - 2026-02-25
 
 ### Added
 
-- Initial repository structure and core documentation
-- AGENTS.md, docs/CODING_PRACTICES.md, and supporting docs/templates/checklists
-- INDEX.yaml with schema and frontmatter validation
-- GitHub Actions CI pipeline and release workflow
+- Initial repository structure and documentation
+- AGENTS.md, CODING_PRACTICES.md, templates, and checklists
+- INDEX.yaml with validation
+- CI pipeline and release workflow
 
 ### Framework Versions Referenced
 
