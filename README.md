@@ -348,17 +348,41 @@ See [CHANGELOG.md](./CHANGELOG.md) for full history.
 
 ## Recent Changes
 
-## [Unreleased]
+## [0.4.0] - 2026-03-24
 
 ### Added
 
+- Agent bundle export workflow for local-first and sandboxed agent use
+- `scripts/export-agent-bundle.sh` for deterministic, offline-safe exports
+- `.agent-skills/docs/CODING-PRACTICES.md` included in exported bundles
+- `make export-dry-run` to preview bundle exports without writing files
+- `make doctor` to validate local tooling and script readiness
+
 ### Changed
+
+- `make verify` is now the primary validation command (replaces `make check`)
+- Export workflow standardized around `EXPORT_TARGET`
+- `make export` help output streamlined for common usage
+- Repository language clarified to reinforce non-authoritative positioning
 
 ### Fixed
 
+- macOS compatibility in `scripts/export-agent-bundle.sh` (removed bash-specific features)
+- Broken references to `docs/CODING-PRACTICES.md`
+- Documentation inconsistencies across contributor workflows
+
 ### Documentation
 
+- README, CONTRIBUTING, and setup docs aligned with current command surface
+- Maintainer release guidance added to `CONTRIBUTING.md`
+
 ### Internal
+
+- Added maintainer-only release targets (`make release-check`, `make release-tag`)
+- Formalized release readiness checks and tagging process
+- Replaced shell-based release parsing with Python implementation
+
+---
 
 [View full changelog](./CHANGELOG.md)
 

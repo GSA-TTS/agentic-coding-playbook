@@ -54,7 +54,11 @@ BEGIN {
 	count = 0
 	in_release = 0
 }
-$0 ~ /^## \[/ {
+$0 ~ /^## \[Unreleased\]/ {
+	in_release = 0
+	next
+}
+$0 ~ /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {
 	count++
 	if (count <= releases) {
 		in_release = 1
