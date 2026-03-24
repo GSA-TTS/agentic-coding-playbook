@@ -79,7 +79,7 @@ in_release {
 	printf '\n'
 	printf '## Recent Changes\n'
 	printf '\n'
-	cat "$EXTRACTED"
+	sed 's/^\([[:space:]]*\)- /\1* /' "$EXTRACTED"
 	printf '[View full changelog](./CHANGELOG.md)\n'
 	printf '\n'
 	printf '%s\n' "$END_MARKER"
