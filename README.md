@@ -1,7 +1,6 @@
 # Federal Agentic AI Playbook
 
 [![CI — Documentation Quality](https://github.com/GSA-TTS/agentic-ai-playbook/actions/workflows/ci.yml/badge.svg)](https://github.com/GSA-TTS/agentic-ai-playbook/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/GSA-TTS/agentic-ai-playbook?display_name=tag)](https://github.com/GSA-TTS/agentic-ai-playbook/releases)
 [![License: CC0 1.0](https://img.shields.io/badge/license-CC0%201.0-blue.svg)](./LICENSE)
 [![Status: Reference Material](https://img.shields.io/badge/status-reference%20material-informational)](#what-this-is-not)
 
