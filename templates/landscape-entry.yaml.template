@@ -1,0 +1,27 @@
+# Template for adding a new entry to data/federal-ai-landscape.yaml
+#
+# Copy this block into the `entries:` list in data/federal-ai-landscape.yaml,
+# fill in all fields, then:
+#   1. Increment `total_entries` at the top of the file
+#   2. Run: make validate-landscape
+#   3. Add a corresponding section to docs/FEDERAL-AI-LANDSCAPE.md
+
+  - id: short-kebab-id                    # Unique ID (lowercase, hyphens)
+    title: "Full Official Title"
+    category: executive_order              # Allowed: executive_order, omb_memo, nist_standard,
+                                           #          legislation, agency_strategy, industry_standard,
+                                           #          white_house_plan
+    source: "Issuing Body"                 # e.g., "White House", "NIST", "Congress", "OWASP"
+    date: "YYYY-MM-DD"                     # Publication or signing date (ISO 8601)
+    status: active                         # Allowed: active, revoked, rescinded, draft, final
+    relevance: "One sentence on why this matters for AI-assisted development"
+    url: "https://official-source-url"
+    playbook_phases: ["0", "2"]            # Which playbook phases this applies to (optional)
+
+    # Optional cross-reference fields (use when this entry relates to others):
+    # revokes: ["other-entry-id"]          # This entry revokes these entries
+    # replaces: ["other-entry-id"]         # This entry replaces these entries
+    # implements: "other-entry-id"         # This entry implements this entry
+    # revoked_by: "other-entry-id"         # This entry was revoked by this entry
+    # replaced_by: "other-entry-id"        # This entry was replaced by this entry
+    # compliance_deadline: "YYYY-MM-DD"    # When agencies must comply

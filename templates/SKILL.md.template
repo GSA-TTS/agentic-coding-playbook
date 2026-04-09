@@ -1,0 +1,62 @@
+---
+# Required fields — fill in all of these
+name: your-skill-name              # Must match directory name. Lowercase, hyphens only, max 64 chars.
+title: "Human-Readable Skill Title"
+description: "One sentence describing what this skill does and when to use it"
+status: canonical                  # canonical | draft | deprecated
+tier: 2                            # 1 = always load, 2 = on-demand, 3 = reference only
+load_priority: on-demand           # always | task-context | on-demand | reference-only
+audience: ["developers", "agents"] # Who uses this skill
+triggers: ["keyword1", "keyword2"] # Keywords that trigger this skill (used by agent context routing)
+dependencies: []                   # Other skills this depends on (e.g., ["project-bootstrap"])
+---
+
+# Skill: Your Skill Title
+
+Brief description of what this skill does (2-3 sentences).
+
+## Files Copied from Playbook to Target Repo
+
+<!-- Remove this section if the skill doesn't copy files to the target repo -->
+<!-- If the skill creates files in a target repository, list them here -->
+
+| Source (this repo) | Destination (target repo) | Purpose |
+|---|---|---|
+| `path/to/source` | `path/in/target` | What this file provides |
+
+## When to Use
+
+- Scenario 1 that triggers this skill
+- Scenario 2 that triggers this skill
+- User says "keyword" or "phrase"
+
+## Prerequisites
+
+- What must be true before this skill runs
+- Required tools, files, or permissions
+
+## Procedure
+
+### Step 1: First Step Title
+
+Description of what to do.
+
+```bash
+# Example command or code
+```
+
+### Step 2: Second Step Title
+
+Description of what to do.
+
+### Step 3: Third Step Title
+
+Description of what to do.
+
+## Verification
+
+After completing this skill, verify:
+
+- [ ] First check passed
+- [ ] Second check passed
+- [ ] No errors in output
