@@ -4,6 +4,35 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.8.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.7.0...v0.8.0) (2026-04-09)
+
+
+### Features
+
+* clean import of agentic-coding-playbook v0.6.0 ([8e1d408](https://github.com/GSA-TTS/agentic-coding-playbook/commit/8e1d408597855dd81cbb3d330b10952b906ab424))
+* clean import of agentic-coding-playbook v0.6.0 ([6251d99](https://github.com/GSA-TTS/agentic-coding-playbook/commit/6251d996ede743d453e553ced7cf1e5813d36653))
+* clean import of agentic-coding-playbook v0.6.0 ([fc2e009](https://github.com/GSA-TTS/agentic-coding-playbook/commit/fc2e009e3685f8c0bfd4ec783035cf7f0f0baa52))
+* clean import of agentic-coding-playbook v0.6.0 ([86a1d16](https://github.com/GSA-TTS/agentic-coding-playbook/commit/86a1d16d2472a2a42cf7cbcaa5df8dd4bbb08263))
+* clean import of agentic-coding-playbook v0.6.0 ([7fb5b92](https://github.com/GSA-TTS/agentic-coding-playbook/commit/7fb5b9229375bd62bb9aaaec656810e44cfd3066))
+
+
+### Bug Fixes
+
+* macOS/BSD compatibility for frontmatter parsing in shell scripts ([#2](https://github.com/GSA-TTS/agentic-coding-playbook/issues/2)) ([0c7c50f](https://github.com/GSA-TTS/agentic-coding-playbook/commit/0c7c50f309a33bfdb785321188c62df5bf48ebfc))
+* update changelog entry injection ignore Unreleased ([f2744d4](https://github.com/GSA-TTS/agentic-coding-playbook/commit/f2744d4108a421c0d33c9122ef2143d1fc6a7f81))
+
+
+### Maintenance
+
+* **deps:** bump actions/setup-python from 5.6.0 to 6.2.0 ([#1](https://github.com/GSA-TTS/agentic-coding-playbook/issues/1)) ([f1edaed](https://github.com/GSA-TTS/agentic-coding-playbook/commit/f1edaed1bb8b9486ec4cc0834c15dad59d85af96))
+* **deps:** bump DavidAnson/markdownlint-cli2-action ([#9](https://github.com/GSA-TTS/agentic-coding-playbook/issues/9)) ([69dcdaf](https://github.com/GSA-TTS/agentic-coding-playbook/commit/69dcdaf4c27e9468a4340bd32059d87a10ae570f))
+* **deps:** bump softprops/action-gh-release from 2.5.0 to 2.6.1 ([#3](https://github.com/GSA-TTS/agentic-coding-playbook/issues/3)) ([734482c](https://github.com/GSA-TTS/agentic-coding-playbook/commit/734482cbf29326d127af4eff52b9eaa948993061))
+* **main:** release 0.7.0 ([#14](https://github.com/GSA-TTS/agentic-coding-playbook/issues/14)) ([9d640ba](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9d640badc3e2f8d9bedfb1db462b42d61851fa1e))
+* **release:** prepare v0.4.0 and align GitHub-native releases ([#7](https://github.com/GSA-TTS/agentic-coding-playbook/issues/7)) ([652940c](https://github.com/GSA-TTS/agentic-coding-playbook/commit/652940c8d0a199cf8ce9af658e475149e3966535))
+* **release:** prepare v0.4.0 and align GitHub-native releases ([#8](https://github.com/GSA-TTS/agentic-coding-playbook/issues/8)) ([45bb1df](https://github.com/GSA-TTS/agentic-coding-playbook/commit/45bb1df6c782629cb8ae002e8f871020eebca56f))
+* update badge in readme ([8b306be](https://github.com/GSA-TTS/agentic-coding-playbook/commit/8b306be1cfd963725938361c1185f2db96777b07))
+* Update guidance to playbook ([#6](https://github.com/GSA-TTS/agentic-coding-playbook/issues/6)) ([4f50692](https://github.com/GSA-TTS/agentic-coding-playbook/commit/4f5069269986f208d6d77f55e48de80010055486))
+
 ## [0.6.0](https://github.com/gsa-tts/agentic-coding-playbook/compare/v0.5.1...v0.6.0) (2026-04-09)
 
 
