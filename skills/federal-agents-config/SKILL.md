@@ -1,16 +1,13 @@
 ---
 name: federal-agents-config
-description: >
-  Generate a project-specific AGENTS.md through interactive decision-tree elicitation.
-  Asks compliance-relevant questions (impact level, data classification, authorized agents,
-  prohibited actions), accumulates a JSON config, then generates a customized AGENTS.md
-  from the federal template. Use when a user needs to create or update their project's
-  AGENTS.md for federal compliance.
-compatibility: Requires Python 3.10+ for generation scripts. Read access to templates/.
-metadata:
-  author: wz-gsa
-  version: "0.2.0"
-  frameworks: "NIST SP 800-53 Rev 5.2 (PL-4, CM-6, AC-6)"
+title: "Federal AGENTS.md Configuration"
+description: "Generate a project-specific AGENTS.md through interactive decision-tree elicitation."
+status: canonical
+tier: 2
+load_priority: on-demand
+audience: ["developers", "agents"]
+triggers: ["AGENTS.md", "agent rules", "behavioral", "compliance"]
+dependencies: []
 ---
 
 # Federal AGENTS.md Configuration
@@ -77,19 +74,16 @@ compliance when the user seems unsure.
 ### Phase 1: System Identification (required)
 
 **Q1: System name and agency**
-
 > "What is the name of this system, and which agency or organization is it for?"
 
 Sets: `system_name`, `agency_name`
 
 **Q2: System description**
-
 > "Briefly describe what this system does (1-2 sentences)."
 
 Sets: `system_description`
 
 **Q3: FIPS impact level**
-
 > "What is the FIPS impact level? (Low / Moderate / High)"
 >
 > - **Low**: Minimal adverse effect from loss of confidentiality, integrity, or availability
@@ -106,13 +100,11 @@ note that this playbook primarily targets FIPS Moderate.
 ### Phase 2: Technical Context (required)
 
 **Q4: Programming language**
-
 > "What is the primary programming language? (e.g., Python 3.12, TypeScript 5.x, Go 1.22)"
 
 Sets: `language`
 
 Use this to pre-populate language-specific defaults:
-
 - **Python** -> bandit (SAST), pip-audit (SCA), ruff (linter), pytest (test)
 - **JavaScript/TypeScript** -> eslint-plugin-security (SAST), npm audit (SCA), eslint (linter), jest/vitest (test)
 - **Go** -> gosec (SAST), govulncheck (SCA), golangci-lint (linter), go test (test)
@@ -121,21 +113,18 @@ Use this to pre-populate language-specific defaults:
 See [references/ELICITATION_GUIDE.md](references/ELICITATION_GUIDE.md) for the full tool mapping.
 
 **Q5: Framework (if any)**
-
 > "What framework does the project use? (e.g., FastAPI, Next.js, Django, Spring Boot, or none)"
 
 Sets: `framework`
 
 **Q6: Authorized agents**
-
-> "Which AI coding agents are authorized to use this project? (e.g., Open Code, GitHub Copilot, Cursor)"
+> "Which AI coding agents are authorized to use this project? (e.g., GitHub Copilot, Cursor, Codex, Cursor)"
 
 Sets: `agent_names` (array)
 
 ### Phase 3: Data Classification (required)
 
 **Q7: Data classification**
-
 > "What is the highest data classification this system handles?"
 >
 > - **Public**: No restrictions
@@ -147,7 +136,6 @@ Sets: `agent_names` (array)
 Sets: `data_classification`
 
 **Q8: Sensitive data types**
-
 > "What specific sensitive data types does this system process? (e.g., SSN, email addresses, health records, financial data)"
 
 Sets: `sensitive_data_types` (array)
@@ -155,13 +143,11 @@ Sets: `sensitive_data_types` (array)
 If data_classification is CUI, PII, or PHI, this question is required. Otherwise optional.
 
 **Q9: Approved data storage**
-
 > "Where is data stored? (e.g., PostgreSQL via RDS, S3 with SSE-KMS, Azure SQL)"
 
 Sets: `approved_storage` (array)
 
 **Q10: Secrets management**
-
 > "What secrets management tool does the project use? (e.g., AWS Secrets Manager, HashiCorp Vault, Azure Key Vault, environment variables only)"
 
 Sets: `secrets_backend`
@@ -169,7 +155,6 @@ Sets: `secrets_backend`
 ### Phase 4: Boundaries (optional — has defaults)
 
 **Q11: Additional prohibited actions**
-
 > "Are there any project-specific actions the agent should NEVER do, beyond the standard federal prohibitions?"
 >
 > Standard prohibitions (already included): access outside project directory, production access, hardcoded secrets, disable security controls, bypass code review, access classified systems.
@@ -177,13 +162,11 @@ Sets: `secrets_backend`
 Sets: `prohibited_actions` (array, appended to defaults)
 
 **Q12: Additional permitted actions**
-
 > "Are there any project-specific actions the agent MAY do without asking? (Beyond reading files, generating code, running tests and linters)"
 
 Sets: `permitted_actions` (array, appended to defaults)
 
 **Q13: Network requirements**
-
 > "Does the agent need network access? If so, which endpoints?"
 >
 > If none: the Network Access section will be omitted from the generated AGENTS.md.
@@ -193,13 +176,11 @@ Sets: `network_allowlist` (array, empty = no network section)
 ### Phase 5: Dependencies and CI (optional — has defaults)
 
 **Q14: Approved package registries**
-
 > "Which package registries are approved? (Default: the standard public registry for your language)"
 
 Sets: `approved_registries` (array)
 
 **Q15: License restrictions**
-
 > "Any license restrictions? (Default: No AGPL, GPL requires legal review)"
 
 Sets: `license_restrictions` (array)
@@ -207,7 +188,6 @@ Sets: `license_restrictions` (array)
 Default: `["No AGPL", "GPL requires legal review"]`
 
 **Q16: CI checks**
-
 > "What CI checks should be required? (Default: lint, test, SAST, SCA, secrets scan)"
 
 Sets: `ci_checks` (array)
@@ -215,7 +195,6 @@ Sets: `ci_checks` (array)
 ### Phase 6: Contacts (optional but recommended)
 
 **Q17: Contacts**
-
 > "Who should be listed as contacts? (Project lead, security contact, ISSO — name and email)"
 
 Sets: `project_lead`, `security_contact`, `isso_contact`
@@ -234,11 +213,11 @@ After collecting all answers:
 
 ## Defaults by Impact Level
 
-| Field                  | Low                      | Moderate                            | High                                     |
-| ---------------------- | ------------------------ | ----------------------------------- | ---------------------------------------- |
-| `test_coverage_target` | 60%                      | 80%                                 | 90%                                      |
-| `branch_protection`    | 1 review                 | 1 review, no force push             | 2 reviews, no force push, signed commits |
-| `ci_checks`            | lint, test, secrets-scan | lint, test, sast, sca, secrets-scan | All + DAST, container scan               |
+| Field | Low | Moderate | High |
+|-------|-----|----------|------|
+| `test_coverage_target` | 60% | 80% | 90% |
+| `branch_protection` | 1 review | 1 review, no force push | 2 reviews, no force push, signed commits |
+| `ci_checks` | lint, test, secrets-scan | lint, test, sast, sca, secrets-scan | All + DAST, container scan |
 
 ## Important Notes
 

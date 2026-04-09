@@ -1,16 +1,13 @@
 ---
 name: federal-decision-records
-description: >
-  Create, validate, and index architectural and security decision records using
-  MADR format with federal compliance extensions. Guides users through documenting
-  decisions with NIST control mappings, impact level, ATO relevance, and risk
-  treatment rationale. Use when documenting AI agent authorization, data handling,
-  deployment, or security architecture decisions for federal compliance.
-compatibility: Requires shell access for scripts. Read access to references/.
-metadata:
-  author: wz-gsa
-  version: "0.2.0"
-  frameworks: "NIST SP 800-53 Rev 5.2 (RA-3, SA-15, PL-2, CM-3), NIST SP 800-218A"
+title: "Federal Decision Records"
+description: "Create, validate, and index architectural and security decision records using MADR format with federal compliance extensions."
+status: canonical
+tier: 2
+load_priority: on-demand
+audience: ["developers", "agents"]
+triggers: ["ADR", "architecture decision", "decision record"]
+dependencies: []
 ---
 
 # Federal Decision Records
@@ -59,7 +56,6 @@ with examples. Each category maps to relevant NIST controls.
 Ask for the required fields:
 
 > "Let's document this decision. I need:
->
 > 1. **Title** — What is being decided? (Use format: 'Use X for Y')
 > 2. **Status** — proposed, accepted, deprecated, or superseded?
 > 3. **Decision makers** — Who is involved in this decision?
@@ -70,7 +66,6 @@ Ask for the required fields:
 These extend standard MADR with federal context:
 
 > "For federal compliance traceability:
->
 > 1. **NIST controls** — Which 800-53 controls does this decision address?
 >    (I can suggest controls based on the category you selected)
 > 2. **Impact level** — Low, Moderate, or High (FIPS 199)?
@@ -89,37 +84,30 @@ Walk through each MADR section. Read the template at
 section structure. For each section:
 
 **Context and Problem Statement:**
-
 > "Describe the problem or context that led to this decision. What question
 > are you trying to answer? (1-3 sentences)"
 
 **Decision Drivers:**
-
 > "What factors influenced this decision? List the key drivers."
 
 Suggest compliance-relevant drivers based on the category:
-
 - For agent authorization: least privilege, audit logging, identity management
 - For data handling: data classification, encryption, access controls
 - For deployment: separation of duties, change management, CI/CD security
 - For cryptography: FIPS 140-2/3 compliance, key management, algorithm selection
 
 **Considered Options:**
-
 > "What options did you evaluate? List 2-4 alternatives."
 
 For each option, ask for a brief description.
 
 **Decision Outcome:**
-
 > "Which option was chosen, and why?"
 
 **Consequences:**
-
 > "What are the positive and negative consequences of this decision?"
 
 Prompt specifically for compliance consequences:
-
 > "Are there any compliance implications? (e.g., additional controls needed,
 > ATO documentation updates, monitoring requirements)"
 
@@ -149,7 +137,7 @@ Save to `{directory}/{NNNN}-{slugified-title}.md`.
 After saving, run the index generator:
 
 ```bash
-bash skills/federal-decision-records/scripts/generate-adr-index.sh [directory]
+make generate
 ```
 
 This updates `{directory}/README.md` with a table of all decision records
@@ -173,11 +161,10 @@ Based on the decision category, suggest follow-up actions:
 Run the validation script:
 
 ```bash
-bash skills/federal-decision-records/scripts/validate-adrs.sh [directory]
+PYTHONPATH=scripts python3 -m playbook_validator validate-adrs --dir docs/adr
 ```
 
 The script checks:
-
 - YAML frontmatter has all required fields (title, status, date, nist_controls)
 - File naming follows `NNNN-title.md` convention
 - No duplicate ADR numbers
@@ -186,19 +173,18 @@ The script checks:
 - Superseded records reference the superseding record
 
 Output is structured JSON. Present results to the user with remediation
-playbook for any failures.
+guidance for any failures.
 
 ## Mode 3: Generate Index
 
 Run the index generator to rebuild the decision record index:
 
 ```bash
-bash skills/federal-decision-records/scripts/generate-adr-index.sh [directory]
+make generate
 ```
 
 This reads frontmatter from all ADR files and generates a `README.md` in the
 decisions directory with:
-
 - Table of all records (number, title, status, date, NIST controls)
 - Counts by status (accepted, proposed, deprecated, superseded)
 - List of all NIST controls referenced across decisions
@@ -211,13 +197,13 @@ Present the generated index to the user.
   ADRs, install packages, or make network calls.
 - Generated records are **drafts** — they should be reviewed by the decision
   makers listed in the frontmatter before being marked "accepted".
-- NIST control suggestions are playbook only — the user should verify
+- NIST control suggestions are guidance only — the user should verify
   applicability with their ISSO.
 - ADR numbers are sequential and MUST NOT be reused, even for superseded
   records (this preserves the audit trail).
 - The federal compliance extensions (nist_controls, impact_level,
   ato_relevance, risk_treatment) are additions to standard MADR — they do
   not break compatibility with MADR tooling.
-- **Policy references:** `AGENTS.md` (agent decisions), `CODING_PRACTICES.md`
-  (coding decisions), `docs/SECURITY-CONTROLS.md` (control playbook),
+- **Policy references:** `AGENTS.md` (agent decisions), `docs/CODING_PRACTICES.md`
+  (coding decisions), `docs/SECURITY-CONTROLS.md` (control guidance),
   `docs/TRACEABILITY.md` (control mappings).

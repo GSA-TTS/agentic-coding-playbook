@@ -1,15 +1,13 @@
 ---
 name: federal-repo-setup
-description: >
-  Initialize a code repository with federal security compliance defaults including
-  .gitignore with secrets exclusions, pre-commit hooks for secrets scanning and
-  linting, .editorconfig, and CI/CD security baseline. Use when setting up a new
-  project or hardening an existing repo for federal AI development.
-compatibility: Requires git, a supported language runtime, and shell access.
-metadata:
-  author: wz-gsa
-  version: "0.2.0"
-  frameworks: "NIST SP 800-53 Rev 5.2 (CM-2, CM-6, SA-10)"
+title: "Federal Repository Setup"
+description: "Initialize a code repository with federal security compliance defaults including .gitignore, pre-commit hooks, .editorconfig, and CI/CD security baseline."
+status: canonical
+tier: 2
+load_priority: on-demand
+audience: ["developers", "agents"]
+triggers: ["repo setup", "repository", "federal compliance", "pre-commit", "security baseline", "hardening"]
+dependencies: []
 ---
 
 # Federal Repository Setup
@@ -27,7 +25,6 @@ workflow for initializing a repository with federal security compliance defaults
 ## Prerequisites
 
 Before starting, confirm the user has:
-
 - Git 2.39+ installed
 - A supported language runtime (Python 3.10+, Node.js 18+, Go 1.21+, Java 17+, or .NET 8+)
 - An approved AI coding agent (per agency policy)
@@ -127,7 +124,7 @@ Create `.pre-commit-config.yaml`:
 ```yaml
 repos:
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2 # Pin to latest stable
+    rev: v8.21.2  # Pin to latest stable
     hooks:
       - id: gitleaks
 ```
@@ -140,11 +137,10 @@ repos:
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        args: ["--baseline", ".secrets.baseline"]
+        args: ['--baseline', '.secrets.baseline']
 ```
 
 Then run:
-
 ```bash
 pre-commit install
 ```
@@ -158,25 +154,23 @@ Add a language-appropriate linter to `.pre-commit-config.yaml`.
 See [references/TOOL_MATRIX.md](references/TOOL_MATRIX.md) for the recommended linter per language.
 
 **Example for Python:**
-
 ```yaml
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.8.6
-  hooks:
-    - id: ruff
-      args: [--fix]
-    - id: ruff-format
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
 ```
 
 **Example for JavaScript/TypeScript:**
-
 ```yaml
-- repo: https://github.com/pre-commit/mirrors-eslint
-  rev: v9.17.0
-  hooks:
-    - id: eslint
-      additional_dependencies:
-        - eslint-plugin-security
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.17.0
+    hooks:
+      - id: eslint
+        additional_dependencies:
+          - eslint-plugin-security
 ```
 
 ### Step 6: Create .env.example
@@ -219,32 +213,32 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       # Add language-specific linter step
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       # Add language-specific test step
 
   sast:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       # Add SAST scanner (see TOOL_MATRIX.md)
 
   dependency-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       # Add dependency vulnerability scanner
 
   secrets-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -265,17 +259,156 @@ stages:
 **Policy reference:** `docs/GETTING-STARTED.md` Section 7 — CI/CD Security Baseline.
 **Controls:** SA-11, RA-5, SA-12.
 
-### Step 8: Run Audit Script
+### Step 8: Generate SECURITY.md
+
+If `SECURITY.md` does not already exist in the repository root, create it:
+
+```markdown
+# Security Policy
+
+## Supported Versions
+
+| Version | Supported          |
+| ------- | ------------------ |
+| latest  | :white_check_mark: |
+
+<!-- Update this table to reflect your project's actual version support policy. -->
+
+## Reporting a Vulnerability
+
+**Do not open a public GitHub issue for security vulnerabilities.**
+
+To report a vulnerability, please email **[AGENCY_SECURITY_CONTACT]** with:
+
+1. A description of the vulnerability
+2. Steps to reproduce
+3. Affected version(s)
+4. Any potential impact assessment
+
+We will acknowledge receipt within **2 business days** and provide an initial
+assessment within **5 business days**.
+
+## Responsible Disclosure
+
+We follow coordinated vulnerability disclosure. We ask that you:
+
+- Allow us reasonable time to investigate and address the issue before public disclosure
+- Make a good-faith effort to avoid privacy violations, data destruction, or service disruption
+- Do not exploit the vulnerability beyond what is necessary to demonstrate it
+
+## Agency-Specific Policy
+
+<!-- Replace this section with your agency's vulnerability handling policy,
+     including references to any applicable NIST SP 800-53 controls (IR-6, SI-5)
+     and your agency's incident response plan. -->
+
+This project follows [NIST SP 800-53 IR-6](https://csf.tools/reference/nist-sp-800-53/r5/ir/ir-6/)
+(Incident Reporting) and [SI-5](https://csf.tools/reference/nist-sp-800-53/r5/si/si-5/)
+(Security Alerts, Advisories, and Directives).
+```
+
+Replace `[AGENCY_SECURITY_CONTACT]` with the actual security contact if known, or leave it as a placeholder for the team to fill in.
+
+### Step 9: Generate CONTRIBUTING.md
+
+If `CONTRIBUTING.md` does not already exist in the repository root, create it:
+
+```markdown
+# Contributing
+
+Thank you for your interest in contributing to this project.
+
+## How to Contribute
+
+1. **Check existing issues** — look for open issues or create a new one describing the change
+2. **Fork the repository** and create a feature branch from `main`
+3. **Make your changes** — follow the coding standards below
+4. **Write or update tests** to cover your changes
+5. **Submit a pull request** against `main` with a clear description
+
+## Code Standards
+
+This project follows the coding practices documented in
+[docs/CODING_PRACTICES.md](docs/CODING_PRACTICES.md) (if present) or the
+language-specific conventions established in the codebase.
+
+Key expectations:
+- All code must pass linting and static analysis before merge
+- Security scanning (secrets, SAST, dependency audit) must pass in CI
+- New features require tests; bug fixes require a regression test
+
+## Commit Messages
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+type(scope): short description
+
+Optional longer description.
+```
+
+Types: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`, `perf`, `ci`
+
+Examples:
+- `feat(auth): add PIV card authentication flow`
+- `fix(api): handle null response from upstream service`
+- `docs: update deployment runbook for FedRAMP boundary`
+
+## Review Process
+
+All pull requests require:
+1. At least one approving review from a maintainer
+2. All CI checks passing (lint, test, SAST, secrets scan, dependency audit)
+3. No unresolved review comments
+
+Reviewers will evaluate contributions for correctness, security impact,
+test coverage, and adherence to project coding standards.
+
+## Questions?
+
+Open an issue with the `question` label or contact the project maintainers.
+```
+
+### Step 10: Generate LICENSE
+
+If `LICENSE` does not already exist in the repository root, create it with the
+CC0 1.0 Universal public domain dedication (standard for U.S. federal government work).
+
+Use the full legal text from the canonical source:
+https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt
+
+The file should begin with:
+
+```
+CC0 1.0 Universal
+
+Statement of Purpose
+
+The laws of most jurisdictions throughout the world automatically confer
+exclusive Copyright and Related Rights (defined below) upon the creator and
+subsequent owner(s) (each and all, an "owner") of an original work of
+authorship and/or a database (each, a "Work").
+...
+```
+
+Copy the complete CC0 1.0 legal text (Sections 1-4 plus Statement of Purpose) into the
+`LICENSE` file. Do not abbreviate or summarize the legal text.
+
+**Note:** CC0 is the standard license for U.S. federal government works (17 U.S.C. 105).
+If the project includes contributions from non-federal employees or uses a different
+license policy, ask the team before generating this file.
+
+### Step 11: Run Audit Script
 
 Run the audit script to verify the setup is complete:
 
 ```bash
-bash skills/federal-repo-setup/scripts/audit-repo-setup.sh
+make validate
 ```
 
 The script outputs structured JSON. Review any failures and address them.
 
-### Step 9: Next Steps
+### Step 12: Next Steps
 
 After completing repo setup, recommend:
 
@@ -283,9 +416,23 @@ After completing repo setup, recommend:
 2. **Review branch protection** — Set up required reviews, status checks, force-push restrictions per `docs/GETTING-STARTED.md` Section 5
 3. **Complete pre-deployment checklist** — Use the `federal-pre-deployment-check` skill before any deployment
 
+## Verification Checklist
+
+Before marking setup complete, confirm all required files exist:
+
+- [ ] `.gitignore` — includes federal security exclusion patterns
+- [ ] `.editorconfig` — consistent formatting rules
+- [ ] `.pre-commit-config.yaml` — secrets scanning + linting hooks
+- [ ] `.env.example` — placeholder environment variables (if applicable)
+- [ ] `.github/workflows/security.yml` or `.gitlab-ci.yml` — CI/CD security baseline
+- [ ] `SECURITY.md` — vulnerability disclosure process
+- [ ] `CONTRIBUTING.md` — contribution standards and review process
+- [ ] `LICENSE` — CC0 1.0 Universal (or agency-approved alternative)
+
 ## Important Notes
 
 - This skill generates new files. It does NOT install packages, make network calls, or modify git history.
+- Steps 8-10 check for existing files before creating — safe to re-run on established repos.
 - Generated CI pipelines use `permissions: contents: read` (least privilege).
 - All tool version pins should be verified against current stable releases.
 - Pre-commit hook configuration is a starting point — agencies may require additional hooks.

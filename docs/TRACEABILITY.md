@@ -8,7 +8,7 @@ nist_controls: ["AC-2", "AC-3", "AC-5", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3"
 frameworks: ["NIST SP 800-53 Rev 5.2", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026", "NIST AI RMF 1.0"]
 audience: "isso"
 keywords: ["traceability", "audit", "cross-reference", "control-mapping"]
-related_files: ["AGENTS.md", "CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "checklists/pre-deployment.md"]
+related_files: ["AGENTS.md", "docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "checklists/pre-deployment.md"]
 load_priority: "on-demand"
 review_cycle: "quarterly"
 ---
@@ -24,19 +24,19 @@ review_cycle: "quarterly"
 This document provides bidirectional traceability between:
 - **NIST SP 800-53 Rev 5.2 controls** (the compliance framework)
 - **OWASP risks** (the threat model)
-- **Playbook documents** (the implementation playbook)
+- **Guidance documents** (the implementation guidance)
 - **Checklist items** (the verification steps)
 
 Use this matrix to:
 - **Auditors:** Trace from a control → find all documents and checklist items that address it
 - **Developers:** Trace from a checklist failure → find the playbook that explains how to fix it
-- **ISSOs:** Trace from an OWASP risk → find controls, playbook, and verification methods
+- **ISSOs:** Trace from an OWASP risk → find controls, guidance, and verification methods
 
 ---
 
 ## 1. NIST 800-53 Control → Document Mapping
 
-For each control referenced in this playbook, this table shows where implementation playbook and verification steps can be found.
+For each control referenced in this playbook, this table shows where implementation guidance and verification steps can be found.
 
 | Control | Name | AGENTS.md | docs/CODING_PRACTICES.md | SECURITY-CONTROLS.md | AGENT-IDENTITY.md | Checklist |
 |---------|------|-----------|--------------------|--------------------|-------------------|-----------|
@@ -117,11 +117,11 @@ For each control referenced in this playbook, this table shows where implementat
 
 ---
 
-## 3. Checklist Item → Control and Playbook Mapping
+## 3. Checklist Item → Control and Guidance Mapping
 
 This reverse mapping lets reviewers trace from a failed checklist item back to the control it satisfies and the playbook for remediation.
 
-| Checklist # | Checklist Item | NIST Control | Playbook Location |
+| Checklist # | Checklist Item | NIST Control | Guidance Location |
 |------------|---------------|-------------|-------------------|
 | 1.1 | Human review of AI-generated code | SA-11, AC-5 | AGENTS.md §8.2 |
 | 1.2 | AI attribution in commits | SA-15 | AGENTS.md §2.1 |

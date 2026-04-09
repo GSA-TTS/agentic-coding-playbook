@@ -1,6 +1,6 @@
 ---
 title: "Pre-Deployment Security Checklist"
-description: "Security checklist for deploying AI-assisted code — secrets, input validation, auth, dependencies, testing, infrastructure"
+description: "62-item security checklist for deploying AI-assisted code — secrets, input validation, auth, dependencies, testing, infrastructure, accessibility"
 status: canonical
 tier: 3
 last_updated: "2026-02-25"
@@ -8,7 +8,7 @@ nist_controls: ["SA-11", "SA-12", "CM-2", "SI-10", "IA-5", "SC-13", "AU-2"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "developers"
 keywords: ["checklist", "pre-deployment", "security-review", "sign-off"]
-related_files: ["CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md"]
+related_files: ["docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md"]
 load_priority: "reference-only"
 review_cycle: "semi-annually"
 ---
@@ -25,7 +25,7 @@ review_cycle: "semi-annually"
   4. Retain completed checklists as part of your deployment records
   5. The reviewer completing this checklist MUST NOT be the same person who directed the agent
 
-  Based on: Federal Agentic AI Playbook v0.1.0
+  Based on: Agentic Coding Playbook v0.4.0
   Aligned with: NIST SP 800-53 Rev 5.2, OWASP Top 10 for LLM/Agentic Applications
 -->
 
@@ -176,6 +176,8 @@ review_cycle: "semi-annually"
 | 9.4 | Static application security testing (SAST) scan passed | [ ] Pass [ ] Fail [ ] N/A | |
 | 9.5 | Software composition analysis (SCA) scan passed | [ ] Pass [ ] Fail [ ] N/A | |
 | 9.6 | AI-generated code specifically reviewed for hallucinated APIs or deprecated methods | [ ] Pass [ ] Fail [ ] N/A | |
+| 9.7 | AI agent `Co-Authored-By` attribution present in commits (per AGENTS.md) | [ ] Pass [ ] Fail [ ] N/A | |
+| 9.8 | Risk assessment document completed and reviewed (per `federal-risk-assessment` skill) | [ ] Pass [ ] Fail [ ] N/A | |
 
 ---
 
@@ -194,6 +196,17 @@ review_cycle: "semi-annually"
 
 ---
 
+## 11. Accessibility
+
+<!-- Section 508 (29 U.S.C. § 794d), WCAG 2.1 Level AA -->
+
+| # | Check | Status | Notes |
+|---|-------|--------|-------|
+| 11.1 | All UI components meet WCAG 2.1 Level AA conformance (semantic HTML, color contrast, keyboard navigation, screen reader compatibility) | [ ] Pass [ ] Fail [ ] N/A | |
+| 11.2 | Automated accessibility scan passed (axe-core, Lighthouse accessibility audit, or equivalent) | [ ] Pass [ ] Fail [ ] N/A | |
+
+---
+
 ## Summary
 
 | Category | Total Checks | Pass | Fail | N/A |
@@ -206,9 +219,10 @@ review_cycle: "semi-annually"
 | 6. Error/Logging | 5 | | | |
 | 7. Crypto/Data | 6 | | | |
 | 8. API/Network | 6 | | | |
-| 9. Testing | 6 | | | |
+| 9. Testing | 8 | | | |
 | 10. Infrastructure | 6 | | | |
-| **Total** | **58** | | | |
+| 11. Accessibility | 2 | | | |
+| **Total** | **62** | | | |
 
 ---
 
@@ -228,5 +242,5 @@ review_cycle: "semi-annually"
 
 ---
 
-*Checklist version 0.1.0 — Based on Federal Agentic AI Playbook*
+*Checklist version 0.1.0 — Based on Agentic Coding Playbook*
 *Aligned with NIST SP 800-53 Rev 5.2, OWASP Top 10 LLM 2025, OWASP Top 10 Agentic 2026*

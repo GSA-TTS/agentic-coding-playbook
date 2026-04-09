@@ -91,7 +91,7 @@ web application risks.
 **Common mitigations:**
 - SAST scanning in CI (SA-11)
 - Human code review of all agent-generated code
-- Coding standards enforcement (CODING_PRACTICES.md)
+- Coding standards enforcement (docs/CODING_PRACTICES.md)
 - Pre-deployment checklist items 3.1-3.6
 
 **Typical rating for FIPS Moderate:** Likelihood 3, Impact 3 (Risk: 9 — Medium)

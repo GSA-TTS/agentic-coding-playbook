@@ -3,21 +3,12 @@ title: "Getting Started: Repository Setup and Environment Hardening"
 description: "Step-by-step guide for setting up a development repository with security controls for AI coding agents"
 status: canonical
 tier: 2
-last_updated: "2026-03-24"
+last_updated: "2026-02-25"
 nist_controls: ["CM-2", "CM-6", "SA-10", "PO.1"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218"]
 audience: "developers"
-keywords:
-  [
-    "setup",
-    "repository",
-    "pre-commit",
-    "secrets-scanning",
-    "branch-protection",
-    "CI-CD",
-  ]
-related_files:
-  ["AGENTS.md", "docs/CODING-PRACTICES.md", "templates/AGENTS.md.template"]
+keywords: ["setup", "repository", "pre-commit", "secrets-scanning", "branch-protection", "CI-CD"]
+related_files: ["AGENTS.md", "docs/CODING_PRACTICES.md", "templates/AGENTS.md.template"]
 load_priority: "on-demand"
 review_cycle: "semi-annually"
 ---
@@ -26,7 +17,7 @@ review_cycle: "semi-annually"
 
 # Getting Started: Repository Setup and Environment Hardening
 
-> **Version:** 0.2.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
+> **Version:** 0.1.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
 
 ## Quick Reference
 
@@ -76,12 +67,12 @@ Before beginning, confirm you have the following installed and configured on you
 
 ### 1.1 Required Software
 
-| Tool                        | Purpose                                                               | How to Verify                                |
-| --------------------------- | --------------------------------------------------------------------- | -------------------------------------------- |
-| Git 2.39+                   | Version control                                                       | `git --version`                              |
-| An approved AI coding agent | AI-assisted development (see Section 9 for selection criteria)        | Agent-specific — check vendor docs           |
-| A language runtime          | Your project's language (Python, Node.js, Go, Java, .NET, Rust, etc.) | Language-specific (e.g., `python --version`) |
-| A pre-commit framework      | Automated checks before each commit                                   | `pre-commit --version` or equivalent         |
+| Tool | Purpose | How to Verify |
+|------|---------|---------------|
+| Git 2.39+ | Version control | `git --version` |
+| An approved AI coding agent | AI-assisted development (see Section 9 for selection criteria) | Agent-specific — check vendor docs |
+| A language runtime | Your project's language (Python, Node.js, Go, Java, .NET, Rust, etc.) | Language-specific (e.g., `python --version`) |
+| A pre-commit framework | Automated checks before each commit | `pre-commit --version` or equivalent |
 
 ### 1.2 Required Access
 
@@ -92,7 +83,6 @@ Before beginning, confirm you have the following installed and configured on you
 ### 1.3 Required Knowledge
 
 You SHOULD be familiar with:
-
 - Basic git operations (clone, branch, commit, push, pull request)
 - Your project's programming language and package manager
 - Your agency's ATO (Authority to Operate) requirements at a high level
@@ -158,7 +148,7 @@ obj/
 
 # Agent-specific working files (if your agent creates temp files)
 .agent-temp/
-````
+```
 
 ### 2.3 Set Up .editorconfig
 
@@ -192,7 +182,7 @@ Adjust `indent_size` and other values to match your team's coding standards. The
 
 You SHOULD establish a standard directory layout early. The exact structure depends on your language and framework, but the following skeleton is common across most projects:
 
-```text
+```
 your-project/
 ├── .editorconfig
 ├── .gitignore
@@ -214,9 +204,7 @@ your-project/
 ## 3. Agent Configuration
 
 <!-- NIST SP 800-53: PL-4 (Rules of Behavior), CM-6 (Configuration Settings) -->
-
 <!-- NIST AI RMF: GOVERN 1 (Policies), GOVERN 6 (Accountability) -->
-
 <!-- NCCOE Agent Identity: Identification -->
 
 ### 3.1 What Is AGENTS.md?
@@ -224,7 +212,6 @@ your-project/
 `AGENTS.md` is a file placed in the root of your repository that tells AI coding agents what rules to follow. Most AI coding agents automatically detect and read files like `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, or similar configuration files in your repository. The filename and format vary by tool — `AGENTS.md` is used here as a tool-agnostic convention.
 
 The file defines:
-
 - What the agent is allowed and prohibited from doing
 - Security controls the agent must follow
 - Data handling requirements
@@ -233,20 +220,16 @@ The file defines:
 
 ### 3.2 Setting Up AGENTS.md
 
-You can either copy the template directly or export a portable agent bundle from this repository.
-
-**Option A — direct copy:**
-
 1. Copy the template from this repository into your project root:
 
    ```bash
+   # From the agentic-coding-playbook repository
    cp templates/AGENTS.md.template /path/to/your-project/AGENTS.md
    ```
 
    See [templates/AGENTS.md.template](../templates/AGENTS.md.template) for the full template.
 
 2. Customize the template for your project:
-
    - Replace placeholder values (agency name, system name, impact level) with your specifics
    - Review each section and remove anything not applicable to your project
    - Add project-specific rules (e.g., required frameworks, coding conventions, approved libraries)
@@ -257,28 +240,6 @@ You can either copy the template directly or export a portable agent bundle from
    git add AGENTS.md
    git commit -m "Add agent behavior rules"
    ```
-
-**Option B — export a bundle from the playbook:**
-
-From the playbook repository, preview the export first:
-
-```bash
-make export-dry-run EXPORT_TARGET=../your-project
-```
-
-Then export the bundle into your target repository:
-
-```bash
-make export EXPORT_TARGET=../your-project EXPORT_OVERWRITE=true
-```
-
-This will generate:
-
-- `AGENTS.md`
-- `.agent-skills/README.md`
-- `.agent-skills/docs/CODING-PRACTICES.md`
-- `.agent-skills/manifest.json`
-- selected skills and optional supporting files
 
 ### 3.3 How Agents Read the File
 
@@ -292,7 +253,6 @@ AI coding agents typically read configuration files at session start — when yo
 ### 3.4 Verifying Agent Compliance
 
 You SHOULD verify that your agent is following the rules by:
-
 - Reviewing agent-generated commits for co-authorship attribution
 - Checking that agent-generated code passes your CI security scans
 - Periodically asking the agent to summarize the rules it is following
@@ -305,7 +265,6 @@ You SHOULD verify that your agent is following the rules by:
 ## 4. Secrets Scanning Setup
 
 <!-- NIST SP 800-53: IA-5 (Authenticator Management), SC-28 (Protection of Information at Rest) -->
-
 <!-- NIST SP 800-218A: PS.1 (Protect All Forms of Code from Unauthorized Access) -->
 
 Secrets scanning prevents credentials, API keys, tokens, and private keys from being committed to version control. This is one of the most important controls for AI-assisted development — AI agents can inadvertently generate code containing placeholder secrets or copy patterns that include real credentials.
@@ -316,11 +275,11 @@ A pre-commit hook runs automatically before every `git commit`. If the hook dete
 
 **Common tools for secrets scanning** (choose one or more based on your agency's approved tool list):
 
-| Tool           | Detection Approach                        | Configuration File  |
-| -------------- | ----------------------------------------- | ------------------- |
-| gitleaks       | Regex pattern matching + entropy analysis | `.gitleaks.toml`    |
-| detect-secrets | Entropy analysis + heuristic plugins      | `.secrets.baseline` |
-| trufflehog     | Regex + entropy + credential verification | `.trufflehog.yaml`  |
+| Tool | Detection Approach | Configuration File |
+|------|-------------------|-------------------|
+| gitleaks | Regex pattern matching + entropy analysis | `.gitleaks.toml` |
+| detect-secrets | Entropy analysis + heuristic plugins | `.secrets.baseline` |
+| trufflehog | Regex + entropy + credential verification | `.trufflehog.yaml` |
 
 The specific tool you use depends on your agency's approved software list. All three are open source and widely used in federal environments. Your agency security team MAY have a preferred tool — check before choosing.
 
@@ -339,10 +298,10 @@ pip install pre-commit      # Python-based framework
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0 # Pin to a specific version
+    rev: v4.6.0    # Pin to a specific version
     hooks:
       - id: check-added-large-files
-        args: ["--maxkb=500"]
+        args: ['--maxkb=500']
       - id: check-merge-conflict
       - id: detect-private-key
 
@@ -393,7 +352,6 @@ You MUST NOT disable the scanner globally to work around false positives. Addres
 ## 5. Branch Protection
 
 <!-- NIST SP 800-53: CM-5 (Access Restrictions for Change), CM-3 (Configuration Change Control) -->
-
 <!-- NIST SP 800-218A: PO.3 (Define and Use Criteria for Checks) -->
 
 Branch protection rules ensure that no code — human-written or AI-generated — reaches production without proper review and automated validation. This is a critical compensating control for AI-assisted development.
@@ -402,14 +360,14 @@ Branch protection rules ensure that no code — human-written or AI-generated �
 
 You MUST configure the following protections on your default branch (typically `main`):
 
-| Rule                                | Setting                            | Rationale                                                        |
-| ----------------------------------- | ---------------------------------- | ---------------------------------------------------------------- |
-| Require pull request reviews        | At least 1 reviewer; 2 recommended | Ensures human review of all changes, including AI-generated code |
-| Dismiss stale reviews on new pushes | Enabled                            | Prevents approved reviews from covering different code           |
-| Require status checks to pass       | Enabled — include CI pipeline      | Ensures automated scans run before merge                         |
-| Require branches to be up to date   | Enabled                            | Prevents merging stale branches that may conflict                |
-| Restrict force pushes               | No force push to main              | Preserves audit trail and prevents history rewriting             |
-| Restrict deletions                  | Enabled                            | Prevents accidental branch deletion                              |
+| Rule | Setting | Rationale |
+|------|---------|-----------|
+| Require pull request reviews | At least 1 reviewer; 2 recommended | Ensures human review of all changes, including AI-generated code |
+| Dismiss stale reviews on new pushes | Enabled | Prevents approved reviews from covering different code |
+| Require status checks to pass | Enabled — include CI pipeline | Ensures automated scans run before merge |
+| Require branches to be up to date | Enabled | Prevents merging stale branches that may conflict |
+| Restrict force pushes | No force push to main | Preserves audit trail and prevents history rewriting |
+| Restrict deletions | Enabled | Prevents accidental branch deletion |
 
 ### 5.2 Configuring Branch Protection
 
@@ -422,7 +380,6 @@ The exact steps depend on your source control platform. The general approach:
 5. Save the configuration
 
 **Platform-specific notes:**
-
 - On GitHub: Settings > Branches > Add branch protection rule
 - On GitLab: Settings > Repository > Protected branches
 - On Bitbucket: Repository settings > Branch permissions
@@ -431,7 +388,6 @@ The exact steps depend on your source control platform. The general approach:
 ### 5.3 Additional Recommendations
 
 You SHOULD also:
-
 - Require signed commits if your agency supports it (maps to SC-13, Cryptographic Protection)
 - Require linear history (no merge commits) for cleaner audit trails
 - Restrict who can push to protected branches to a defined set of maintainers
@@ -440,7 +396,6 @@ You SHOULD also:
 ### 5.4 Why This Matters for AI Agents
 
 AI agents typically commit code through pull requests, just like human developers. Branch protection ensures that:
-
 - Every AI-generated change is reviewed by a human before it enters the main branch
 - Automated security scans catch issues the agent may have introduced
 - The audit trail is preserved — you can always trace who approved what
@@ -485,7 +440,6 @@ FEATURE_NEW_DASHBOARD=false
 ```
 
 **Rules for .env.example:**
-
 - MUST list every variable the application needs
 - MUST include a comment describing each variable's purpose
 - MUST leave secret values blank (or use a clearly fake placeholder like `CHANGE_ME`)
@@ -493,7 +447,6 @@ FEATURE_NEW_DASHBOARD=false
 - MUST NOT contain actual credentials, tokens, or keys
 
 **Rules for .env:**
-
 - MUST be listed in `.gitignore` (it contains real secrets)
 - MUST NOT be committed to version control under any circumstances
 - MUST be populated from your agency's secrets management system
@@ -504,15 +457,14 @@ For production deployments, environment variables SHOULD be injected from an app
 
 **Common secrets management approaches** (choose based on your agency's approved services):
 
-| Approach                                  | When to Use                                               |
-| ----------------------------------------- | --------------------------------------------------------- |
-| Platform secrets (CI/CD built-in secrets) | CI/CD pipeline secrets during build and deploy            |
-| Cloud provider secrets manager            | Runtime secrets for cloud-deployed applications           |
-| Self-hosted vault                         | Runtime secrets for on-premises or hybrid deployments     |
-| Encrypted files (SOPS, age)               | Secrets committed encrypted to version control (advanced) |
+| Approach | When to Use |
+|----------|-------------|
+| Platform secrets (CI/CD built-in secrets) | CI/CD pipeline secrets during build and deploy |
+| Cloud provider secrets manager | Runtime secrets for cloud-deployed applications |
+| Self-hosted vault | Runtime secrets for on-premises or hybrid deployments |
+| Encrypted files (SOPS, age) | Secrets committed encrypted to version control (advanced) |
 
 Regardless of the approach, all secrets MUST:
-
 - Be encrypted at rest using FIPS-validated encryption
 - Be rotated on a defined schedule (per agency policy)
 - Be auditable — access to secrets should be logged
@@ -521,7 +473,6 @@ Regardless of the approach, all secrets MUST:
 ### 6.3 What AI Agents Need to Know
 
 You SHOULD instruct your AI agent (via AGENTS.md) to:
-
 - Reference `.env.example` when it needs to know what environment variables exist
 - Never generate code that hardcodes values that should come from environment variables
 - Use the standard environment variable access pattern for your language (e.g., `os.environ.get()` in Python, `process.env` in Node.js)
@@ -534,27 +485,26 @@ You SHOULD instruct your AI agent (via AGENTS.md) to:
 ## 7. CI/CD Security Baseline
 
 <!-- NIST SP 800-53: SA-11 (Developer Testing), SA-15 (Development Process), RA-5 (Vulnerability Monitoring) -->
-
 <!-- NIST SP 800-218A: PW.6 (Configure the Build Process), PW.7 (Review and Test Code), PW.9 (Test Executable Code) -->
 
 Your CI/CD (Continuous Integration / Continuous Delivery) pipeline is the automated gatekeeper that validates every change before it reaches production. At minimum, the pipeline MUST include the five checks below.
 
 ### 7.1 Minimum Pipeline Stages
 
-```text
+```
 ┌─────────┐    ┌──────────┐    ┌───────────┐    ┌─────────────┐    ┌──────────────┐
 │  Lint   │───>│   Test   │───>│   SAST    │───>│ Dependency  │───>│   Secrets    │
 │         │    │          │    │   Scan    │    │ Vuln Scan   │    │    Scan      │
 └─────────┘    └──────────┘    └───────────┘    └─────────────┘    └──────────────┘
 ```
 
-| Stage                             | Purpose                                                                     | Fails Build If                                      |
-| --------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------- |
-| **Lint**                          | Enforces coding standards and catches common errors                         | Style violations or syntax errors found             |
-| **Test**                          | Runs automated test suite                                                   | Any test fails                                      |
-| **SAST Scan**                     | Static Application Security Testing — scans source code for vulnerabilities | High or critical findings (configurable threshold)  |
-| **Dependency vulnerability scan** | Checks dependencies against known CVE databases                             | Known critical/high vulnerabilities in dependencies |
-| **Secrets scan**                  | Scans committed files for hardcoded secrets                                 | Secrets detected                                    |
+| Stage | Purpose | Fails Build If |
+|-------|---------|----------------|
+| **Lint** | Enforces coding standards and catches common errors | Style violations or syntax errors found |
+| **Test** | Runs automated test suite | Any test fails |
+| **SAST Scan** | Static Application Security Testing — scans source code for vulnerabilities | High or critical findings (configurable threshold) |
+| **Dependency vulnerability scan** | Checks dependencies against known CVE databases | Known critical/high vulnerabilities in dependencies |
+| **Secrets scan** | Scans committed files for hardcoded secrets | Secrets detected |
 
 **SAST** (Static Application Security Testing) analyzes your source code without executing it, looking for patterns that indicate security vulnerabilities — SQL injection, cross-site scripting, path traversal, and similar issues.
 
@@ -607,12 +557,12 @@ Your CI/CD pipeline itself is a security-critical component. It MUST be configur
 
 Beyond the five required stages, you SHOULD consider adding:
 
-| Stage                       | Purpose                                             | When to Add                                              |
-| --------------------------- | --------------------------------------------------- | -------------------------------------------------------- |
-| Container image scan        | Scan container images for vulnerabilities           | If your project uses containers                          |
-| Infrastructure as Code scan | Scan IaC templates for misconfigurations            | If your project includes Terraform, CloudFormation, etc. |
-| SBOM generation             | Generate Software Bill of Materials                 | Required by OMB for federal software                     |
-| License compliance          | Check dependency licenses for federal compatibility | For projects with many dependencies                      |
+| Stage | Purpose | When to Add |
+|-------|---------|-------------|
+| Container image scan | Scan container images for vulnerabilities | If your project uses containers |
+| Infrastructure as Code scan | Scan IaC templates for misconfigurations | If your project includes Terraform, CloudFormation, etc. |
+| SBOM generation | Generate Software Bill of Materials | Required by OMB for federal software |
+| License compliance | Check dependency licenses for federal compatibility | For projects with many dependencies |
 
 > **Control Mapping:** SA-11 (Developer Testing), SA-15 (Development Process), RA-5 (Vulnerability Monitoring), SI-3 (Malicious Code Protection), SA-12 (Supply Chain Protection)
 
@@ -621,7 +571,6 @@ Beyond the five required stages, you SHOULD consider adding:
 ## 8. IDE/Editor Hardening
 
 <!-- NIST SP 800-53: CM-7 (Least Functionality), SC-7 (Boundary Protection), AU-2 (Audit Events) -->
-
 <!-- NIST AI 600-1: GAI Risk — Data Privacy -->
 
 Your Integrated Development Environment (IDE) or code editor is the primary interface between you, your AI agent, and your code. Configuring it securely reduces the risk of accidental data exposure.
@@ -642,7 +591,7 @@ AI agents should not read or suggest changes to files that contain secrets or se
 
 **Files to exclude from AI agent context:**
 
-```text
+```
 .env
 .env.*
 *.key
@@ -656,7 +605,6 @@ vault-config.*
 ```
 
 The mechanism for excluding files varies by agent. Common approaches:
-
 - Agent-specific ignore files (e.g., `.cursorignore`, agent-specific settings)
 - Editor workspace settings that exclude paths from indexing
 - Rules in AGENTS.md instructing the agent to skip certain file patterns
@@ -684,9 +632,7 @@ You SHOULD restrict your AI agent's file access to the project directory:
 ## 9. Tooling Selection Criteria
 
 <!-- NIST SP 800-53: SA-4 (Acquisition Process), SA-9 (External Information System Services) -->
-
 <!-- FedRAMP 20x -->
-
 <!-- OMB M-25-21 (AI Governance) -->
 
 When selecting development tools — AI agents, CI/CD platforms, security scanners, cloud services — federal teams MUST evaluate them against security and compliance criteria, not just developer convenience. This section provides a tool-agnostic evaluation framework.
@@ -695,43 +641,42 @@ When selecting development tools — AI agents, CI/CD platforms, security scanne
 
 You MUST evaluate any development tool against these criteria before adoption:
 
-| Criterion                | What to Check                                                                                       | Why It Matters                                                                                                                                                            |
-| ------------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Authorization status** | Is the tool FedRAMP authorized (or agency-authorized equivalent)?                                   | FedRAMP authorization indicates the tool meets a baseline of federal security controls. For FIPS Moderate, the tool SHOULD hold FedRAMP Moderate or higher authorization. |
-| **Data residency**       | Where is data stored and processed? Is it in the US? Can you restrict data to specific regions?     | Federal data MUST be stored and processed within jurisdictions authorized by your agency.                                                                                 |
-| **Data handling**        | What data does the tool collect? Is code sent to external servers? Is data used for model training? | Understand what leaves your boundary. AI coding agents may send code to external APIs for processing.                                                                     |
-| **Logging and audit**    | Does the tool provide audit logs? Can you export them? Are they tamper-resistant?                   | Federal systems require audit trails (AU-2). You need to be able to demonstrate what the tool did and when.                                                               |
-| **Access control**       | Does the tool support SSO/SAML? Can you enforce MFA? Can you manage permissions granularly?         | Federal systems require centralized identity management and multi-factor authentication (IA-2).                                                                           |
-| **Encryption**           | Does the tool encrypt data at rest and in transit? Are FIPS-validated modules used?                 | FIPS Moderate requires FIPS 140-2/3 validated cryptographic modules (SC-13).                                                                                              |
+| Criterion | What to Check | Why It Matters |
+|-----------|---------------|----------------|
+| **Authorization status** | Is the tool FedRAMP authorized (or agency-authorized equivalent)? | FedRAMP authorization indicates the tool meets a baseline of federal security controls. For FIPS Moderate, the tool SHOULD hold FedRAMP Moderate or higher authorization. |
+| **Data residency** | Where is data stored and processed? Is it in the US? Can you restrict data to specific regions? | Federal data MUST be stored and processed within jurisdictions authorized by your agency. |
+| **Data handling** | What data does the tool collect? Is code sent to external servers? Is data used for model training? | Understand what leaves your boundary. AI coding agents may send code to external APIs for processing. |
+| **Logging and audit** | Does the tool provide audit logs? Can you export them? Are they tamper-resistant? | Federal systems require audit trails (AU-2). You need to be able to demonstrate what the tool did and when. |
+| **Access control** | Does the tool support SSO/SAML? Can you enforce MFA? Can you manage permissions granularly? | Federal systems require centralized identity management and multi-factor authentication (IA-2). |
+| **Encryption** | Does the tool encrypt data at rest and in transit? Are FIPS-validated modules used? | FIPS Moderate requires FIPS 140-2/3 validated cryptographic modules (SC-13). |
 
 ### 9.2 Additional Evaluation Criteria
 
 You SHOULD also evaluate:
 
-| Criterion                     | What to Check                                                                                  |
-| ----------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Incident response**         | Does the vendor have a documented incident response process? Will they notify you of breaches? |
-| **Supply chain transparency** | Does the vendor publish an SBOM? Do they follow secure development practices?                  |
-| **Exit strategy**             | Can you export your data if you switch tools? Is there vendor lock-in?                         |
-| **Accessibility**             | Does the tool meet Section 508 requirements?                                                   |
-| **Support**                   | Is support available during US business hours? Is there a government support tier?             |
+| Criterion | What to Check |
+|-----------|---------------|
+| **Incident response** | Does the vendor have a documented incident response process? Will they notify you of breaches? |
+| **Supply chain transparency** | Does the vendor publish an SBOM? Do they follow secure development practices? |
+| **Exit strategy** | Can you export your data if you switch tools? Is there vendor lock-in? |
+| **Accessibility** | Does the tool meet Section 508 requirements? |
+| **Support** | Is support available during US business hours? Is there a government support tier? |
 
 ### 9.3 AI Agent-Specific Criteria
 
 When evaluating AI coding agents specifically, also consider:
 
-| Criterion                   | What to Check                                                          |
-| --------------------------- | ---------------------------------------------------------------------- |
-| **Context window behavior** | What data is included in the AI's context? Can you control it?         |
-| **Training data usage**     | Is your code used to train or improve the AI model? Can you opt out?   |
-| **Prompt logging**          | Are your prompts and conversations logged? Where? Who can access them? |
-| **Output filtering**        | Does the agent filter harmful, insecure, or inappropriate outputs?     |
-| **Configuration**           | Can you customize the agent's behavior (via AGENTS.md or equivalent)?  |
+| Criterion | What to Check |
+|-----------|---------------|
+| **Context window behavior** | What data is included in the AI's context? Can you control it? |
+| **Training data usage** | Is your code used to train or improve the AI model? Can you opt out? |
+| **Prompt logging** | Are your prompts and conversations logged? Where? Who can access them? |
+| **Output filtering** | Does the agent filter harmful, insecure, or inappropriate outputs? |
+| **Configuration** | Can you customize the agent's behavior (via AGENTS.md or equivalent)? |
 
 ### 9.4 Documentation Requirements
 
 You MUST document your tool selection decision, including:
-
 - Which criteria were evaluated
 - How the tool met each criterion
 - Any risk acceptances or compensating controls
@@ -747,15 +692,14 @@ This documentation supports your ATO package and helps future team members under
 
 With the controls in this guide implemented, your repository has a security baseline appropriate for AI-assisted federal development at FIPS Moderate. Here is what to read next:
 
-| Document                                                        | What It Covers                                                  | When to Read                                      |
-| --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------- |
-| [AGENTS.md](../AGENTS.md)                                       | Complete agent behavior rules — the rules your AI agent follows | Before your first AI-assisted coding session      |
-| [docs/CODING-PRACTICES.md](./CODING-PRACTICES.md)               | Secure coding standards for AI-generated and human-written code | Before writing or reviewing any code              |
-| [docs/SECURITY-CONTROLS.md](./SECURITY-CONTROLS.md)             | NIST 800-53 control overlay specific to agentic AI systems      | When building your SSP or preparing for ATO       |
-| [docs/AGENT-IDENTITY.md](./AGENT-IDENTITY.md)                   | Agent identity, authentication, and delegation (NCCOE-aligned)  | When configuring agent service accounts or tokens |
-| [templates/AGENTS.md.template](../templates/AGENTS.md.template) | Copy-paste AGENTS.md for new projects                           | When starting a new repository                    |
-| [checklists/pre-deployment.md](../checklists/pre-deployment.md) | Pre-deployment security checklist                               | Before deploying to staging or production         |
-| [CONTRIBUTING.md](../CONTRIBUTING.md)                           | Contributor workflow and maintainer release process             | When contributing to or maintaining this repo     |
+| Document | What It Covers | When to Read |
+|----------|---------------|--------------|
+| [AGENTS.md](../AGENTS.md) | Complete agent behavior rules — the rules your AI agent follows | Before your first AI-assisted coding session |
+| [docs/CODING_PRACTICES.md](../docs/CODING_PRACTICES.md) | Secure coding standards for AI-generated and human-written code | Before writing or reviewing any code |
+| [docs/SECURITY-CONTROLS.md](./SECURITY-CONTROLS.md) | NIST 800-53 control overlay specific to agentic AI systems | When building your SSP or preparing for ATO |
+| [docs/AGENT-IDENTITY.md](./AGENT-IDENTITY.md) | Agent identity, authentication, and delegation (NCCOE-aligned) | When configuring agent service accounts or tokens |
+| [templates/AGENTS.md.template](../templates/AGENTS.md.template) | Copy-paste AGENTS.md for new projects | When starting a new repository |
+| [checklists/pre-deployment.md](../checklists/pre-deployment.md) | Pre-deployment security checklist | Before deploying to staging or production |
 
 ### Summary Checklist
 
@@ -777,27 +721,26 @@ Before moving on, verify you have completed:
 
 ## Glossary
 
-| Term        | Definition                                                                                                          |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| **ATO**     | Authority to Operate — formal authorization for a federal system to process data at a specified impact level        |
-| **CUI**     | Controlled Unclassified Information — unclassified information that requires safeguarding per federal regulation    |
-| **CVE**     | Common Vulnerabilities and Exposures — a standardized identifier for known security vulnerabilities                 |
+| Term | Definition |
+|------|-----------|
+| **ATO** | Authority to Operate — formal authorization for a federal system to process data at a specified impact level |
+| **CUI** | Controlled Unclassified Information — unclassified information that requires safeguarding per federal regulation |
+| **CVE** | Common Vulnerabilities and Exposures — a standardized identifier for known security vulnerabilities |
 | **FedRAMP** | Federal Risk and Authorization Management Program — standardized approach to security assessment for cloud services |
-| **FIPS**    | Federal Information Processing Standards — mandatory standards for federal computer systems                         |
-| **NIST**    | National Institute of Standards and Technology                                                                      |
-| **SAST**    | Static Application Security Testing — analyzing source code for vulnerabilities without executing it                |
-| **SBOM**    | Software Bill of Materials — a formal list of all components in a piece of software                                 |
-| **SCA**     | Software Composition Analysis — identifying and evaluating third-party components for known vulnerabilities         |
-| **SSP**     | System Security Plan — documents the security controls in place for a federal information system                    |
+| **FIPS** | Federal Information Processing Standards — mandatory standards for federal computer systems |
+| **NIST** | National Institute of Standards and Technology |
+| **SAST** | Static Application Security Testing — analyzing source code for vulnerabilities without executing it |
+| **SBOM** | Software Bill of Materials — a formal list of all components in a piece of software |
+| **SCA** | Software Composition Analysis — identifying and evaluating third-party components for known vulnerabilities |
+| **SSP** | System Security Plan — documents the security controls in place for a federal information system |
 
 ---
 
 ## Version History
 
-| Date       | Version | Change                                                                                    |
-| ---------- | ------- | ----------------------------------------------------------------------------------------- |
-| 2026-03-24 | 0.2.0   | Updated for export workflow, command surface changes, and coding practices path alignment |
-| 2026-02-25 | 0.1.0   | Initial release                                                                           |
+| Date | Version | Change |
+|------|---------|--------|
+| 2026-02-25 | 0.1.0 | Initial release |
 
 ## Framework References
 

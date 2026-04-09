@@ -8,7 +8,7 @@ nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3",
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
 keywords: ["agent-rules", "behavioral-contract", "least-privilege", "audit-logging", "prompt-injection", "prohibited-actions", "meta-constraints", "plan-before-execute", "verification-transcript", "engineering-discipline"]
-related_files: ["CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md", "templates/AGENTS.md.template"]
+related_files: ["docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md", "templates/AGENTS.md.template"]
 load_priority: "always"
 review_cycle: "quarterly"
 ---
@@ -228,7 +228,7 @@ The agent MUST:
 The agent SHOULD:
 - Prefer memory-safe languages (Rust, Go, Python, Java, C#, JavaScript/TypeScript) for new projects
 - When using memory-unsafe languages (C, C++), use compiler hardening flags and static analysis
-- Follow CISA memory safety playbook for language selection
+- Follow CISA memory safety guidance for language selection
 
 > **Control Mapping:** SI-10 (Input Validation), SA-11 (Developer Testing), SC-13 (Cryptographic Protection), SA-15 (Development Process)
 
@@ -452,7 +452,7 @@ All `.md` content files in this repository MUST include YAML frontmatter with at
 - `title` — Document title
 - `description` — One-line summary
 - `status` — `canonical`, `draft`, or `deprecated`
-- `tier` — `1` (core playbook), `2` (supporting), or `3` (templates/checklists)
+- `tier` — `1` (core standards), `2` (supporting), or `3` (templates/checklists)
 
 When updating a document, the agent SHOULD update `last_updated` in the frontmatter.
 
@@ -548,7 +548,7 @@ The agent MUST NOT escalate its own risk mode — the human decides whether to a
 
 <!-- NIST SP 800-53: SA-5 (System Documentation), SA-8 (Security Engineering Principles), SA-15 (Development Process), SA-17 (Developer Security Architecture) -->
 
-The agent is responsible for enforcing the engineering disciplines defined in `CODING_PRACTICES.md` §11-§13 during code generation and review.
+The agent is responsible for enforcing the engineering disciplines defined in `docs/CODING_PRACTICES.md` §11-§13 during code generation and review.
 
 ### 15.1 ADR Trigger Conditions
 
@@ -618,7 +618,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 ## Framework References
 
-- NIST SP 800-53 Rev 5.2.0 (September 2024)
+- NIST SP 800-53 Rev 5.2 (September 2024)
 - NIST AI RMF 1.0 (January 2023)
 - NIST AI 600-1 Generative AI Profile (July 2024)
 - NIST SP 800-218A SSDF for Generative AI (June 2024)
@@ -628,3 +628,67 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 - OWASP Top 10 for Agentic Applications 2026 (December 2025)
 - CISA Secure by Design Principles (2025)
 - OMB M-25-21 (April 2025)
+
+---
+
+## Repository-Specific Instructions
+
+> The sections below are specific to this repository's tooling and structure. They complement the behavioral rules above.
+
+For detailed repo-specific reference (canonical paths, validation package, context budgets), see [docs/AGENT-INSTRUCTIONS.md](docs/AGENT-INSTRUCTIONS.md).
+
+### Quick Reference
+
+```bash
+# Validation (Python package — 285 tests)
+PYTHONPATH=scripts python3 -m playbook_validator validate-docs
+PYTHONPATH=scripts python3 -m playbook_validator validate-skills
+PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
+PYTHONPATH=scripts python3 -m playbook_validator validate-plan --path PROJECT_PLAN.md
+PYTHONPATH=scripts python3 -m playbook_validator validate-risk-assessment --path docs/risk-assessment.md
+PYTHONPATH=scripts python3 -m playbook_validator doctor [--json]
+PYTHONPATH=scripts python3 -m playbook_validator pre-deploy
+
+# Generation
+make generate            # Generate INDEX.yaml + README skills table
+make generate-check    # Verify INDEX.yaml is up to date
+
+# Testing
+PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v
+```
+
+### Document Architecture
+
+| Tier | Load When | Documents |
+|------|-----------|-----------|
+| **1 — Always** | Every task | AGENTS.md, CODING_PRACTICES.md, PLAYBOOK.md |
+| **2 — On demand** | Task matches keywords | SECURITY-CONTROLS.md, AGENT-IDENTITY.md, FEDERAL-AI-LANDSCAPE.md |
+| **3 — Reference** | Explicitly needed | GETTING-STARTED.md, TRACEABILITY.md, templates/ |
+
+### Skills
+
+<!-- GENERATED:SKILLS_TABLE:START — do not edit, run: make generate -->
+| Skill | Purpose | Scripts? |
+|-------|---------|----------|
+| `agent-permissions` | Detect available credentials, diagnose gaps against PROJECT_PLAN.md, and guide setup... | No |
+| `ato-package` | Collect and verify all ATO submission artifacts into a review-ready package | No |
+| `cloudgov-deploy` | Deploy applications to cloud.gov — sandbox setup, manifest generation, CI/CD pipeline | No |
+| `code-review` | Review AI-assisted code changes and create compliant pull requests with proper attribution | No |
+| `federal-agents-config` | Generate a project-specific AGENTS.md through interactive decision-tree elicitation. | Yes |
+| `federal-decision-records` | Create, validate, and index architectural and security decision records using MADR... | No |
+| `federal-pre-deployment-check` | Run the 62-item federal pre-deployment security checklist against a codebase. | Yes |
+| `federal-repo-setup` | Initialize a code repository with federal security compliance defaults including... | No |
+| `federal-risk-assessment` | Walk through the AI agent risk assessment worksheet interactively, helping users... | No |
+| `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No |
+| `project-bootstrap` | Automatically set up a new federal coding project from a PROJECT_PLAN.md file | No |
+<!-- GENERATED:SKILLS_TABLE:END -->
+
+### Self-Check Gate
+
+Before completing any task:
+
+- [ ] Frontmatter valid on new/modified `.md` files
+- [ ] INDEX.yaml regenerated if documents changed
+- [ ] Tests pass (`PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v`)
+- [ ] No credentials in any file
+- [ ] NIST controls cited where applicable

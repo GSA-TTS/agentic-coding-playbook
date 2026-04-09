@@ -1,58 +1,25 @@
+# Pre-commit hooks — run: pre-commit install
+# All hooks pinned to commit SHAs for supply chain security.
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # v6.0.0
     hooks:
-      - id: check-merge-conflict
-      - id: check-case-conflict
-      - id: check-added-large-files
-        args: ["--maxkb=1000"]
-      - id: trailing-whitespace
-        args: ["--markdown-linebreak-ext=md"]
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-        args: ["--fix=lf"]
       - id: check-yaml
-        args: ["--allow-multiple-documents"]
       - id: check-json
-      - id: check-executables-have-shebangs
-      - id: check-shebang-scripts-are-executable
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
 
-  - repo: local
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: ee6b38352380ce52369d16b7873093c4b8bf829b  # v8.24.3
     hooks:
-      - id: sync-generated-content
-        name: sync generated content
-        entry: bash scripts/sync-generated-content.sh
-        language: system
-        pass_filenames: false
-        always_run: true
-        require_serial: true
+      - id: gitleaks
 
-      - id: validate-docs
-        name: validate docs
-        entry: bash scripts/validate-docs.sh
-        language: system
-        pass_filenames: false
-        always_run: true
-        require_serial: true
-
-      - id: validate-skills
-        name: validate skills
-        entry: bash scripts/validate-skills.sh
-        language: system
-        pass_filenames: false
-        always_run: true
-        require_serial: true
-
-      - id: shellcheck-repo-scripts
-        name: shellcheck repo shell scripts
-        entry: bash scripts/run-shellcheck.sh
-        language: system
-        pass_filenames: false
-        require_serial: true
-
-      - id: executable-shell-scripts
-        name: ensure shell scripts are executable
-        entry: bash scripts/check-executables.sh
-        language: system
-        pass_filenames: false
-        require_serial: true
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: c60c980e561ed3e73101667fe8365c609d19a438  # v0.15.9
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format

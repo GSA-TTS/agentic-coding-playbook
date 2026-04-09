@@ -96,7 +96,7 @@ Django's CSRF protection, Next.js server components).
 must be identified and authorized. Only listed agents should work on the codebase.
 
 **Common options:**
-- Open Code
+- GitHub Copilot
 - GitHub Copilot
 - Cursor
 - OpenAI Codex CLI

@@ -13,7 +13,7 @@
       "pattern": "^#"
     },
     {
-      "pattern": "^https://github\\.com/cloud-gov/agentic-ai-playbook"
+      "pattern": "^https://github\\.com/gsa-tts/agentic-coding-playbook"
     }
   ],
   "replacementPatterns": [],

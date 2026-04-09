@@ -70,7 +70,7 @@ decision drivers}.
 ## Links
 
 - {Link to related ADR, risk assessment, or policy document}
-- {Link to relevant NIST control playbook}
+- {Link to relevant NIST control guidance}
 ````
 
 ## Frontmatter Field Reference

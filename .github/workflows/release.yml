@@ -2,62 +2,23 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*.*.*"
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Existing tag to release (for manual runs)"
-        required: false
-        type: string
-
-permissions:
-  contents: write
+    branches: [main]
 
 concurrency:
-  group: release-${{ github.ref_name || inputs.tag }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+permissions: {}
+
 jobs:
-  release:
-    name: Create GitHub Release
+  release-please:
+    name: Release Please
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - name: Determine tag
-        id: vars
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            TAG="${{ inputs.tag }}"
-            if [[ -z "${TAG}" ]]; then
-              echo "Error: workflow_dispatch requires an existing tag input."
-              exit 1
-            fi
-          else
-            TAG="${GITHUB_REF_NAME}"
-          fi
-
-          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
-
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
         with:
-          fetch-depth: 0
-
-      - name: Verify tag exists
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --tags --force
-          git rev-parse "${{ steps.vars.outputs.tag }}" >/dev/null 2>&1
-
-      - name: Create release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
-        with:
-          tag_name: ${{ steps.vars.outputs.tag }}
-          name: ${{ steps.vars.outputs.tag }}
-          generate_release_notes: true
-          make_latest: true
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

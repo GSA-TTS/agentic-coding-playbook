@@ -1,22 +1,20 @@
 ---
 name: federal-risk-assessment
-description: >
-  Walk through the AI agent risk assessment worksheet interactively, helping users
-  complete system identification, agent capabilities inventory, data classification,
-  threat analysis with pre-filled threat descriptions, control assessment, and risk
-  treatment planning. Use when preparing for ATO or evaluating AI agent deployment risk.
-compatibility: Read access to templates/risk-assessment.md. No external tools needed.
-metadata:
-  author: wz-gsa
-  version: "0.2.0"
-  frameworks: "NIST AI RMF 1.0, NIST SP 800-53 Rev 5.2 (RA-3, RA-5)"
+title: "Federal Risk Assessment"
+description: "Walk through the AI agent risk assessment worksheet interactively, helping users complete each section with context-appropriate guidance."
+status: canonical
+tier: 2
+load_priority: on-demand
+audience: ["developers", "agents"]
+triggers: ["risk", "ATO", "threat", "vulnerability", "risk assessment"]
+dependencies: []
 ---
 
 # Federal Risk Assessment
 
 This skill walks users through the risk assessment template from
 `templates/risk-assessment.md` interactively, helping them complete each
-section with context-appropriate playbook.
+section with context-appropriate guidance.
 
 ## When to Use
 
@@ -38,7 +36,6 @@ through each section, explain what's needed, ask questions, and fill in the temp
 Ask the user for basic system information:
 
 > "Let's start with system identification. I need the following:
->
 > 1. System name
 > 2. System owner (name, title)
 > 3. ISSO (name, title)
@@ -55,8 +52,7 @@ Fill in the System Identification table.
 Ask about the AI agent being assessed:
 
 > "Now let's identify the AI agent:
->
-> 1. Agent name and product (e.g., Open Code, GitHub Copilot)
+> 1. Agent name and product (e.g., GitHub Copilot, Cursor, Codex)
 > 2. Agent version
 > 3. Agent vendor (e.g., Anthropic, GitHub/Microsoft)
 > 4. Deployment model — Local (runs on dev machine), Cloud SaaS, or Self-hosted?
@@ -100,7 +96,6 @@ For each threat in [references/THREAT_CATALOG.md](references/THREAT_CATALOG.md),
 > "For **T[N]: [Threat Name]** — [one-sentence description from catalog]
 >
 > On a scale of 1-5:
->
 > - **Likelihood** (1=Rare, 2=Unlikely, 3=Possible, 4=Likely, 5=Almost Certain): How likely is this in your environment?
 > - **Impact** (1=Negligible, 2=Minor, 3=Moderate, 4=Major, 5=Severe): If it happened, how bad would it be?
 >
@@ -109,7 +104,6 @@ For each threat in [references/THREAT_CATALOG.md](references/THREAT_CATALOG.md),
 Calculate Risk = Likelihood x Impact for each threat.
 
 After completing all threats, summarize with the risk tolerance table:
-
 - Critical (20-25): MUST mitigate before deployment
 - High (12-19): MUST mitigate within 30 days
 - Medium (6-11): SHOULD mitigate
@@ -131,14 +125,12 @@ If "Partial" or "Not implemented", ask what's missing and note it.
 For each risk rated Medium (6+) or above in Section 4, create a treatment plan:
 
 > "Risk T[N] scored [score] ([level]). How would you like to treat it?
->
 > - **Mitigate**: Reduce likelihood or impact with additional controls
 > - **Transfer**: Shift risk to another party (e.g., vendor SLA)
 > - **Accept**: Document and accept the residual risk
 > - **Avoid**: Eliminate the risk by not using the capability"
 
 For "Mitigate", ask:
-
 - What controls will be implemented?
 - Who is responsible?
 - Target completion date?
@@ -149,11 +141,10 @@ For "Mitigate", ask:
 Summarize the assessment:
 
 > "Based on this assessment:
->
-> - [x] risks scored Critical or High
-> - [x] risks scored Medium
-> - [x] risks scored Low
-> - [x] of [N] control areas fully implemented
+> - [X] risks scored Critical or High
+> - [X] risks scored Medium
+> - [X] risks scored Low
+> - [X] of [N] control areas fully implemented
 >
 > The recommended risk acceptance is: [Acceptable / Conditionally Acceptable / Not Acceptable]
 >
@@ -171,4 +162,4 @@ signed by the System Owner and ISSO before it becomes part of the ATO documentat
 - Risk scores are based on the user's input — the agent does not override or second-guess ratings.
 - Threat descriptions are pre-filled from OWASP and NIST sources. See `references/THREAT_CATALOG.md`.
 - The full template is at `templates/risk-assessment.md`. This skill makes it interactive, it does not change the template structure.
-- **Policy reference:** `templates/risk-assessment.md` (template), `docs/SECURITY-CONTROLS.md` (control playbook).
+- **Policy reference:** `templates/risk-assessment.md` (template), `docs/SECURITY-CONTROLS.md` (control guidance).

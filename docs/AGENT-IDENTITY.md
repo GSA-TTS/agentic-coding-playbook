@@ -31,15 +31,15 @@ review_cycle: "quarterly"
 | Audit | Log every action with: agent ID, delegating user, timestamp, action, outcome |
 | Revocation | Immediate credential revocation capability, break-glass procedures documented |
 
-> **Full playbook with NCCOE alignment and implementation patterns in sections below.**
+> **Full guidance with NCCOE alignment and implementation patterns in sections below.**
 
 ---
 
 > **Disclaimer:** This playbook is informational only and is not authoritative federal policy. Each agency must tailor these recommendations to their specific ATO requirements, organizational policies, and risk tolerance.
 
-This document provides practical playbook for managing AI coding agent identities within federal systems. It covers how agents are identified, how they authenticate, what they are authorized to do, how user identity delegates to agent identity, and how all of it gets logged for audit.
+This document provides practical guidance for managing AI coding agent identities within federal systems. It covers how agents are identified, how they authenticate, what they are authorized to do, how user identity delegates to agent identity, and how all of it gets logged for audit.
 
-**Alignment:** This playbook aligns with:
+**Alignment:** This guidance aligns with:
 - **NCCOE** — [Accelerating the Adoption of Software and AI Agent Identity and Authorization](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization) Concept Paper (February 2026)
 - **NIST CAISI** — [AI Agent Standards Initiative](https://www.nist.gov/caisi/ai-agent-standards-initiative) (February 2026)
 
@@ -79,7 +79,7 @@ The NCCOE concept paper (February 2026) identifies four focus areas for managing
 | 3 | **Access Delegation** — Linking user identities to AI agents for accountability | [Section 5](#5-delegation-model) |
 | 4 | **Logging and Transparency** — Linking agent actions to their non-human entity for audit | [Section 6](#6-audit-and-non-repudiation) |
 
-The NIST CAISI initiative is developing standards for AI agent behavior more broadly. While those standards are still emerging, this document provides actionable playbook you can implement now.
+The NIST CAISI initiative is developing standards for AI agent behavior more broadly. While those standards are still emerging, this document provides actionable practices you can implement now.
 
 **Who should read this:** Federal developers, DevOps engineers, and system administrators who deploy or manage AI coding agents. You do not need deep IAM expertise — this document explains concepts as it goes.
 
@@ -113,8 +113,8 @@ Every AI agent operating in your system MUST have the following metadata recorde
 
 | Field | Description | Example |
 |---|---|---|
-| `agent_id` | Unique identifier for this agent instance | `open-code-a1b2c3d4` |
-| `agent_name` | Human-readable name of the agent product | `Open Code` |
+| `agent_id` | Unique identifier for this agent instance | `ai-agent-a1b2c3d4` |
+| `agent_name` | Human-readable name of the agent product | `AI Coding Agent` |
 | `agent_version` | Version of the agent software | `1.42.0` |
 | `agent_type` | Category of agent | `coding-assistant` |
 | `owning_user` | The human user who invoked the agent | `jane.doe@agency.gov` |
@@ -123,7 +123,7 @@ Every AI agent operating in your system MUST have the following metadata recorde
 | `expires_at` | When the agent's authorization expires | `2026-02-25T22:30:00Z` |
 
 The agent SHOULD also track:
-- **Model identifier** — which AI model is powering the agent (e.g., `claude-opus-4-6`)
+- **Model identifier** — which AI model is powering the agent (e.g., `model-name-version`)
 - **Provider** — the vendor or service (e.g., `anthropic`, `openai`, `self-hosted`)
 - **Deployment context** — where the agent is running (e.g., `developer-workstation`, `ci-pipeline`, `cloud-ide`)
 
@@ -134,7 +134,7 @@ Every action taken by an agent MUST be distinguishable from a human action in al
 **In version control:**
 - Agent-authored commits MUST include a co-authorship trailer:
   ```
-  Co-Authored-By: Open Code <agent@example.com>
+  Co-Authored-By: AI Coding Agent <agent@example.com>
   ```
 - The committer identity SHOULD identify the agent, not the user, when possible
 - If the VCS system does not support separate committer/author fields, the commit message body MUST identify the agent
@@ -142,7 +142,7 @@ Every action taken by an agent MUST be distinguishable from a human action in al
 **In API calls:**
 - The `User-Agent` header SHOULD include the agent name and version:
   ```
-  User-Agent: open-code/1.42.0 (federal-workstation)
+  User-Agent: ai-agent/1.0.0 (federal-workstation)
   ```
 - If the API supports custom headers, include an `X-Agent-Id` header with the agent's unique identifier
 
@@ -158,7 +158,7 @@ svc-agent-{agent-type}-{environment}-{sequence}
 ```
 
 Examples:
-- `svc-agent-claude-dev-001` — Open Code agent in development
+- `svc-agent-dev-001` — AI Coding Agent agent in development
 - `svc-agent-copilot-staging-001` — GitHub Copilot agent in staging
 - `svc-agent-cursor-prod-001` — Cursor agent in production
 
@@ -403,7 +403,7 @@ A delegation token encodes the relationship between the user and the agent. It a
 ```json
 {
   "iss": "https://idp.agency.gov",
-  "sub": "svc-agent-claude-dev-001",
+  "sub": "svc-agent-dev-001",
   "act": {
     "sub": "jane.doe@agency.gov"
   },
@@ -412,7 +412,7 @@ A delegation token encodes the relationship between the user and the agent. It a
   "project": "project-alpha",
   "iat": 1740494400,
   "exp": 1740523200,
-  "jti": "example_token_id"
+  "jti": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 }
 ```
 
@@ -497,15 +497,15 @@ Agent audit logs MUST use structured JSON format. One JSON object per line (JSON
   "correlation_id": "corr_9e8d7c6b",
   "session_id": "sess_a1b2c3d4",
   "requesting_user": "jane.doe@agency.gov",
-  "agent_id": "open-code-a1b2c3d4",
-  "agent_name": "Open Code",
+  "agent_id": "ai-agent-a1b2c3d4",
+  "agent_name": "AI Coding Agent",
   "agent_version": "1.42.0",
   "action_type": "file_write",
   "action_detail": "Modified src/api/handler.ts — added input validation",
   "resource": "/project-alpha/src/api/handler.ts",
   "result": "success",
   "authorization_basis": "role:agent-developer",
-  "delegation_token_id": "example_token_id"
+  "delegation_token_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 }
 ```
 
@@ -518,15 +518,15 @@ Agent audit logs MUST use structured JSON format. One JSON object per line (JSON
   "correlation_id": "corr_9e8d7c6b",
   "session_id": "sess_a1b2c3d4",
   "requesting_user": "jane.doe@agency.gov",
-  "agent_id": "open-code-a1b2c3d4",
-  "agent_name": "Open Code",
+  "agent_id": "ai-agent-a1b2c3d4",
+  "agent_name": "AI Coding Agent",
   "agent_version": "1.42.0",
   "action_type": "file_write",
   "action_detail": "Attempted to modify deploy/production.yaml",
   "resource": "/project-alpha/deploy/production.yaml",
   "result": "denied",
   "authorization_basis": "policy:deny_production_config_write",
-  "delegation_token_id": "example_token_id"
+  "delegation_token_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 }
 ```
 

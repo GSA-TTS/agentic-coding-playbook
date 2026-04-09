@@ -20,7 +20,7 @@ and what actions are prohibited.
 **Suggested NIST controls:** AC-2, AC-3, AC-6, CM-7, PL-4
 
 **Example decisions:**
-- Use Open Code as the authorized AI coding agent for Project X
+- Use GitHub Copilot as the authorized AI coding agent for Project X
 - Restrict agent file system access to the repository directory only
 - Prohibit agent from making network calls outside the approved allowlist
 - Require human approval for all agent-initiated git push operations

@@ -6,69 +6,28 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
-  markdown-lint:
-    name: Markdown Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: DavidAnson/markdownlint-cli2-action@ce4853d43830c74c1753b39f3cf40f71c2031eb9 # v23.0.0
-        with:
-          globs: "**/*.md"
-
   link-check:
     name: Link Check
     runs-on: ubuntu-latest
+    continue-on-error: true  # External URLs can be flaky — don't block CI
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: gaurav-nelson/github-action-markdown-link-check@3c3b66f1f7d0900e37b71eca45b63ea9eedfce31 # v1.0.17
+      - uses: tcort/github-action-markdown-link-check@e7c7a18363c842693fadde5d41a3bd3573a7a225 # v1.1.2
         with:
           config-file: ".markdown-link-check.json"
           use-quiet-mode: "yes"
           folder-path: "."
 
-  shellcheck:
-    name: ShellCheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Run ShellCheck on repository shell scripts
-        run: |
-          chmod +x scripts/run-shellcheck.sh
-          bash scripts/run-shellcheck.sh
-
-  generated-content-validation:
-    name: Generated Content Validation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Verify generated content is up to date
-        run: |
-          chmod +x scripts/generate-index.sh
-          chmod +x scripts/generate-readme-structure.sh
-          chmod +x scripts/generate-readme-skills.sh
-          chmod +x scripts/generate-readme-changelog.sh
-          chmod +x scripts/sync-generated-content.sh
-          bash scripts/sync-generated-content.sh --check
-
-  frontmatter-validation:
-    name: Frontmatter Validation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Validate frontmatter and INDEX.yaml references
-        run: |
-          chmod +x scripts/validate-docs.sh
-          bash scripts/validate-docs.sh
-
-  skills-validation:
-    name: Skills Validation
+  python:
+    name: Python Lint, Test & Validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -77,8 +36,39 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.12"
+          cache: "pip"
 
-      - name: Validate skills format
-        run: |
-          chmod +x scripts/validate-skills.sh
-          bash scripts/validate-skills.sh
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Markdown lint
+        run: npx markdownlint-cli2
+
+      - name: Ruff lint
+        run: ruff check scripts/
+
+      - name: Ruff format check
+        run: ruff format --check scripts/
+
+      - name: Run tests
+        run: PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v
+
+      - name: SCA vulnerability scan
+        run: pip install pip-audit && pip-audit -r requirements.lock
+
+      - name: Validate frontmatter
+        run: PYTHONPATH=scripts python3 -m playbook_validator validate-docs --root .
+
+      - name: Validate landscape registry
+        run: PYTHONPATH=scripts python3 -m playbook_validator validate-landscape --path data/federal-ai-landscape.yaml
+
+      - name: Validate skills
+        run: PYTHONPATH=scripts python3 -m playbook_validator validate-skills --root .
+
+      - name: Verify INDEX.yaml is up to date
+        run: PYTHONPATH=scripts python3 -m playbook_validator generate-index --check --root .
