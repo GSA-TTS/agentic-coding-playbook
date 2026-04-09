@@ -97,7 +97,6 @@ must be identified and authorized. Only listed agents should work on the codebas
 
 **Common options:**
 - GitHub Copilot
-- GitHub Copilot
 - Cursor
 - OpenAI Codex CLI
 - Gemini CLI

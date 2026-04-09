@@ -143,7 +143,7 @@ make validate-docs       # Document frontmatter
 make validate-skills     # Skill directories
 make validate-landscape  # Federal AI landscape registry
 make test                # Python test suite
-make lint                # Ruff + pymarkdown
+make lint                # Ruff + markdownlint
 make doctor              # Check environment readiness
 make new-project DIR=x   # Bootstrap a new project
 ```

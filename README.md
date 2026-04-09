@@ -68,7 +68,7 @@ Full details: [PLAYBOOK.md](./PLAYBOOK.md)
 
 ## Skills — Executable Compliance Procedures
 
-Skills convert policy standards into step-by-step workflows that any AI coding agent can follow. The behavioral contract (`AGENTS.md`) uses the [AGENTS.md standard](https://agents.md), supported by 25+ tools including Codex, Copilot, Cursor, and Windsurf.
+Skills convert policy standards into step-by-step workflows that any AI coding agent can follow. The behavioral contract (`AGENTS.md`) uses the [AGENTS.md standard](https://agents.md), supported by 25+ AI coding tools.
 
 <!-- GENERATED:SKILLS_TABLE:START — do not edit, run: make generate -->
 | Skill | Purpose | Scripts? |

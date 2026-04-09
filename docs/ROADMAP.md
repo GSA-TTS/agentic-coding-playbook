@@ -12,13 +12,13 @@ keywords: ["roadmap", "plan", "future", "strategy"]
 
 Long-term plan for making the Agentic Coding Playbook a living, learnable resource for federal engineers.
 
-## Current State (v0.5.0)
+## Current State (v0.6.0)
 
 | Metric | Count |
 |--------|-------|
 | Documents | 20 |
 | Skills | 11 |
-| Tests | 270 |
+| Tests | 285 |
 | Checklist items | 62 |
 | Landscape entries | 39 |
 | NIST controls mapped | 55 |
@@ -27,29 +27,23 @@ The playbook covers the full SDLC from project planning through deployment and c
 
 ## Phase 1: Documentation Site (Next)
 
-**Goal:** Make the playbook browsable and searchable as a website.
+**Goal:** Make the playbook browsable and searchable as a hosted website.
 
-**Recommended tool:** [Astro Starlight](https://starlight.astro.build/) — built for docs, supports YAML frontmatter natively, fast static output, sidebar auto-generation.
-
-- Convert markdown docs to a Starlight site
-- Auto-generate sidebar from tier structure
-- Add search (built into Starlight)
-- Deploy to GitHub Pages or cloud.gov
+- Convert markdown docs to a static documentation site
+- Auto-generate navigation from tier structure
+- Add full-text search
+- Deploy to a FedRAMP-authorized hosting platform
 - Skills become interactive pages with copy-paste commands
 
-**Why Starlight:** Python-based alternatives (MkDocs) are good but Starlight has native frontmatter validation via content collections (replaces some of our custom validators), built-in versioning, and is used by major open source projects.
+The content is already well-structured with YAML frontmatter — static site generation is primarily a configuration task.
 
-**Effort:** Medium (1-2 weeks). The content is already well-structured — it's mostly configuration.
+**Effort:** Medium (1-2 weeks).
 
-## Phase 2: Interactive Skills with Runme
+## Phase 2: Interactive Skills
 
 **Goal:** Make skills executable, not just readable.
 
-[Runme](https://runme.dev/) lets users run code blocks directly from markdown in VS Code or the terminal. Skills like `federal-repo-setup` and `code-review` have command blocks that could be executed in place.
-
-- Add Runme annotations to skill code blocks
-- Users click "Run" on each step instead of copy-pasting
-- Works with any terminal — no vendor lock-in
+Enable users to run code blocks directly from skill documents in their editor or terminal, rather than manual copy-paste. Several open-source tools support executable markdown — evaluate options that work without vendor lock-in.
 
 **Effort:** Small (2-3 days). Add annotations to existing code blocks.
 
@@ -81,7 +75,7 @@ Each path is a curated sequence of existing documents with checkpoint exercises.
 - Skill contribution guide with templates (already exists)
 - Office hours or async Q&A channel
 - Agency-specific skill packs (extensions, not forks)
-- Align with 18F/digital.gov guide patterns
+- Align with existing federal digital service guide patterns
 
 ## Phase 5: Automated Freshness
 
@@ -109,34 +103,6 @@ Tracked by issue #13. Requires:
 - NIST controls for multi-agent systems (emerging)
 
 This is blocked on NIST CAISI standards (expected 2026-2027).
-
-## Tooling Decisions
-
-### Keep (working well)
-
-| Tool | Purpose | Why keep |
-|------|---------|----------|
-| Custom Python validators | Frontmatter, skills, landscape, ADRs | Tailored to our schema, 285 tests |
-| pymarkdown | Markdown lint | Python-native, no Node.js dependency |
-| ruff | Python lint + format | Fast, comprehensive |
-| release-please | Automated releases | Zero-maintenance changelog + versioning |
-| Makefile | Developer commands | Universal, no dependencies |
-
-### Consider adding
-
-| Tool | Purpose | When |
-|------|---------|------|
-| Astro Starlight | Documentation site | Phase 1 |
-| Runme | Interactive skills | Phase 2 |
-
-### Not recommended
-
-| Tool | Why not |
-|------|---------|
-| MkDocs | Good but Starlight has better frontmatter validation |
-| Docusaurus | React dependency, heavy for a playbook |
-| Backstage | Designed for service catalogs, overkill here |
-| Custom CLI (npm/pip package) | YAGNI — Makefile + Python module is sufficient |
 
 ## Success Metrics
 

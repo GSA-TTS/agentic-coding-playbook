@@ -2,7 +2,7 @@
 
 ## Scope
 
-This repository contains **reference documentation only** — no executable code, services, or infrastructure. Security concerns here relate to:
+This repository contains **reference documentation** and a **Python validation toolchain** (`scripts/playbook_validator/`). There are no deployed services or infrastructure. Security concerns here relate to:
 
 - Incorrect or outdated security standards that could lead to insecure implementations
 - Misaligned NIST control mappings that could cause compliance gaps
