@@ -113,14 +113,9 @@ doctor-json: ## Environment doctor with JSON output
 pre-deploy: ## Run pre-deployment security checks
 	$(VALIDATOR) pre-deploy --path .
 
-.PHONY: lock
-lock: ## Regenerate dependency lock files (requirements.lock + requirements-dev.lock)
-	pip-compile pyproject.toml -o requirements.lock --generate-hashes --strip-extras -q
-	pip-compile pyproject.toml --extra dev -o requirements-dev.lock --generate-hashes --strip-extras -q
-
 .PHONY: audit
-audit: ## Run SCA vulnerability scan on locked dependencies
-	pip-audit -r requirements.lock
+audit: ## Run SCA vulnerability scan on installed packages
+	pip-audit
 
 # ── CI Reproduction ───────────────────────────────────────────────
 

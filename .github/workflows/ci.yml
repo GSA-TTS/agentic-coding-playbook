@@ -59,7 +59,7 @@ jobs:
         run: PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v
 
       - name: SCA vulnerability scan
-        run: pip install pip-audit && pip-audit -r requirements.lock
+        run: pip install pip-audit && pip-audit
 
       - name: Validate frontmatter
         run: PYTHONPATH=scripts python3 -m playbook_validator validate-docs --root .
