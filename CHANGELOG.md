@@ -10,8 +10,8 @@ This project uses [Semantic Versioning](https://semver.org/). Framework alignmen
 ### Features
 
 * add dependency lock files and pip-audit SCA scanning ([#85](https://github.com/gsa-tts/agentic-coding-playbook/issues/85)) ([bdd0b3f](https://github.com/gsa-tts/agentic-coding-playbook/commit/bdd0b3f70be174a4a0738e9b95fe4fa498bf66b8))
-* nexus-agents iteration 2 — CI hardening, Makefile targets, pyproject.toml checker ([#89](https://github.com/gsa-tts/agentic-coding-playbook/issues/89)) ([2eb18db](https://github.com/gsa-tts/agentic-coding-playbook/commit/2eb18db6bda27cc0d4e31b2106a4eff7b1904731))
-* nexus-agents review — harden CLI, doctor, CI, refactor, add 23 tests ([#80](https://github.com/gsa-tts/agentic-coding-playbook/issues/80)) ([d7c7067](https://github.com/gsa-tts/agentic-coding-playbook/commit/d7c7067474c097a4dc3fc2cc545a4572ccc967d5))
+* CI hardening, Makefile targets, pyproject.toml checker ([#89](https://github.com/gsa-tts/agentic-coding-playbook/issues/89)) ([2eb18db](https://github.com/gsa-tts/agentic-coding-playbook/commit/2eb18db6bda27cc0d4e31b2106a4eff7b1904731))
+* harden CLI, doctor, CI, refactor, add 23 tests ([#80](https://github.com/gsa-tts/agentic-coding-playbook/issues/80)) ([d7c7067](https://github.com/gsa-tts/agentic-coding-playbook/commit/d7c7067474c097a4dc3fc2cc545a4572ccc967d5))
 
 ## [0.5.1](https://github.com/gsa-tts/agentic-coding-playbook/compare/v0.5.0...v0.5.1) (2026-04-02)
 
