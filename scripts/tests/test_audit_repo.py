@@ -109,12 +109,14 @@ class TestCheckEnvNotCommitted:
         env_file = tmp_path / ".env"
         env_file.write_text("SECRET=oops\n")
         subprocess.run(
-            ["git", "-C", str(tmp_path), "add", ".env"],
+            ["git", "-C", str(tmp_path), "add", "-f", ".env"],
             check=True,
             capture_output=True,
         )
+        # Use --no-verify to bypass pre-commit hooks in test environment
+        # (this test verifies audit detection, not pre-commit hook behavior)
         subprocess.run(
-            ["git", "-C", str(tmp_path), "commit", "-m", "add env", "--no-gpg-sign"],
+            ["git", "-C", str(tmp_path), "commit", "-m", "add env", "--no-gpg-sign", "--no-verify"],
             check=True,
             capture_output=True,
             env={
