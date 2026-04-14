@@ -128,7 +128,7 @@ Every practice maps to one or more authoritative sources:
 | [NIST AI 600-1](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence) | 1.0 | GenAI risk profile |
 | [OWASP Top 10 LLM](https://genai.owasp.org/llm-top-10/) | 2025 | LLM application risks |
 | [OWASP Agentic AI](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) | 2026 | Agentic application risks |
-| [OMB M-25-21](https://www.whitehouse.gov/) | Apr 2025 | Federal AI governance |
+| [OMB M-25-21](https://www.whitehouse.gov/wp-content/uploads/2025/02/M-25-21-Accelerating-Federal-Use-of-AI-through-Innovation-Governance-and-Public-Trust.pdf) | Apr 2025 | Federal AI governance |
 | [CISA Secure by Design](https://www.cisa.gov/securebydesign) | 2025 | Secure-by-default principles |
 
 Full catalog of 39 federal AI guidance documents: [docs/FEDERAL-AI-LANDSCAPE.md](./docs/FEDERAL-AI-LANDSCAPE.md)

@@ -23,24 +23,24 @@ review_cycle: "quarterly"
 3. **Load on demand** — do NOT load all documents preemptively
 4. **Security is non-negotiable** — when in doubt about a security requirement, load the relevant doc rather than guessing
 
-## Tier 1 — Always Load (~13,222 words)
+## Tier 1 — Always Load (~13,420 words)
 
 These define the behavioral contract. Load for **every task**.
 
 | Document | Words | What It Covers |
 |----------|-------|----------------|
-| `AGENTS.md` | 4,577 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
-| `PLAYBOOK.md` | 1,152 | Step-by-step guide: project setup → deployment (9 phases, 11 skills) |
-| `docs/CODING_PRACTICES.md` | 6,137 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
-| `docs/CODING_STANDARDS_COMPACT.md` | 445 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
+| `AGENTS.md` | 4,735 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
+| `PLAYBOOK.md` | 1,155 | Step-by-step guide: project setup → deployment (9 phases, 11 skills) |
+| `docs/CODING_PRACTICES.md` | 6,171 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
+| `docs/CODING_STANDARDS_COMPACT.md` | 448 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
 | `docs/AGENT-INSTRUCTIONS.md` | 911 | Repo-specific tooling reference: canonical paths, validation commands, context budgets |
 
-## Tier 2 — Load When Task Matches (~12,746 words)
+## Tier 2 — Load When Task Matches (~12,868 words)
 
 | Document | Words | Load When Task Involves |
 |----------|-------|------------------------|
 | `docs/SECURITY-CONTROLS.md` | 7,212 | Security controls, ATO, FedRAMP, compliance assessment, ISSO review |
-| `docs/AGENT-IDENTITY.md` | 5,534 | Authentication, authorization, OAuth, RBAC, delegation, identity management |
+| `docs/AGENT-IDENTITY.md` | 5,656 | Authentication, authorization, OAuth, RBAC, delegation, identity management |
 
 ## Tier 3 — Load On Demand (~7,218 words)
 
@@ -50,14 +50,14 @@ These define the behavioral contract. Load for **every task**.
 | `docs/FEDERAL-AI-LANDSCAPE.md` | — | Federal AI guidance catalog (39 entries, EOs, OMB, NIST) |
 | `docs/TRACEABILITY.md` | 2,342 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
 
-## Tier 4 — Reference Only (~3,925 words)
+## Tier 4 — Reference Only (~3,926 words)
 
 Load only when the specific activity is being performed.
 
 | Document | Words | Load When |
 |----------|-------|-----------|
 | `templates/risk-assessment.md` | 1,727 | Performing a risk assessment |
-| `checklists/pre-deployment.md` | 2,198 | Running pre-deployment checklist |
+| `checklists/pre-deployment.md` | 2,199 | Running pre-deployment checklist |
 
 ## Skills — Load Only When Invoked
 

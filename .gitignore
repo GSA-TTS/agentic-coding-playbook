@@ -17,14 +17,24 @@ __pycache__/
 dist/
 build/
 .venv/
+venv/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
 htmlcov/
+.coverage
+*.coverage
+
+# Node.js (for commitlint/tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment
 .env
 .env.local
+.env.*
 
 # Secrets (never commit)
 *.key
@@ -32,3 +42,17 @@ htmlcov/
 *.p12
 *.pfx
 credentials.*
+secrets.yaml
+secrets.yml
+.secrets/
+**/secrets/
+
+# Terraform (if applicable)
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Logs and backups
+*.log
+*.bak
+*.backup
