@@ -4,6 +4,28 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.6.2](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.1...v0.6.2) (2026-04-14)
+
+
+### Bug Fixes
+
+* **deps:** upgrade pytest to 9.0.3 for CVE-2025-71176 ([4849d13](https://github.com/GSA-TTS/agentic-coding-playbook/commit/4849d13ad4a3379dfb4aac68cc54f80bb37c4a9d))
+
+
+### Documentation
+
+* update ai attribution guidance based on federal research ([7d8b7e9](https://github.com/GSA-TTS/agentic-coding-playbook/commit/7d8b7e9c497bc0d9b804231566d2e39d2c78c794))
+
+
+### Maintenance
+
+* fix word counts, urls, and enhance gitignore ([9699d31](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9699d311e3be82d44f2e2e4929ed5c78035e8e93))
+
+
+### Tests
+
+* unlock GPG cache ([da48a80](https://github.com/GSA-TTS/agentic-coding-playbook/commit/da48a80bdadf8438504afa938c3b50ad58517708))
+
 ## [0.6.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.0...v0.6.1) (2026-04-09)
 
 

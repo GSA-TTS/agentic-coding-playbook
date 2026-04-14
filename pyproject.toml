@@ -1,6 +1,6 @@
 [project]
 name = "playbook-validator"
-version = "0.6.1"
+version = "0.6.2"
 description = "Validation and generation tools for the agentic-coding-playbook"
 license = "CC0-1.0"
 requires-python = ">=3.12"
