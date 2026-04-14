@@ -24,7 +24,7 @@ Each of the 58 pre-deployment checklist items is classified by how an agent can 
 | # | Check | Type | Tool/Method |
 |---|-------|------|-------------|
 | 1.1 | Human review of AI-generated code | Manual | Ask reviewer |
-| 1.2 | AI attribution in commits | Semi-automated | `git log --format='%b' | grep Co-Authored-By` |
+| 1.2 | AI attribution documented | Semi-automated | Check PR description, AGENTS.md, or `git log --format='%b' \| grep Co-Authored-By` |
 | 1.3 | Standard PR/review process followed | Manual | Ask reviewer |
 | 1.4 | No direct commits to protected branches | Semi-automated | Check branch protection config or git history |
 | 1.5 | Reviewer understands the code | Manual | Ask reviewer |

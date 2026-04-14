@@ -194,7 +194,7 @@ accountability and incident response.
 
 **Common mitigations:**
 - Audit logging of all agent actions (AU-2, AU-3)
-- Co-Authored-By attribution in commits
+- AI attribution documented (PR-level or commit-level per AGENTS.md)
 - Structured log format with timestamps
 - Agent cannot delete or modify logs (AGENTS.md Section 2.2)
 

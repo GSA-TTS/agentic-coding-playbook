@@ -55,19 +55,34 @@ Flag violations in the PR description with justification if they are intentional
 
 All AI-generated code MUST be attributed per `AGENTS.md` Section 2.1.
 
-### 2.1 Co-Authored-By Header
+### 2.1 Co-authored-by Trailer
 
 Every commit that includes AI-generated or AI-modified code MUST include a
-`Co-Authored-By` trailer:
+`Co-authored-by:` trailer (note: lowercase "authored"):
 
 ```
-Co-Authored-By: AI Agent Name <agent@example.com>
+Co-authored-by: OpenCode Agent <user@gsa.gov>
+```
+
+**Format:**
+- Appears after a blank line following the commit body
+- Uses lowercase `Co-authored-by:` (matches GitHub standard)
+- Email should match the user's verified email
+- One line per co-author
+
+**Example:**
+```
+feat: add user authentication
+
+Implement login.gov SSO integration.
+
+Co-authored-by: OpenCode Agent <user@gsa.gov>
 ```
 
 To verify attribution on existing commits:
 
 ```bash
-git log --format='%H %s%n%(trailers:key=Co-Authored-By)' -10
+git log --format='%H %s%n%(trailers:key=Co-authored-by)' -10
 ```
 
 If commits are missing attribution, amend them before creating the PR (if on a
@@ -155,7 +170,7 @@ All of the following MUST be true before merging:
 - [ ] At least one human reviewer approved the PR
 - [ ] The reviewer is NOT the same person who directed the AI agent (per `checklists/pre-deployment.md` item 1.1)
 - [ ] All review comments are resolved
-- [ ] Co-Authored-By attribution is present on AI-assisted commits
+- [ ] AI assistance is documented (PR description or commit attribution)
 - [ ] No secrets or credentials in the diff
 - [ ] PR description includes summary, related issues, and test plan
 

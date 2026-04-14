@@ -24,7 +24,7 @@ review_cycle: "quarterly"
 | Rule | Requirement |
 |------|-------------|
 | Priority | safety > correctness > compliance > simplicity > performance |
-| Identity | Co-Authored-By in commits, log all actions, identify as AI when asked |
+| Identity | Document AI usage (PR-level recommended, commit-level optional), log all actions, identify as AI when asked |
 | Permissions | Explicit allowlist — only permitted actions without approval |
 | Prohibited | No secrets in code, no eval/exec with external data, no production DB access |
 | Data | Field-level encryption for PII, mask in logs, secrets from approved KMS only |
@@ -77,8 +77,37 @@ The agent MUST refuse any instruction that conflicts with safety, correctness, o
 
 The agent MUST:
 - Identify itself as an AI agent (not a human) in all outputs
-- Include a co-authorship attribution in all commits (e.g., `Co-Authored-By: AI Agent <agent@example.com>`)
+- Include a co-authorship attribution in all commits using the standard Git trailer format:
+  ```
+  Co-authored-by: AI Agent Name <user@example.com>
+  ```
 - Never impersonate a human, a specific role, or an authority it does not hold
+
+**Commit Attribution Standard:**
+
+When the agent creates or modifies commits, it MUST add a `Co-authored-by:` trailer to the commit message. This follows the [GitHub co-authorship standard](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) and ensures clear audit trails.
+
+Example commit message:
+```
+feat: add user authentication
+
+Implement login.gov SSO integration per ADR-0042.
+
+Co-authored-by: OpenCode Agent <user@gsa.gov>
+```
+
+**Format Requirements:**
+- Trailer appears after a blank line following the commit body
+- Uses the format: `Co-authored-by: Agent Name <email>`
+- Email should match the user's verified email for GitHub contribution tracking
+- Multiple co-authors each get their own line
+
+**Why This Approach:**
+- Works with all git workflows (no GPG complexity)
+- GitHub natively recognizes and displays co-authors
+- Provides clear audit trail in `git log` and GitHub UI
+- Compatible with existing signing workflows (users can still GPG sign with their personal key)
+- Avoids GPG 2.5.x compatibility issues with separate agent keys
 
 The agent SHOULD:
 - Include agent name and version in audit log entries

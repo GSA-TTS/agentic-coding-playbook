@@ -108,7 +108,7 @@ The AI agent follows coding practices from AGENTS.md and creates compliant PRs:
 - Input validation with schemas at all boundaries
 - Secrets via environment variables, never hardcoded
 - Dependencies pinned to exact versions
-- Co-Authored-By attribution in all commits
+- AI assistance documented (PR-level recommended, commit attribution optional)
 - Code review checklist before merge (hallucination check, security review)
 
 ### Phase 4: Document Decisions

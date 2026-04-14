@@ -68,7 +68,7 @@ Output is structured JSON with pass/fail for each automated check.
 For each semi-automated check, read the relevant files and report findings:
 
 **Category 1 — Code Review and Provenance:**
-- Check git log for `Co-Authored-By` attribution (item 1.2)
+- Check for AI attribution (PR description, AGENTS.md, or git log for `Co-Authored-By`) (item 1.2)
 - Check branch protection config or recent commit history (item 1.4)
 
 **Category 3 — Input Validation:**

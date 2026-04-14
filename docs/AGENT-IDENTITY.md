@@ -132,12 +132,25 @@ The agent SHOULD also track:
 Every action taken by an agent MUST be distinguishable from a human action in all systems the agent touches.
 
 **In version control:**
-- Agent-authored commits MUST include a co-authorship trailer:
-  ```
-  Co-Authored-By: AI Coding Agent <agent@example.com>
-  ```
+
+Per NIST AI RMF and SP 800-218A, AI-generated code requires **traceability** but federal guidance emphasizes system-level documentation over granular per-commit attribution. Organizations SHOULD choose an attribution approach that balances traceability with practicality:
+
+| Level | Required? | How |
+|-------|-----------|-----|
+| **PR Description** | RECOMMENDED | Include "AI-assisted" disclosure in PR description |
+| **Commit Message** | OPTIONAL | `Co-Authored-By: AI Agent <ai-agent@gsa.gov>` in footer |
+| **Documentation** | REQUIRED | AGENTS.md documents AI agent authorization for the project |
+
+When per-commit attribution IS used, include a co-authorship trailer:
+```
+Co-Authored-By: AI Agent <ai-agent@gsa.gov>
+```
+
+Additional version control guidance:
 - The committer identity SHOULD identify the agent, not the user, when possible
 - If the VCS system does not support separate committer/author fields, the commit message body MUST identify the agent
+
+**Rationale:** Federal guidance (NIST AI RMF, SP 800-218A) emphasizes traceability and provenance at the system/project level, not granular per-commit attribution. PR-level disclosure provides auditable records without commit noise, while per-commit attribution remains available for organizations that prefer it.
 
 **In API calls:**
 - The `User-Agent` header SHOULD include the agent name and version:
