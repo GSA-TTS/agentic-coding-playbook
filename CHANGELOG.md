@@ -4,6 +4,13 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.6.3](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.2...v0.6.3) (2026-04-20)
+
+
+### Maintenance
+
+* **deps:** bump googleapis/release-please-action from 4.4.0 to 4.4.1 ([#18](https://github.com/GSA-TTS/agentic-coding-playbook/issues/18)) ([dede825](https://github.com/GSA-TTS/agentic-coding-playbook/commit/dede825beb454a72f0fa57371c9794f50c26c5f8))
+
 ## [0.6.2](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.1...v0.6.2) (2026-04-14)
 
 
