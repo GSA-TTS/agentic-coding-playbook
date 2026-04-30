@@ -4,6 +4,19 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.6.5](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.4...v0.6.5) (2026-04-28)
+
+
+### Bug Fixes
+
+* **ci:** ignore CVE-2026-3219 in pip during vulnerability scan ([95457f2](https://github.com/GSA-TTS/agentic-coding-playbook/commit/95457f2cea991c051a052e06e5cb5d6b61cf9bf5))
+
+
+### Maintenance
+
+* **deps:** bump pre-commit from 4.5.1 to 4.6.0 ([#25](https://github.com/GSA-TTS/agentic-coding-playbook/issues/25)) ([4d1a332](https://github.com/GSA-TTS/agentic-coding-playbook/commit/4d1a332635212e26697bc21a7a1efe7dc6e4ba1b))
+* **deps:** bump ruff from 0.15.11 to 0.15.12 ([#24](https://github.com/GSA-TTS/agentic-coding-playbook/issues/24)) ([680e025](https://github.com/GSA-TTS/agentic-coding-playbook/commit/680e025e6492302b834602143a77ece5844d04ec))
+
 ## [0.6.4](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.3...v0.6.4) (2026-04-20)
 
 
