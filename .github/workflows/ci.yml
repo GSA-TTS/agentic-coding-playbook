@@ -12,8 +12,28 @@ concurrency:
 
 permissions:
   contents: read
+  security-events: write  # Required for Semgrep SARIF upload
 
 jobs:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:1.67.0  # Pinned version per AGENTS.md
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Semgrep
+        run: semgrep scan --config p/python --config p/security-audit --sarif --output semgrep.sarif scripts/
+        env:
+          SEMGREP_APP_TOKEN: ""  # Run locally without Semgrep Cloud
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3.28.18
+        with:
+          sarif_file: semgrep.sarif
+        if: always()
+
   link-check:
     name: Link Check
     runs-on: ubuntu-latest
