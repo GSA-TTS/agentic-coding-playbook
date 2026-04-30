@@ -13,18 +13,20 @@ concurrency:
 permissions:
   contents: read
   security-events: write  # Required for Semgrep SARIF upload
+  actions: read  # Required for upload-sarif to get workflow run info
 
 jobs:
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
-    container:
-      image: semgrep/semgrep:1.67.0  # Pinned version per AGENTS.md
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Run Semgrep
-        run: semgrep scan --config p/python --config p/security-audit --sarif --output semgrep.sarif scripts/
+        uses: returntocorp/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
+        with:
+          config: p/python p/security-audit
+          generateSarif: "1"
         env:
           SEMGREP_APP_TOKEN: ""  # Run locally without Semgrep Cloud
 
