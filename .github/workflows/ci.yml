@@ -14,6 +14,20 @@ permissions:
   contents: read
 
 jobs:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      # Official Semgrep container - Semgrep CE is LGPL-2.1 licensed (free)
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Semgrep CE scan
+        # Using Semgrep Community Edition with public rulesets (no license required)
+        # Rulesets: p/python (Python security), p/security-audit (general security)
+        run: semgrep scan --config p/python --config p/security-audit scripts/
+
   link-check:
     name: Link Check
     runs-on: ubuntu-latest
@@ -35,7 +49,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: "3.12"
+          python-version: "3.13"  # Use bugfix-phase Python (3.12 is security-only)
           cache: "pip"
 
       - name: Set up Node.js
