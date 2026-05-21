@@ -1,11 +1,23 @@
 # Agentic Coding Playbook
 
-Practical, tool-agnostic playbook for US federal employees building software with AI coding agents.
+Practical, tool-agnostic playbook for federal employees building software with AI coding agents.
 
 [![CI](https://github.com/gsa-tts/agentic-coding-playbook/actions/workflows/ci.yml/badge.svg)](https://github.com/gsa-tts/agentic-coding-playbook/actions/workflows/ci.yml)
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-lightgrey.svg)](https://creativecommons.org/publicdomain/zero/1.0/)
 
-> **Disclaimer:** This playbook is **informational only** and is not authoritative federal policy. Each agency must tailor these practices to their ATO requirements, organizational policies, and applicable laws. This project does not replace NIST publications, OMB memoranda, or agency-specific guidance.
+> **Note:** This playbook represents best practices. Tailor to your agency's ATO requirements and policies.
+
+## Agentic Coding Ecosystem
+
+This repository is part of a three-repo ecosystem:
+
+| Repo | Purpose | When to Use |
+|------|---------|-------------|
+| **[Quickstart](https://github.com/GSA-TTS/agentic-coding-quickstart)** | Get running | First day setup, SBX + USAi config |
+| **[Playbook](https://github.com/GSA-TTS/agentic-coding-playbook)** (you are here) | Do it right | Repo setup, standards, best practices |
+| **[Patterns](https://github.com/GSA-TTS/agentic-coding-patterns)** | Share & learn | Community patterns, lessons learned |
+
+**Your journey:** After getting your environment running (Quickstart), use this Playbook to set up your projects with good defaults, then share what you learn in Patterns.
 
 ---
 
@@ -32,7 +44,7 @@ The agent reads your plan and sets up everything: `AGENTS.md`, coding standards,
 
 ## What This Is
 
-A set of markdown files, templates, and validation tools that tell AI coding agents **what to do** and **how to do it** when helping federal employees build software. Drop these files into any repository to get secure-by-default agent behavior across the full development lifecycle.
+A set of markdown files, templates, and validation tools that help AI coding agents follow **secure-by-default practices** when assisting federal employees with software development. Drop these files into any repository to establish consistent behavioral standards across the full development lifecycle.
 
 Designed for **FIPS Moderate** systems, **single-agent** architectures, and **internal enterprise** environments.
 
@@ -66,9 +78,9 @@ Full details: [PLAYBOOK.md](./PLAYBOOK.md)
 
 ---
 
-## Skills — Executable Compliance Procedures
+## Skills — Executable Best Practice Procedures
 
-Skills convert policy standards into step-by-step workflows that any AI coding agent can follow. The behavioral contract (`AGENTS.md`) uses the [AGENTS.md standard](https://agents.md), supported by 25+ AI coding tools.
+Skills convert best practices into step-by-step workflows that any AI coding agent can follow. The behavioral contract (`AGENTS.md`) uses the [AGENTS.md standard](https://agents.md), supported by 25+ AI coding tools.
 
 <!-- GENERATED:SKILLS_TABLE:START — do not edit, run: make generate -->
 | Skill | Purpose | Scripts? |
@@ -174,7 +186,17 @@ agentic-coding-playbook/
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md). This project uses [conventional commits](https://www.conventionalcommits.org/) and automated releases via [release-please](https://github.com/googleapis/release-please).
+We welcome contributions from the agentic coding community.
+
+- **Fix it directly** — Submit a PR (preferred for internal repos)
+- **Questions** — Ask in the agentic-coding Slack channel
+- **Not sure how?** — Open an issue to discuss
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for details. This project uses [conventional commits](https://www.conventionalcommits.org/) and automated releases via [release-please](https://github.com/googleapis/release-please).
+
+### Share What You Learn
+
+Discovered a useful workflow or pattern? Consider contributing it to the [Patterns repo](https://github.com/GSA-TTS/agentic-coding-patterns) so others can benefit.
 
 ## License
 

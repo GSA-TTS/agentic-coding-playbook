@@ -1,9 +1,9 @@
 ---
-title: "Federal AI Agent Behavior Rules"
-description: "Master behavioral contract defining what AI coding agents MUST, SHOULD, and MAY do in federal development environments — includes meta-constraints, engineering discipline enforcement, and verification requirements"
+title: "Federal AI Agent Behavioral Best Practices"
+description: "Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements"
 status: canonical
 tier: 1
-last_updated: "2026-02-25"
+last_updated: "2026-05-21"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-8", "IR-4", "IR-6", "PL-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
@@ -13,9 +13,9 @@ load_priority: "always"
 review_cycle: "quarterly"
 ---
 
-<!-- LOAD: always — This is the core behavioral contract. Agents MUST load this document for every task. -->
+<!-- LOAD: always — This is the core behavioral best practices document. Agents MUST load this document for every task. -->
 
-# AGENTS.md — Federal AI Agent Behavior Rules
+# AGENTS.md — Federal AI Agent Behavioral Best Practices
 
 > **Version:** 0.1.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
 
@@ -38,9 +38,9 @@ review_cycle: "quarterly"
 
 ---
 
-> **Disclaimer:** This playbook is informational only and is not authoritative federal policy. Each agency must tailor these rules to their specific ATO requirements, organizational policies, and risk tolerance.
+> **Disclaimer:** This playbook provides informational best practices — it is not official GSA policy or authoritative federal guidance. Each agency must tailor these recommendations to their specific ATO requirements, organizational policies, and risk tolerance. This content supports the Agentic Coding Capability Assessment being conducted at GSA-TTS.
 
-This document defines the behavioral rules that AI coding agents MUST follow when assisting federal employees with software development. Place this file (or a customized copy from `templates/AGENTS.md.template`) in the root of your repository.
+This document defines the behavioral best practices that AI coding agents SHOULD follow when assisting federal employees with software development. Place this file (or a customized copy from `templates/AGENTS.md.template`) in the root of your repository.
 
 **Key words:** "MUST", "MUST NOT", "SHOULD", "SHOULD NOT", and "MAY" are used per [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 
