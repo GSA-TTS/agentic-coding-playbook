@@ -4,6 +4,28 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.6.6](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.5...v0.6.6) (2026-05-21)
+
+
+### Bug Fixes
+
+* **ci:** remove sarif upload until code security is enabled ([b667f89](https://github.com/GSA-TTS/agentic-coding-playbook/commit/b667f89f349803893a3207408b9c4b3b7787bb4d))
+* **ci:** use semgrep action and add actions:read permission ([487daac](https://github.com/GSA-TTS/agentic-coding-playbook/commit/487daac170c49ace919687840c27a70f13b5478f))
+* **ci:** use semgrep ce container instead of deprecated action ([323fec0](https://github.com/GSA-TTS/agentic-coding-playbook/commit/323fec0a85f6ad2f673882fb55dfa97beb2d26b6))
+
+
+### Maintenance
+
+* **ci:** upgrade python to 3.13 for active bugfix support ([f9dec0c](https://github.com/GSA-TTS/agentic-coding-playbook/commit/f9dec0cad232cb61087f7384c2d89297148c17f8))
+* **deps:** bump googleapis/release-please-action from 4.4.1 to 5.0.0 ([#23](https://github.com/GSA-TTS/agentic-coding-playbook/issues/23)) ([4a9dbae](https://github.com/GSA-TTS/agentic-coding-playbook/commit/4a9dbae8ece6e546e32c81aac80c40ade2834119))
+* **deps:** bump ruff from 0.15.12 to 0.15.13 ([#32](https://github.com/GSA-TTS/agentic-coding-playbook/issues/32)) ([c121fc2](https://github.com/GSA-TTS/agentic-coding-playbook/commit/c121fc28ae9b3ef45f210e061c7a6e7babd98c8d))
+
+
+### CI/CD
+
+* **security:** add semgrep sast scanning to ci pipeline ([0871963](https://github.com/GSA-TTS/agentic-coding-playbook/commit/08719631d751d88e604b5389e3831ce90666f11a))
+* **security:** add semgrep sast scanning to ci pipeline ([0333e01](https://github.com/GSA-TTS/agentic-coding-playbook/commit/0333e01635b04fde63ba29928d54386b87645d93))
+
 ## [0.6.5](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.4...v0.6.5) (2026-04-28)
 
 
