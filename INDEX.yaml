@@ -7,10 +7,10 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-04-14
+# Last generated: 2026-05-21
 
 schema_version: "1.0"
-generated: "2026-04-14"
+generated: "2026-05-21"
 repo: "gsa-tts/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
@@ -33,12 +33,12 @@ frontmatter_schema:
 documents:
   # ── Tier 1: Core Guidance ────────────────────────────────────────
   - path: "AGENTS.md"
-    title: "Federal AI Agent Behavior Rules"
-    description: "Master behavioral contract defining what AI coding agents MUST, SHOULD, and MAY do in federal development environments — includes meta-constraints, engineering discipline enforcement, and verification requirements"
+    title: "Federal AI Agent Behavioral Best Practices"
+    description: "Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements"
     status: canonical
     tier: 1
     load_priority: always
-    last_updated: "2026-02-25"
+    last_updated: "2026-05-21"
     audience: all
     nist_controls_count: 26
     review_cycle: quarterly

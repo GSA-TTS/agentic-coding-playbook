@@ -1,15 +1,32 @@
 # Contributing
 
-Thank you for your interest in improving the Agentic Coding Playbook. This project benefits from input by practitioners across agencies.
+Thank you for your interest in improving the Agentic Coding Playbook! This is an internal repository that benefits from input by practitioners across GSA.
 
-> **Eligibility:** We accept contributions from **federal employees** and **active federal contractors** only. If you are unsure whether you are eligible to contribute, please [open an issue](https://github.com/gsa-tts/agentic-coding-playbook/issues/new) and ask — we are happy to help.
+## Ecosystem Overview
+
+This repo is one of three in the agentic coding ecosystem:
+
+| Repo | Focus | Typical Contributions |
+|------|-------|----------------------|
+| **[Quickstart](https://github.com/GSA-TTS/agentic-coding-quickstart)** | Environment setup | SBX fixes, troubleshooting docs |
+| **[Playbook](https://github.com/GSA-TTS/agentic-coding-playbook)** (you are here) | Standards & practices | Coding standards, skills, templates |
+| **[Patterns](https://github.com/GSA-TTS/agentic-coding-patterns)** | Community sharing | Workflows, lessons learned, examples |
+
+**Not sure where your contribution belongs?** Ask in the agentic-coding Slack channel.
+
+## Getting Help
+
+- **Questions:** Ask in the agentic-coding Slack channel
+- **Bugs/improvements:** Open a GitHub issue or submit a PR
+- **Security issues:** See [SECURITY.md](SECURITY.md) — direct fixes preferred
 
 ## How to Contribute
 
-1. **Open an issue** describing the improvement, gap, or correction
-2. **Reference the specific NIST control or framework section** that applies
-3. **Fork the repo** and make your changes on a feature branch
-4. **Submit a pull request** with a clear description of what changed and why
+The simplest approach:
+
+1. **Fix it directly** — Submit a PR (preferred for internal repos)
+2. **Not sure how?** — Open an issue to discuss first
+3. **Questions?** — Ask in the agentic-coding Slack channel
 
 ## Contribution Guidelines
 
@@ -216,8 +233,17 @@ Then run `make ci` to verify everything passes before pushing.
 
 ## Review Process
 
-All pull requests require review by at least one maintainer. Changes to security controls mapping or compliance standards require additional scrutiny.
+All pull requests require review. Changes to security standards require additional attention.
+
+## Teams
+
+- **[@GSA-TTS/agentic-coding-team](https://github.com/orgs/GSA-TTS/teams/agentic-coding-team):** Team members — review, contribute, provide feedback
+- **[@GSA-TTS/agentic-coding-admins](https://github.com/orgs/GSA-TTS/teams/agentic-coding-admins):** Repository administrators — merge, release, maintain
 
 ## Code of Conduct
 
-Be professional, constructive, and respectful. This is content that federal employees will rely on — quality and accuracy matter more than speed.
+Be professional, constructive, and respectful. Quality and accuracy matter.
+
+## Share What You Learn
+
+Discovered a useful workflow or pattern while using this playbook? Consider sharing it in the [Patterns repo](https://github.com/GSA-TTS/agentic-coding-patterns) so others can benefit.
