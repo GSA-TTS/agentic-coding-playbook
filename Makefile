@@ -17,12 +17,15 @@ install: ## Install all dependencies (use: pip or uv)
 install-uv: ## Install all dependencies using uv (faster)
 	uv pip install -e ".[dev]"
 
-.PHONY: install-hooks
-install-hooks: ## Install pre-commit hooks
-	pre-commit install
-
 .PHONY: setup
-setup: install install-hooks ## Full setup: install deps + hooks
+setup: install ## Install dependencies only (no hooks)
+	@echo "✅ Dependencies installed."
+	@echo "💡 Optional: Install pre-commit hooks with 'make install-hooks'"
+
+.PHONY: install-hooks
+install-hooks: ## [OPTIONAL] Install pre-commit hooks for contributors
+	pre-commit install
+	@echo "✅ Pre-commit hooks installed. They will run automatically on git commit."
 
 # ── Testing ────────────────────────────────────────────────────────
 
