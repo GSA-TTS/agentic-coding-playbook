@@ -4,6 +4,25 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.7.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.6...v0.7.0) (2026-05-26)
+
+
+### Features
+
+* **ci:** Add workflow_dispatch trigger for manual CI runs ([ce831eb](https://github.com/GSA-TTS/agentic-coding-playbook/commit/ce831eb4c4dfb31c3285196ea6f268d4c65756cf))
+
+
+### Documentation
+
+* improve ecosystem documentation and contribution experience ([#37](https://github.com/GSA-TTS/agentic-coding-playbook/issues/37)) ([63f97d2](https://github.com/GSA-TTS/agentic-coding-playbook/commit/63f97d2279187792cb881c1c777fa3d82983666d))
+
+
+### Maintenance
+
+* add CODEOWNERS file ([#40](https://github.com/GSA-TTS/agentic-coding-playbook/issues/40)) ([963c9e7](https://github.com/GSA-TTS/agentic-coding-playbook/commit/963c9e75b4e98b38f70c8bf481798e3b1864c924))
+* **ci:** add commitlint configuration ([#41](https://github.com/GSA-TTS/agentic-coding-playbook/issues/41)) ([1db6fcb](https://github.com/GSA-TTS/agentic-coding-playbook/commit/1db6fcb687f8bba14bf9348531b72dd33e70a554))
+* **deps:** bump ruff from 0.15.13 to 0.15.14 ([#38](https://github.com/GSA-TTS/agentic-coding-playbook/issues/38)) ([bc12bfb](https://github.com/GSA-TTS/agentic-coding-playbook/commit/bc12bfb48e7321f42d765a81ba70118e5195b308))
+
 ## [0.6.6](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.6.5...v0.6.6) (2026-05-21)
 
 
