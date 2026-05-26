@@ -1,0 +1,13 @@
+# CODEOWNERS
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+* @GSA-TTS/agentic-coding-team
+
+# Security-sensitive files require additional review
+/.github/workflows/ @GSA-TTS/agentic-coding-team
+/scripts/ @GSA-TTS/agentic-coding-team
+/AGENTS.md @GSA-TTS/agentic-coding-team
+/SECURITY.md @GSA-TTS/agentic-coding-team
+/docs/SECURITY-CONTROLS.md @GSA-TTS/agentic-coding-team
+/docs/CODING_PRACTICES.md @GSA-TTS/agentic-coding-team
