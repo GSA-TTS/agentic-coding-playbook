@@ -134,8 +134,70 @@ To update a mapping:
 Run once after cloning the repo:
 
 ```bash
-make setup      # Install dependencies + pre-commit hooks
+make setup      # Install dependencies only
 ```
+
+### Pre-commit Hooks (Optional)
+
+Pre-commit hooks are **optional** for this repository. They are designed for **contributors** who are actively developing this project.
+
+**If you cloned this repo for guidance only** (to reference standards for your own projects), **you do not need to install the hooks**.
+
+**If you are contributing to this repo**, you can opt-in to pre-commit hooks:
+
+```bash
+make install-hooks    # [OPTIONAL] Install pre-commit hooks
+```
+
+These hooks run automatically on `git commit` and check for:
+- YAML/JSON syntax errors
+- Trailing whitespace and end-of-file fixes
+- Secrets detection (gitleaks)
+- Python linting and formatting (ruff)
+
+**CI enforces the same checks** via `make ci`, so hooks are not required — they just provide faster feedback during local development.
+
+#### Working in SBX Containers
+
+Most users will be working **inside Docker SBX containers** per the [Quickstart guidance](https://github.com/GSA-TTS/agentic-coding-quickstart). This creates additional considerations for pre-commit hooks.
+
+**Installing the pre-commit tools in a container:**
+
+When you run `make setup` or `make install-hooks` inside an SBX container, the pre-commit tools are installed in that container's environment:
+
+```bash
+sbx exec <sandbox-name> make install-hooks
+```
+
+**Two workflows for committing changes:**
+
+**Workflow A: Edit in container, verify in container, commit on host**
+1. Edit files inside the SBX container
+2. Run `make ci` inside the container to verify all checks pass
+3. Exit the container and commit from your host machine
+4. Pre-commit hooks (if installed on host) will run again on commit
+
+This workflow is recommended because:
+- Keeps git history on the host (persistent across container restarts)
+- Verifies changes in the same environment where they'll run in CI
+- No risk of losing commits when containers are destroyed
+
+**Workflow B: Edit in container, install hooks in container, commit in container**
+1. Edit files inside the SBX container
+2. Install pre-commit hooks inside the container: `make install-hooks`
+3. Commit changes inside the container
+
+**Important:** SBX containers are ephemeral. If the container is destroyed or recreated, any hooks installed inside it will be lost. You'll need to re-run `make install-hooks` in the new container.
+
+**Recommended practice:**
+
+Before committing on your host machine, verify changes in the container first:
+
+```bash
+sbx exec <sandbox-name> make ci
+```
+
+This ensures all checks pass in the standardized SBX environment before you commit. CI will run the same checks, so catching issues early saves time.
 
 ## Before Every PR
 
