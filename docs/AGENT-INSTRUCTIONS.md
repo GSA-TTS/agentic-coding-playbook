@@ -32,6 +32,11 @@ make generate-check    # Verify INDEX.yaml is up to date
 
 # Testing
 PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v
+
+# Federal AI Landscape Monitoring (Phase 1)
+python scripts/check_federal_landscape_rss.py           # Check RSS feeds for new publications
+python scripts/check_federal_landscape_rss.py | \
+  python scripts/compare_landscape_versions.py          # Check and compare against registry
 ```
 
 ## Canonical Paths
@@ -140,6 +145,41 @@ The `scripts/playbook_validator/` Python package provides all validation and gen
 | `audit_repo.py` | Federal compliance baseline audit |
 | `generate_index.py` | INDEX.yaml generation |
 | `pre_deploy_checks.py` | Pre-deployment security checks |
+
+### Maintenance Workflows
+
+#### Federal AI Landscape Monitoring
+
+**Phase 1** (Implemented): Automated RSS monitoring foundation
+
+1. **Check RSS feeds** for new federal AI guidance:
+   ```bash
+   python scripts/check_federal_landscape_rss.py
+   ```
+
+   Monitors:
+   - Federal Register (NIST publications)
+   - White House actions feed
+   - NIST CSRC publications
+   - OWASP GenAI releases
+
+   Outputs JSON with `new_entries` list. Exit code 0 if new entries found, 1 if none.
+
+2. **Compare against registry** to detect version/status changes:
+   ```bash
+   python scripts/check_federal_landscape_rss.py | python scripts/compare_landscape_versions.py
+   ```
+
+   Detects:
+   - Version updates (e.g., draft → final)
+   - Status changes (active → revoked)
+   - New publications not yet in `data/federal-ai-landscape.yaml`
+
+3. **State persistence**: Last-seen entry IDs stored in `data/.landscape-rss-state.json`
+
+**Phase 2-4** (Planned): See `skills/federal-landscape-update/SKILL.md` for diff reporting, skill integration, and review workflow.
+
+**Manual review required**: All detected changes must be reviewed by humans before updating the registry or documentation.
 
 ## Self-Check Quality Gate
 
