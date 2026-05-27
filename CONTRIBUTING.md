@@ -227,33 +227,137 @@ make doctor              # Check environment readiness
 make new-project DIR=x   # Bootstrap a new project
 ```
 
-## Commit Messages
+## Commit Message Format
 
-This project uses [conventional commits](https://www.conventionalcommits.org/) for automated changelog generation and semantic versioning.
+We follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/) to maintain a clean, parseable git history and enable automated changelog generation. This standard is enforced by CI — PRs with non-conventional titles will not pass checks.
 
-**Format:** `type(scope): description`
-
-| Type | When to Use |
-|------|-------------|
-| `feat` | New feature, skill, or document |
-| `fix` | Bug fix, correction, broken reference |
-| `docs` | Documentation-only changes |
-| `chore` | Maintenance (deps, config, CI) |
-| `refactor` | Code restructuring (no behavior change) |
-| `test` | Adding or updating tests |
-| `perf` | Performance improvement |
-| `ci` | CI/CD pipeline changes |
-
-**Examples:**
+### Format
 
 ```
-feat: add PROJECT_PLAN.md validator with TDD tests
-fix: update stale M-24-18 reference to M-25-22
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Types for Playbook Repository
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `feat` | New skill, doc, or feature | `feat(skills): add federal-decision-records skill` |
+| `fix` | Bug fix in skill or script | `fix(validator): correct frontmatter schema check` |
+| `docs` | Documentation only | `docs: update SECURITY-CONTROLS.md` |
+| `test` | Add or fix tests | `test(validator): add edge case coverage` |
+| `chore` | Maintenance (deps, CI) | `chore(deps): update feedparser to 6.0.11` |
+| `refactor` | Code restructuring (no behavior change) | `refactor(validator): simplify frontmatter parsing` |
+| `perf` | Performance improvement | `perf(validator): cache INDEX.yaml reads` |
+| `ci` | CI/CD pipeline changes | `ci: add commitlint enforcement` |
+
+### Common Scopes
+
+- `skills` — Skill implementations
+- `validator` — Validation scripts in `scripts/`
+- `landscape` — Federal AI landscape registry
+- `docs` — Documentation files
+- `ci` — CI/CD workflows
+- `deps` — Dependencies
+
+### Examples
+
+✅ **Good:**
+```
+feat(landscape): add Phase 1 foundation for automated monitoring
+
+Implement RSS monitoring and version comparison scripts for
+federal AI guidance. Enables automated detection of new EOs,
+OMB memos, and NIST standards.
+
+Related to #46
+```
+
+```
+fix(validator): handle skills with no scripts directory
+
+Previously crashed with FileNotFoundError when validating
+skills without a scripts/ directory.
+
+Closes #48
+```
+
+```
 docs: add cloud.gov sandbox 90-day wipe warning
-chore(deps): update ruff 0.9.10 → 0.15.7
+
+Warn contributors about ephemeral SBX environments to prevent
+data loss.
 ```
 
-PR titles are validated by CI — PRs with non-conventional titles will not pass checks.
+❌ **Bad:**
+```
+update landscape
+```
+```
+fixed bug
+```
+```
+WIP: testing stuff
+```
+
+### Line Length
+
+- **First line (subject):** ≤72 characters (recommended), ≤100 characters (enforced by commitlint)
+- **Body lines:** ≤100 characters for readability
+
+### AI Agent Attribution
+
+**When AI agents contribute to a commit**, include a `Co-authored-by:` trailer per [AGENTS.md section 2.1](AGENTS.md#21-agent-identification):
+
+```
+feat(skills): add new pattern
+
+Implementation details...
+
+Co-authored-by: OpenCode Agent <user@gsa.gov>
+```
+
+**Format Requirements:**
+- Trailer appears after a blank line following the commit body
+- Uses the format: `Co-authored-by: Agent Name <email@gsa.gov>`
+- Email MUST use `@gsa.gov` domain for federal compliance
+- Multiple co-authors each get their own line
+
+**Why we require this:**
+- Maintains transparent audit trail per AU-2 (Audit Events)
+- Enables attribution in GitHub UI and contribution graphs
+- Distinguishes human-written from AI-assisted code
+- Supports future AI risk management analysis
+
+See [AGENTS.md](AGENTS.md#21-agent-identification) for full AI attribution requirements.
+
+### Validation
+
+Check your commit message locally before pushing:
+
+```bash
+# Option 1: Use commitlint (if installed via pre-commit hooks)
+npx commitlint --from=HEAD~1
+
+# Option 2: Run the full CI suite (includes commitlint)
+make ci
+```
+
+### Pre-commit Hook (Optional)
+
+Automate validation with our pre-commit config:
+
+```bash
+# Install pre-commit hooks
+make install-hooks
+
+# Your commits will now be validated automatically
+```
+
+The commitlint hook is already configured in `.pre-commit-config.yaml`.
 
 ## Releases
 
