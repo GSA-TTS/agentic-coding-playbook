@@ -329,7 +329,7 @@ Thank you for your interest in contributing to this project.
 ## Code Standards
 
 This project follows the coding practices documented in
-[docs/CODING_PRACTICES.md](docs/CODING_PRACTICES.md) (if present) or the
+[CODING_PRACTICES.md](../../docs/CODING_PRACTICES.md) (if present) or the
 language-specific conventions established in the codebase.
 
 Key expectations:
