@@ -4,6 +4,18 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.8.3](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.8.2...v0.8.3) (2026-05-27)
+
+
+### Maintenance
+
+* **hooks:** add markdownlint and zizmor to pre-commit ([#64](https://github.com/GSA-TTS/agentic-coding-playbook/issues/64)) ([1f0c995](https://github.com/GSA-TTS/agentic-coding-playbook/commit/1f0c9953b4e45f67b0dffe12e6529e55fb695f1b))
+
+
+### Refactoring
+
+* **tests:** add conftest.py with shared fixtures ([#62](https://github.com/GSA-TTS/agentic-coding-playbook/issues/62)) ([267be30](https://github.com/GSA-TTS/agentic-coding-playbook/commit/267be30d8da1df19a8f970f96a7deb064ab5c7b6)), closes [#60](https://github.com/GSA-TTS/agentic-coding-playbook/issues/60)
+
 ## [0.8.2](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.8.1...v0.8.2) (2026-05-27)
 
 
