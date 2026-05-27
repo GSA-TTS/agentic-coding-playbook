@@ -15,7 +15,9 @@
 
 - [ ] Changes are accurate and cite authoritative sources
 - [ ] No typos or formatting issues
-- [ ] Commit messages follow conventional commits (`feat:`, `fix:`, `docs:`)
+- [ ] Commit messages follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/) format (see [CONTRIBUTING.md](../CONTRIBUTING.md#commit-message-format))
+- [ ] PR title follows conventional commits format (`<type>[optional scope]: <description>`)
+- [ ] If AI-assisted, commits include `Co-authored-by:` trailer (see [AGENTS.md §2.1](../AGENTS.md#21-agent-identification))
 
 ### Required for Content Changes
 
