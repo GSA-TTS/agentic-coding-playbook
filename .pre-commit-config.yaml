@@ -1,11 +1,12 @@
 # Pre-commit hooks — run: pre-commit install
-# All hooks pinned to commit SHAs for supply chain security.
+# All hooks pinned to commit SHAs for supply chain security (NIST SA-12).
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # v6.0.0
     hooks:
       - id: check-yaml
       - id: check-json
+      - id: check-toml
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-merge-conflict
@@ -23,3 +24,22 @@ repos:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
+
+  # Markdown linting — ensures consistent doc quality
+  # Uses .markdownlint-cli2.yaml for configuration
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: d174eb7a8f35e05d4065c82d375ad84aa0b32352  # v0.17.2
+    hooks:
+      - id: markdownlint-cli2
+        args: ["--fix"]
+
+  # GitHub Actions security scanning (optional — skips if zizmor not installed)
+  # Install: cargo install zizmor OR brew install zizmor
+  - repo: local
+    hooks:
+      - id: zizmor
+        name: zizmor - GitHub Actions security scanner
+        entry: bash -c 'command -v zizmor >/dev/null 2>&1 && zizmor "$@" || exit 0' --
+        language: system
+        files: ^\.github/workflows/.*\.ya?ml$
+        pass_filenames: true
