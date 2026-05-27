@@ -4,6 +4,18 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.8.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.7.1...v0.8.0) (2026-05-27)
+
+
+### Features
+
+* **landscape:** add Phase 1 foundation for automated monitoring ([#49](https://github.com/GSA-TTS/agentic-coding-playbook/issues/49)) ([db6129f](https://github.com/GSA-TTS/agentic-coding-playbook/commit/db6129fa84cd5667ce14302b5e94ad1ac17520b7))
+
+
+### Bug Fixes
+
+* **skills:** correct CODING_PRACTICES.md path in federal-repo-setup ([#47](https://github.com/GSA-TTS/agentic-coding-playbook/issues/47)) ([dadb4cf](https://github.com/GSA-TTS/agentic-coding-playbook/commit/dadb4cf2f251168893a773d4f5d12807959776f8)), closes [#45](https://github.com/GSA-TTS/agentic-coding-playbook/issues/45)
+
 ## [0.7.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.7.0...v0.7.1) (2026-05-26)
 
 
