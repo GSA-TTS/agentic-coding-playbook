@@ -72,7 +72,7 @@ jobs:
       - name: Run release-please (with config)
         if: ${{ inputs.config-file != '' }}
         id: release
-        uses: googleapis/release-please-action@a02a34c4d625f9be7cb89f4291f3e3969c43c7c8 # v4.2.0
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         with:
           token: ${{ github.token }}
           config-file: ${{ inputs.config-file }}
@@ -81,7 +81,7 @@ jobs:
       - name: Run release-please (simple)
         if: ${{ inputs.config-file == '' }}
         id: release-simple
-        uses: googleapis/release-please-action@a02a34c4d625f9be7cb89f4291f3e3969c43c7c8 # v4.2.0
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         with:
           token: ${{ github.token }}
           release-type: ${{ inputs.release-type }}
