@@ -4,6 +4,13 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.10.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.9.0...v0.10.0) (2026-05-28)
+
+
+### Features
+
+* **skills:** add federal-landscape-update skill for RSS monitoring ([#70](https://github.com/GSA-TTS/agentic-coding-playbook/issues/70)) ([891696e](https://github.com/GSA-TTS/agentic-coding-playbook/commit/891696ec3cff91837e86b4f46da8530d3de57748))
+
 ## [0.9.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.8.3...v0.9.0) (2026-05-28)
 
 
