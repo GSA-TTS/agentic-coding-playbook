@@ -140,6 +140,16 @@ documents:
     nist_controls_count: 40
     review_cycle: quarterly
 
+  - path: "docs/WORKFLOW_CONTRACT.md"
+    title: "Reusable Workflows Contract"
+    description: "API contract, versioning policy, and usage guide for GSA-TTS reusable GitHub Actions workflows"
+    status: canonical
+    tier: 2
+    load_priority: on-demand
+    last_updated: "2026-05-28"
+    audience: developers
+    review_cycle: quarterly
+
   - path: "templates/SKILL.md.template"
     title: "Human-Readable Skill Title"
     description: "One sentence describing what this skill does and when to use it"
@@ -308,10 +318,10 @@ skills:
     has_scripts: false
 
 stats:
-  total_documents: 21
+  total_documents: 22
   total_skills: 12
   tier_1_core: 8
-  tier_2_supporting: 5
+  tier_2_supporting: 6
   tier_3_templates: 8
   total_nist_controls_referenced: 55
   frameworks_covered: 19
