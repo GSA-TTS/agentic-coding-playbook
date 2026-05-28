@@ -4,6 +4,16 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.10.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.10.0...v0.10.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* **ci:** correct action-semantic-pull-request SHA ([#74](https://github.com/GSA-TTS/agentic-coding-playbook/issues/74)) ([8c1ee27](https://github.com/GSA-TTS/agentic-coding-playbook/commit/8c1ee272b225552b5d221e9df63ef863038f43e1))
+* **ci:** remove GITHUB_TOKEN from release-please workflow secrets ([#75](https://github.com/GSA-TTS/agentic-coding-playbook/issues/75)) ([5c2b636](https://github.com/GSA-TTS/agentic-coding-playbook/commit/5c2b636fe15d1139c17acf0bfce2242d21b3a1b0))
+* **ci:** remove GITHUB_TOKEN from reusable workflow secrets ([#72](https://github.com/GSA-TTS/agentic-coding-playbook/issues/72)) ([8754045](https://github.com/GSA-TTS/agentic-coding-playbook/commit/875404507e27a0c5ce2262be7edf10166e548664))
+* **ci:** update release-please-action to v4.4.1 with correct SHA ([#76](https://github.com/GSA-TTS/agentic-coding-playbook/issues/76)) ([3f8dfe1](https://github.com/GSA-TTS/agentic-coding-playbook/commit/3f8dfe12e16a1b5d3f5f975bf65ed9c11cc5d0b0))
+
 ## [0.10.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.9.0...v0.10.0) (2026-05-28)
 
 
