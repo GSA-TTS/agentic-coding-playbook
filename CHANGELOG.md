@@ -4,6 +4,14 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.10.2](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.10.1...v0.10.2) (2026-05-28)
+
+
+### Documentation
+
+* add WORKFLOW_CONTRACT.md for reusable workflows ([bbd52d7](https://github.com/GSA-TTS/agentic-coding-playbook/commit/bbd52d737c107601d4767a5524ab2ccf8fcc9b3a))
+* add WORKFLOW_CONTRACT.md for reusable workflows ([b9842e8](https://github.com/GSA-TTS/agentic-coding-playbook/commit/b9842e85d6f0ac336eb2cac4b46a2f0ade921c77))
+
 ## [0.10.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.10.0...v0.10.1) (2026-05-28)
 
 
