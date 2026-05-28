@@ -7,8 +7,9 @@
 #       uses: GSA-TTS/agentic-coding-playbook/.github/workflows/reusable-pr-lint.yml@main
 #       with:
 #         validate-commits: true
-#       secrets:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+# Note: GITHUB_TOKEN is automatically inherited from the calling workflow.
+# Do not pass it explicitly as a secret (reserved name collision).
 
 name: Reusable PR Lint
 
@@ -30,10 +31,8 @@ on:
         required: false
         type: string
         default: '22'
-    secrets:
-      GITHUB_TOKEN:
-        description: 'GitHub token for PR access'
-        required: true
+    # Note: GITHUB_TOKEN is automatically available to reusable workflows
+    # via the permissions block - no need to pass as secret
 
 concurrency:
   group: pr-lint-${{ github.head_ref || github.ref }}
@@ -51,7 +50,7 @@ jobs:
       - name: Validate PR title
         uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155571e35 # v5.5.3
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           types: |
             feat
