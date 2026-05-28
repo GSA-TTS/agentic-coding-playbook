@@ -7,10 +7,10 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-05-21
+# Last generated: 2026-05-28
 
 schema_version: "1.0"
-generated: "2026-05-21"
+generated: "2026-05-28"
 repo: "gsa-tts/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
@@ -275,6 +275,11 @@ skills:
     description: "Create, validate, and index architectural and security decision records using MADR format with federal compliance extensions."
     has_scripts: false
 
+  - name: federal-landscape-update
+    path: "skills/federal-landscape-update/SKILL.md"
+    description: "Monitor RSS feeds for federal AI guidance updates, compare against current registry, and generate diff reports for human review."
+    has_scripts: false
+
   - name: federal-pre-deployment-check
     path: "skills/federal-pre-deployment-check/SKILL.md"
     description: "Run the 62-item federal pre-deployment security checklist against a codebase."
@@ -304,7 +309,7 @@ skills:
 
 stats:
   total_documents: 21
-  total_skills: 11
+  total_skills: 12
   tier_1_core: 8
   tier_2_supporting: 5
   tier_3_templates: 8

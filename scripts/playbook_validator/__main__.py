@@ -222,6 +222,19 @@ def cmd_pre_deploy(args: argparse.Namespace) -> int:
     return rc.exit_code
 
 
+def cmd_landscape_check(args: argparse.Namespace) -> int:
+    """Run the landscape monitor to check for federal AI guidance updates."""
+    import landscape_monitor
+
+    argv = ["--registry", args.registry]
+    if args.output:
+        argv.extend(["--output", args.output])
+    if args.dry_run:
+        argv.append("--dry-run")
+
+    return landscape_monitor.main(argv)
+
+
 def _build_parser() -> argparse.ArgumentParser:
     """Build the CLI argument parser with all subcommands."""
     parser = argparse.ArgumentParser(prog="playbook_validator", description="Playbook validation tools")
@@ -255,6 +268,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("pre-deploy", help="Run pre-deployment security checks")
     p.add_argument("--path", default=".", help="Repository path")
 
+    p = sub.add_parser("landscape-check", help="Check for federal AI guidance updates via RSS")
+    p.add_argument("--registry", default="data/federal-ai-landscape.yaml", help="Path to landscape registry")
+    p.add_argument("--output", help="Output path for diff report (default: stdout)")
+    p.add_argument("--dry-run", action="store_true", help="Show what would be checked")
+
     p = sub.add_parser("validate-plan", help="Validate PROJECT_PLAN.md")
     p.add_argument("--path", default="PROJECT_PLAN.md", help="Path to PROJECT_PLAN.md")
 
@@ -277,6 +295,7 @@ _COMMANDS = {
     "doctor": cmd_doctor,
     "audit-repo": cmd_audit_repo,
     "pre-deploy": cmd_pre_deploy,
+    "landscape-check": cmd_landscape_check,
     "validate-plan": cmd_validate_plan,
     "validate-risk-assessment": cmd_validate_risk_assessment,
     "new-project": cmd_new_project,

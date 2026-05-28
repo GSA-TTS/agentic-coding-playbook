@@ -705,6 +705,7 @@ PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v
 | `code-review` | Review AI-assisted code changes and create compliant pull requests with proper attribution | No |
 | `federal-agents-config` | Generate a project-specific AGENTS.md through interactive decision-tree elicitation. | Yes |
 | `federal-decision-records` | Create, validate, and index architectural and security decision records using MADR... | No |
+| `federal-landscape-update` | Monitor RSS feeds for federal AI guidance updates, compare against current registry,... | No |
 | `federal-pre-deployment-check` | Run the 62-item federal pre-deployment security checklist against a codebase. | Yes |
 | `federal-repo-setup` | Initialize a code repository with federal security compliance defaults including... | No |
 | `federal-risk-assessment` | Walk through the AI agent risk assessment worksheet interactively, helping users... | No |
