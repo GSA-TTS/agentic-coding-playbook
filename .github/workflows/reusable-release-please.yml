@@ -1,0 +1,91 @@
+# Reusable Release Please Workflow
+# Standardized release management for agentic ecosystem repos
+#
+# Usage (with config files):
+#   jobs:
+#     release:
+#       uses: GSA-TTS/agentic-coding-playbook/.github/workflows/reusable-release-please.yml@main
+#       with:
+#         config-file: 'release-please-config.json'
+#         manifest-file: '.release-please-manifest.json'
+#       secrets:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+# Usage (simple):
+#   jobs:
+#     release:
+#       uses: GSA-TTS/agentic-coding-playbook/.github/workflows/reusable-release-please.yml@main
+#       with:
+#         release-type: 'simple'
+#       secrets:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+name: Reusable Release Please
+
+on:
+  workflow_call:
+    inputs:
+      config-file:
+        description: 'Path to release-please-config.json (use for multi-package repos)'
+        required: false
+        type: string
+        default: ''
+      manifest-file:
+        description: 'Path to .release-please-manifest.json'
+        required: false
+        type: string
+        default: ''
+      release-type:
+        description: 'Release type when not using config files (simple, python, node, etc.)'
+        required: false
+        type: string
+        default: 'simple'
+    outputs:
+      release_created:
+        description: 'Whether a release was created'
+        value: ${{ jobs.release-please.outputs.release_created }}
+      tag_name:
+        description: 'The release tag name'
+        value: ${{ jobs.release-please.outputs.tag_name }}
+      version:
+        description: 'The release version'
+        value: ${{ jobs.release-please.outputs.version }}
+    secrets:
+      GITHUB_TOKEN:
+        description: 'GitHub token for creating releases'
+        required: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created || steps.release-simple.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name || steps.release-simple.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version || steps.release-simple.outputs.version }}
+    steps:
+      - name: Run release-please (with config)
+        if: ${{ inputs.config-file != '' }}
+        id: release
+        uses: googleapis/release-please-action@a02a34c4d625f9be7cb89f4291f3e3969c43c7c8 # v4.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: ${{ inputs.config-file }}
+          manifest-file: ${{ inputs.manifest-file }}
+
+      - name: Run release-please (simple)
+        if: ${{ inputs.config-file == '' }}
+        id: release-simple
+        uses: googleapis/release-please-action@a02a34c4d625f9be7cb89f4291f3e3969c43c7c8 # v4.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: ${{ inputs.release-type }}

@@ -1,0 +1,52 @@
+# Reusable Semgrep SAST Workflow
+# Static Application Security Testing using Semgrep Community Edition
+#
+# Usage:
+#   jobs:
+#     security:
+#       uses: GSA-TTS/agentic-coding-playbook/.github/workflows/reusable-semgrep.yml@main
+#       with:
+#         scan-path: 'scripts/'
+#         rulesets: 'p/python p/security-audit'
+
+name: Reusable Semgrep SAST
+
+on:
+  workflow_call:
+    inputs:
+      scan-path:
+        description: 'Path to scan'
+        required: false
+        type: string
+        default: '.'
+      rulesets:
+        description: 'Space-separated Semgrep rulesets'
+        required: false
+        type: string
+        default: 'p/python p/security-audit'
+
+concurrency:
+  group: semgrep-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      # Official Semgrep container - Semgrep CE is LGPL-2.1 licensed (free)
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Semgrep CE scan
+        run: |
+          RULESETS="${{ inputs.rulesets }}"
+          CONFIG_ARGS=""
+          for ruleset in $RULESETS; do
+            CONFIG_ARGS="$CONFIG_ARGS --config $ruleset"
+          done
+          semgrep scan $CONFIG_ARGS ${{ inputs.scan-path }}
