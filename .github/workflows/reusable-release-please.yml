@@ -8,8 +8,6 @@
 #       with:
 #         config-file: 'release-please-config.json'
 #         manifest-file: '.release-please-manifest.json'
-#       secrets:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #
 # Usage (simple):
 #   jobs:
@@ -17,8 +15,9 @@
 #       uses: GSA-TTS/agentic-coding-playbook/.github/workflows/reusable-release-please.yml@main
 #       with:
 #         release-type: 'simple'
-#       secrets:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+# Note: GITHUB_TOKEN is automatically inherited via permissions block.
+# Do not pass it explicitly as a secret (reserved name collision).
 
 name: Reusable Release Please
 
@@ -50,10 +49,7 @@ on:
       version:
         description: 'The release version'
         value: ${{ jobs.release-please.outputs.version }}
-    secrets:
-      GITHUB_TOKEN:
-        description: 'GitHub token for creating releases'
-        required: true
+    # Note: GITHUB_TOKEN is automatically available via permissions block
 
 concurrency:
   group: release-${{ github.ref }}
@@ -78,7 +74,7 @@ jobs:
         id: release
         uses: googleapis/release-please-action@a02a34c4d625f9be7cb89f4291f3e3969c43c7c8 # v4.2.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           config-file: ${{ inputs.config-file }}
           manifest-file: ${{ inputs.manifest-file }}
 
@@ -87,5 +83,5 @@ jobs:
         id: release-simple
         uses: googleapis/release-please-action@a02a34c4d625f9be7cb89f4291f3e3969c43c7c8 # v4.2.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           release-type: ${{ inputs.release-type }}
