@@ -4,6 +4,19 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.9.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.8.3...v0.9.0) (2026-05-28)
+
+
+### Features
+
+* **ci:** add reusable GitHub Actions workflows for ecosystem ([#68](https://github.com/GSA-TTS/agentic-coding-playbook/issues/68)) ([7183464](https://github.com/GSA-TTS/agentic-coding-playbook/commit/7183464d8f75e26967585d3f390afebf16746ae9))
+
+
+### Maintenance
+
+* add landscape RSS state file to .gitignore ([#69](https://github.com/GSA-TTS/agentic-coding-playbook/issues/69)) ([14eea23](https://github.com/GSA-TTS/agentic-coding-playbook/commit/14eea23eb911796bf12565b9ebe9b4295730ee37))
+* disable subject-case rule to allow acronyms ([#66](https://github.com/GSA-TTS/agentic-coding-playbook/issues/66)) ([5d68910](https://github.com/GSA-TTS/agentic-coding-playbook/commit/5d689109c6dab92c80876d602b7c697d0f1ea4f7))
+
 ## [0.8.3](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.8.2...v0.8.3) (2026-05-27)
 
 
