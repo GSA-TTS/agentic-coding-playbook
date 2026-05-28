@@ -56,3 +56,6 @@ secrets.yml
 *.log
 *.bak
 *.backup
+
+# Runtime state files
+data/.landscape-rss-state.json
