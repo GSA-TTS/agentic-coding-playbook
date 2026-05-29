@@ -36,6 +36,7 @@ jobs:
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     container:
       # Official Semgrep container - Semgrep CE is LGPL-2.1 licensed (free)
       image: semgrep/semgrep
