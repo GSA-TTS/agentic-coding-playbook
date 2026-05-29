@@ -46,9 +46,10 @@ jobs:
   pr-title:
     name: Conventional Commit Title
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Validate PR title
-        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
+        uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -75,6 +76,7 @@ jobs:
   commits:
     name: Validate Commits
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: ${{ inputs.validate-commits }}
     steps:
       - name: Checkout

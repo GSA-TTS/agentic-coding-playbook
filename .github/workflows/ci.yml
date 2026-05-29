@@ -18,6 +18,7 @@ jobs:
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     container:
       # Official Semgrep container - Semgrep CE is LGPL-2.1 licensed (free)
       image: semgrep/semgrep
@@ -32,6 +33,7 @@ jobs:
   link-check:
     name: Link Check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     continue-on-error: true  # External URLs can be flaky — don't block CI
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -44,6 +46,7 @@ jobs:
   python:
     name: Python Lint, Test & Validate
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -78,7 +81,7 @@ jobs:
           pip install pip-audit
           # Audit the installed environment but skip pip/setuptools (CI tooling).
           # The --skip-editable flag ignores the local playbook-validator package.
-          pip-audit --skip-editable --ignore-vuln CVE-2026-3219
+          pip-audit --skip-editable
 
       - name: Validate frontmatter
         run: PYTHONPATH=scripts python3 -m playbook_validator validate-docs --root .
