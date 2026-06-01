@@ -3,6 +3,7 @@ title: "Prompt Injection Defense Patterns"
 description: "Implementation patterns for defending against prompt injection in AI-assisted federal applications"
 status: canonical
 tier: 3
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 keywords: ["prompt injection", "defense", "security", "input validation", "output filtering"]

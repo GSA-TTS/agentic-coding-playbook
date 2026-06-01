@@ -3,6 +3,7 @@ title: "Security Tool Matrix"
 description: "Maps programming languages to recommended security scanners, linters, and dependency audit tools"
 status: canonical
 tier: 3
+last_updated: "2026-06-01"
 ---
 
 # Security Tool Matrix

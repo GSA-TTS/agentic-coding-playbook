@@ -3,6 +3,7 @@ title: "AI Agent Threat Catalog"
 description: "Pre-filled threat descriptions for the 10 threats in the risk assessment template, with OWASP references and example mitigations"
 status: canonical
 tier: 3
+last_updated: "2026-06-01"
 ---
 
 # AI Agent Threat Catalog

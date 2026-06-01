@@ -4,6 +4,7 @@ title: "Federal Security Controls Lookup"
 description: "Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find relevant guidance"
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "isso", "agents"]
 triggers: ["NIST control", "OWASP", "security", "AC-", "SI-", "CM-", "control lookup"]

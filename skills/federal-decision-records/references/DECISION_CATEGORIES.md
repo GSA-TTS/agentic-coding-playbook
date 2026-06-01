@@ -3,6 +3,7 @@ title: "Decision Categories for Federal AI Projects"
 description: "Pre-filled decision categories with suggested NIST control mappings and example decisions"
 status: canonical
 tier: 3
+last_updated: "2026-06-01"
 ---
 
 # Decision Categories for Federal AI Projects

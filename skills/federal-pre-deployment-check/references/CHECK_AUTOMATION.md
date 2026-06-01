@@ -3,6 +3,7 @@ title: "Pre-Deployment Check Automation Classification"
 description: "Classifies each of the 58 pre-deployment checklist items as automated, semi-automated, or manual"
 status: canonical
 tier: 3
+last_updated: "2026-06-01"
 ---
 
 # Check Automation Classification

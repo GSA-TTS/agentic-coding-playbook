@@ -4,6 +4,7 @@ title: "Project Bootstrap"
 description: "Automatically set up a new federal coding project from a PROJECT_PLAN.md file"
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["new project", "bootstrap", "setup repo", "initialize", "scaffolding"]

@@ -3,6 +3,7 @@ title: "AGENTS.md Elicitation Guide"
 description: "Full question catalog with help text and federal compliance context for AGENTS.md generation"
 status: canonical
 tier: 3
+last_updated: "2026-06-01"
 ---
 
 # AGENTS.md Elicitation Guide

@@ -4,6 +4,7 @@ title: "Federal AI Landscape Update"
 description: "Monitor RSS feeds for federal AI guidance updates, compare against current registry, and generate diff reports for human review."
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "isso", "agents"]
 triggers: ["landscape update", "federal guidance", "policy update", "RSS monitor", "compliance deadline"]

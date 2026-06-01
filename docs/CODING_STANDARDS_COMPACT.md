@@ -3,6 +3,7 @@ title: "Coding Standards — Compact Reference"
 description: "LLM-optimized coding standards for inclusion in code generation context (~500 words)"
 status: canonical
 tier: 1
+last_updated: "2026-06-01"
 load_priority: task-context
 audience: ["agents"]
 keywords: ["coding", "code generation", "standards", "compact", "prompt"]

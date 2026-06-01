@@ -4,6 +4,7 @@ title: "Federal Pre-Deployment Check"
 description: "Run the 62-item federal pre-deployment security checklist against a codebase."
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["deploy", "pre-deploy", "checklist", "security check"]

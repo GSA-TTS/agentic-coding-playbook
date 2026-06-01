@@ -2,8 +2,6 @@
 
 Validates data/federal-ai-landscape.yaml structure, field values,
 cross-references, and entry count consistency.
-
-Replaces scripts/validate-landscape.py (standalone).
 """
 
 import re

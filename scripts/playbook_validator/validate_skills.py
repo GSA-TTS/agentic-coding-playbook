@@ -3,8 +3,6 @@
 Validates that skill directories under skills/ contain a well-formed
 SKILL.md with correct frontmatter, naming conventions, and INDEX.yaml
 cross-references.
-
-Replaces scripts/validate-skills.sh.
 """
 
 from pathlib import Path

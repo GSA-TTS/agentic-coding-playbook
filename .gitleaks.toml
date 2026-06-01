@@ -1,0 +1,288 @@
+# Gitleaks Configuration for agentic-coding-playbook
+# GitHub Issue: #78 - chore: add gitleaks configuration for consistent secret scanning
+#
+# This configuration extends the default gitleaks rules and adds allowlists
+# for intentional test/example credentials used in this federal playbook repository.
+
+title = "Agentic Coding Playbook Gitleaks Config"
+
+# Minimum gitleaks version required for this config
+minVersion = "v8.25.0"
+
+[extend]
+# Use the default gitleaks rules as the base configuration
+useDefault = true
+
+# =============================================================================
+# GLOBAL ALLOWLIST
+# =============================================================================
+# Allowlist entries that apply to all rules. These prevent false positives
+# from test files, documentation examples, and placeholder patterns.
+
+[allowlist]
+description = "Allowlist for agentic-coding-playbook false positives"
+
+# -----------------------------------------------------------------------------
+# Path-based allowlists
+# Files that intentionally contain fake/test credentials
+# -----------------------------------------------------------------------------
+paths = [
+    # Test files with mock credentials for testing environment detection
+    '''scripts/tests/test_doctor\.py$''',
+    '''scripts/tests/conftest\.py$''',
+
+    # Example/template files showing placeholder patterns
+    '''examples/.*\.example$''',
+    '''examples/AGENTS\.md\.example$''',
+
+    # This gitleaks config file itself
+    '''\.gitleaks\.toml$''',
+]
+
+# -----------------------------------------------------------------------------
+# Regex-based allowlists
+# Patterns that are clearly fake, placeholder, or documentation examples
+# -----------------------------------------------------------------------------
+regexes = [
+    # Clearly fake test values - used in test_doctor.py
+    '''TESTFAKE''',
+    '''TEST_FAKE''',
+    '''test_?fake''',
+
+    # Placeholder patterns in documentation
+    '''YOUR_TOKEN''',
+    '''your-?token''',
+    '''your-?api-?key''',
+    '''YOUR_API_KEY''',
+    '''YOUR_SECRET''',
+    '''your-?secret''',
+
+    # Example/placeholder markers
+    '''EXAMPLE''',
+    '''PLACEHOLDER''',
+    '''CHANGE_ME''',
+    '''REPLACE_THIS''',
+    '''<your-[^>]+>''',
+    '''<[^>]*token[^>]*>''',
+
+    # GitHub Actions secret references (not actual secrets)
+    '''\$\{\{\s*secrets\.''',
+    '''secrets\.[A-Z_]+\s*\}\}''',
+
+    # Fake SSN patterns for test data documentation
+    '''000-00-0000''',
+    '''123-45-6789''',
+
+    # Example localhost connection strings in documentation
+    # Tightened to only match obvious placeholder usernames (not real credentials)
+    '''user:password@localhost''',
+    '''postgres://(?:user|example|test|demo|admin|root)[^@]*@localhost''',
+    '''postgresql://(?:user|example|test|demo|admin|root)[^@]*@localhost''',
+
+    # Common documentation placeholders - require context to avoid masking real short secrets
+    # These match only when appearing as standalone placeholder values
+    '''(?:password|secret|key|token)\s*[:=]\s*['\"]?(?:xxxx|XXXX|aaaa|1234)['\"]?''',
+
+    # Environment variable references (not actual values)
+    '''\$\{[A-Z_]+\}''',
+    '''\$[A-Z_]+(?:\s|$|")''',
+]
+
+# -----------------------------------------------------------------------------
+# Stopwords
+# Common false positive triggers that should be ignored
+# -----------------------------------------------------------------------------
+stopwords = [
+    "testfake",
+    "test_fake",
+    "example",
+    "placeholder",
+    "your_token",
+    "your_api_key",
+    "change_me",
+    "localhost",
+    "000-00-0000",
+]
+
+# =============================================================================
+# RULE-SPECIFIC ALLOWLISTS
+# =============================================================================
+# Override specific rules that have known false positives in this codebase
+
+# -----------------------------------------------------------------------------
+# GitHub Token Rule Allowlist
+# Allows fake GitHub tokens used in test files
+# -----------------------------------------------------------------------------
+[[rules]]
+id = "github-pat"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+keywords = ["ghp_"]
+
+[[rules.allowlists]]
+description = "Allow fake GitHub PATs in test files"
+regexes = [
+    '''ghp_TESTFAKE''',
+    '''ghp_[A-Z]+FAKE''',
+]
+paths = [
+    '''scripts/tests/.*\.py$''',
+    '''skills/.*\.md$''',
+]
+
+# -----------------------------------------------------------------------------
+# GitLab Token Rule Allowlist
+# Allows fake GitLab tokens used in test files and docs
+# -----------------------------------------------------------------------------
+[[rules]]
+id = "gitlab-pat"
+description = "GitLab Personal Access Token"
+regex = '''glpat-[0-9a-zA-Z\-_]{20,}'''
+keywords = ["glpat-"]
+
+[[rules.allowlists]]
+description = "Allow fake GitLab PATs in test and doc files"
+regexes = [
+    '''glpat-TESTFAKE''',
+    '''glpat-YOUR_TOKEN''',
+    '''glpat-[A-Z]+FAKE''',
+]
+paths = [
+    '''scripts/tests/.*\.py$''',
+    '''skills/.*\.md$''',
+    '''docs/.*\.md$''',
+]
+
+# -----------------------------------------------------------------------------
+# Anthropic API Key Rule Allowlist
+# Allows fake Anthropic keys used in test files
+# -----------------------------------------------------------------------------
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API Key"
+regex = '''sk-ant-api[0-9]{2}-[a-zA-Z0-9_\-]{93}AA'''
+keywords = ["sk-ant-"]
+
+[[rules.allowlists]]
+description = "Allow fake Anthropic keys in test files"
+regexes = [
+    '''sk-ant-TESTFAKE''',
+    '''sk-ant-[A-Z]+FAKE''',
+]
+paths = [
+    '''scripts/tests/.*\.py$''',
+]
+
+# -----------------------------------------------------------------------------
+# OpenAI API Key Rule Allowlist
+# Allows fake OpenAI keys used in test files
+# -----------------------------------------------------------------------------
+[[rules]]
+id = "openai-api-key"
+description = "OpenAI API Key"
+regex = '''sk-[a-zA-Z0-9]{20,}T3BlbkFJ[a-zA-Z0-9]{20,}'''
+keywords = ["sk-"]
+
+[[rules.allowlists]]
+description = "Allow fake OpenAI keys in test files"
+regexes = [
+    '''sk-TESTFAKE''',
+    '''sk-[A-Z]+FAKE''',
+]
+paths = [
+    '''scripts/tests/.*\.py$''',
+]
+
+# -----------------------------------------------------------------------------
+# NPM Token Rule Allowlist
+# Allows fake npm tokens used in test files
+# -----------------------------------------------------------------------------
+[[rules]]
+id = "npm-access-token"
+description = "npm Access Token"
+regex = '''npm_[a-zA-Z0-9]{36}'''
+keywords = ["npm_"]
+
+[[rules.allowlists]]
+description = "Allow fake npm tokens in test files"
+regexes = [
+    '''npm_TESTFAKE''',
+    '''npm_YOUR_TOKEN''',
+]
+paths = [
+    '''scripts/tests/.*\.py$''',
+    '''scripts/playbook_validator/.*\.py$''',
+]
+
+# -----------------------------------------------------------------------------
+# PyPI Token Rule Allowlist
+# Allows fake PyPI tokens used in test files
+# -----------------------------------------------------------------------------
+[[rules]]
+id = "pypi-upload-token"
+description = "PyPI Upload Token"
+regex = '''pypi-[a-zA-Z0-9]{60,}'''
+keywords = ["pypi-"]
+
+[[rules.allowlists]]
+description = "Allow fake PyPI tokens in test files"
+regexes = [
+    '''pypi-TESTFAKE''',
+    '''pypi-YOUR_TOKEN''',
+]
+paths = [
+    '''scripts/tests/.*\.py$''',
+    '''scripts/playbook_validator/.*\.py$''',
+]
+
+# -----------------------------------------------------------------------------
+# Generic API Key Rule Allowlist
+# Reduce false positives from documentation examples
+# -----------------------------------------------------------------------------
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)[\w.-]{0,50}?(?:access|auth|api|credential|creds|key|passw(?:or)?d|secret|token)(?:[ \t\w.-]{0,20})[\s'"]{0,3}(?:=|>|:{1,3}=|\|\||:|=>|\?=|,)[\x60'"\s=]{0,5}([\w.=-]{10,150})'''
+keywords = [
+    "access",
+    "api",
+    "auth",
+    "key",
+    "credential",
+    "creds",
+    "passwd",
+    "password",
+    "secret",
+    "token",
+]
+entropy = 3.5
+
+[[rules.allowlists]]
+description = "Allow generic patterns in docs and examples"
+regexes = [
+    '''your-api-key-here''',
+    '''YOUR_TOKEN_HERE''',
+    '''test123''',
+    '''example''',
+    '''placeholder''',
+]
+paths = [
+    '''docs/.*\.md$''',
+    '''skills/.*\.md$''',
+    '''examples/.*''',
+    '''scripts/tests/.*\.py$''',
+]
+
+# =============================================================================
+# COMMIT ALLOWLIST
+# =============================================================================
+# Allow specific commits that are known to contain intentional test data
+# Add commit SHAs here if needed after review
+
+# [[allowlist.commits]]
+# description = "Initial commit with test fixtures"
+# commits = []
+
+# =============================================================================
+# END OF CONFIGURATION
+# =============================================================================

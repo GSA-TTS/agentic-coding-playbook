@@ -4,6 +4,7 @@ title: "cloud.gov Deployment"
 description: "Deploy applications to cloud.gov — sandbox setup, manifest generation, CI/CD pipeline"
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["deploy", "cloud.gov", "cloudgov", "push to cloud", "deploy to sandbox"]

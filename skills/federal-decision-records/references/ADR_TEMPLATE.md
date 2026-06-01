@@ -3,6 +3,7 @@ title: "Federal ADR Template"
 description: "MADR template with federal compliance frontmatter extensions for documenting architectural and security decisions"
 status: canonical
 tier: 3
+last_updated: "2026-06-01"
 ---
 
 # ADR Template — Federal MADR with Compliance Extensions
