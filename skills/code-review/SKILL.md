@@ -4,6 +4,7 @@ title: "Code Review and PR Workflow"
 description: "Review AI-assisted code changes and create compliant pull requests with proper attribution"
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["code review", "pull request", "PR", "review code", "merge", "attribution"]

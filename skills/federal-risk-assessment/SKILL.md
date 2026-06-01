@@ -4,6 +4,7 @@ title: "Federal Risk Assessment"
 description: "Walk through the AI agent risk assessment worksheet interactively, helping users complete each section with context-appropriate guidance."
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["risk", "ATO", "threat", "vulnerability", "risk assessment"]

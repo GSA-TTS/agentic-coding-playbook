@@ -3,6 +3,7 @@ title: "Federal AI Landscape"
 description: "Canonical catalog of federal AI guidance, executive orders, standards, and legislation relevant to AI-assisted software development"
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "isso", "managers", "agents"]
 keywords: ["federal", "AI", "guidance", "executive order", "NIST", "OMB", "OWASP", "compliance", "legislation"]

@@ -4,6 +4,7 @@ title: "Federal AGENTS.md Configuration"
 description: "Generate a project-specific AGENTS.md through interactive decision-tree elicitation."
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["AGENTS.md", "agent rules", "behavioral", "compliance"]

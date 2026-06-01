@@ -1,7 +1,6 @@
 """Schema constants and validation helpers for the agentic-coding-playbook.
 
 Single source of truth for validation rules, enum values, and limits.
-Replaces scripts/config.sh.
 """
 
 import re

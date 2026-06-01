@@ -20,7 +20,9 @@ Output:
 
 import argparse
 import json
+import os
 import sys
+from contextlib import redirect_stderr
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -162,10 +164,11 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.output_json:
-        # Suppress stderr messages in JSON-only mode
-        sys.stderr = open("/dev/null", "w")  # noqa: SIM115
-
-    result = check_feeds(args.state_file)
+        # Suppress stderr messages in JSON-only mode using proper context manager
+        with open(os.devnull, "w") as devnull, redirect_stderr(devnull):
+            result = check_feeds(args.state_file)
+    else:
+        result = check_feeds(args.state_file)
 
     # Always output JSON to stdout
     print(json.dumps(result, indent=2))

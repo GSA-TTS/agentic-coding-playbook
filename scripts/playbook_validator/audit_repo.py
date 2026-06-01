@@ -1,6 +1,5 @@
 """Repository audit — federal compliance baseline checks.
 
-Python equivalent of skills/federal-repo-setup/scripts/audit-repo-setup.sh.
 Checks git init, .gitignore secret patterns, pre-commit secrets hooks,
 .env not committed, CI/CD pipeline, AGENTS.md, and lock file presence.
 """

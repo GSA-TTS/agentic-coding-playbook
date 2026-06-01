@@ -4,6 +4,7 @@ title: "Federal Decision Records"
 description: "Create, validate, and index architectural and security decision records using MADR format with federal compliance extensions."
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["ADR", "architecture decision", "decision record"]

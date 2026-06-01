@@ -3,8 +3,6 @@
 Validates that all NNNN-*.md files in a decisions directory have correct
 frontmatter, valid field values, proper naming conventions, and consistent
 cross-references.
-
-Replaces skills/federal-decision-records/scripts/validate-adrs.sh.
 """
 
 import re

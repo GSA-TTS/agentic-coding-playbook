@@ -4,6 +4,7 @@ title: "Federal Repository Setup"
 description: "Initialize a code repository with federal security compliance defaults including .gitignore, pre-commit hooks, .editorconfig, and CI/CD security baseline."
 status: canonical
 tier: 2
+last_updated: "2026-06-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["repo setup", "repository", "federal compliance", "pre-commit", "security baseline", "hardening"]

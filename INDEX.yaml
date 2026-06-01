@@ -7,10 +7,10 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-05-28
+# Last generated: 2026-06-01
 
 schema_version: "1.0"
-generated: "2026-05-28"
+generated: "2026-06-01"
 repo: "gsa-tts/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
@@ -77,6 +77,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: always
+    last_updated: "2026-06-01"
     audience: [developers, agents]
 
   - path: "docs/CODING_PRACTICES.md"
@@ -96,6 +97,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: task-context
+    last_updated: "2026-06-01"
     audience: [agents]
 
   - path: "docs/SECURITY-CONTROLS.md"
@@ -116,6 +118,7 @@ documents:
     status: canonical
     tier: 2
     load_priority: on-demand
+    last_updated: "2026-06-01"
     audience: [developers, isso, managers, agents]
 
   - path: "docs/GETTING-STARTED.md"
@@ -186,6 +189,7 @@ documents:
     status: canonical
     tier: 3
     load_priority: on-demand
+    last_updated: "2026-06-01"
     audience: [developers, agents]
     nist_controls_count: 2
 
@@ -195,6 +199,7 @@ documents:
     status: canonical
     tier: 3
     load_priority: reference-only
+    last_updated: "2026-06-01"
     audience: [developers, managers]
 
   - path: "examples/AGENTS.md.example"

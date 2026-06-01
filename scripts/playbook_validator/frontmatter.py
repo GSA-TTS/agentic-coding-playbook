@@ -1,7 +1,4 @@
-"""YAML frontmatter extraction from Markdown files.
-
-Replaces the fragile sed/awk parsing in lib/common.sh with proper YAML parsing.
-"""
+"""YAML frontmatter extraction from Markdown files."""
 
 from pathlib import Path
 from typing import Any

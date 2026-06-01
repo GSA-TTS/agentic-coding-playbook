@@ -3,6 +3,7 @@ title: "Roadmap"
 description: "Long-term plan for the Agentic Coding Playbook — making it a living resource for federal engineers learning agentic coding"
 status: canonical
 tier: 3
+last_updated: "2026-06-01"
 load_priority: reference-only
 audience: ["developers", "managers"]
 keywords: ["roadmap", "plan", "future", "strategy"]

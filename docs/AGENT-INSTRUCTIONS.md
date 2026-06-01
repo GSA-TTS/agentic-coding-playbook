@@ -3,6 +3,7 @@ title: "Agent Instructions"
 description: "Model-agnostic repo-specific reference for any AI coding agent working in this repository"
 status: canonical
 tier: 1
+last_updated: "2026-06-01"
 load_priority: always
 audience: ["developers", "agents"]
 keywords: ["agent", "instructions", "commands", "paths", "skills", "validation"]

@@ -2,8 +2,6 @@
 
 Validates that all content Markdown files have correct frontmatter
 with required fields and valid enum values.
-
-Replaces scripts/validate-docs.sh.
 """
 
 from pathlib import Path
