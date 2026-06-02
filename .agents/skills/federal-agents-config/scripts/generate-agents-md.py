@@ -10,9 +10,8 @@ The config JSON must conform to the schema in references/PLACEHOLDER_SCHEMA.json
 """
 
 import json
-import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Prevent arbitrary file writes outside expected locations
@@ -89,7 +88,7 @@ def generate_agents_md(config: dict) -> str:
     agents = config.get("agent_names", [])
     agents_str = ", ".join(agents) if agents else "[Authorized agents]"
     reviewed_by = get_default(config, "reviewed_by", "[Name, Title]")
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
 
     # Data handling
     sensitive_types = config.get("sensitive_data_types", [])
@@ -134,7 +133,7 @@ def generate_agents_md(config: dict) -> str:
 
     # Build prohibited actions
     default_prohibited = [
-        f"Access files outside the project directory",
+        "Access files outside the project directory",
         "Access or modify production systems or data",
         "Hardcode secrets, API keys, tokens, or passwords",
         "Disable security controls, pre-commit hooks, or CI checks",
@@ -204,9 +203,9 @@ def generate_agents_md(config: dict) -> str:
     # PII handling line
     pii_line = ""
     if data_class.upper() in ("PII", "PHI", "CUI"):
-        pii_line = f"- **PII handling:** Must use field-level encryption, must mask in logs"
+        pii_line = "- **PII handling:** Must use field-level encryption, must mask in logs"
     else:
-        pii_line = f"- **PII handling:** Follow agency data handling procedures"
+        pii_line = "- **PII handling:** Follow agency data handling procedures"
 
     output = f"""# AGENTS.md — {system_name}
 
@@ -214,7 +213,8 @@ def generate_agents_md(config: dict) -> str:
 >
 > **Last Updated:** {today} | **Reviewed By:** {reviewed_by}
 >
-> This document defines the behavioral rules for AI coding agents operating within this project. The AI agent MUST follow these rules without exception.
+> This document defines the behavioral rules for AI coding agents operating within
+> this project. The AI agent MUST follow these rules without exception.
 
 ---
 
