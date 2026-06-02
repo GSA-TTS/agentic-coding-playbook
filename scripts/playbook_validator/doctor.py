@@ -292,12 +292,17 @@ def check_dependencies() -> list[dict[str, object]]:
     except ImportError:
         results.append(_result("PyYAML", False, "Run: pip install PyYAML"))
 
-    # Dev tools — optional but needed for make ci
-    for tool in ("ruff", "pymarkdown"):
-        if shutil.which(tool) is not None:
-            results.append(_result(tool, True, "installed"))
-        else:
-            results.append(_skip(tool, f"not found — install with: pip install {tool}"))
+    # ruff — Python linter/formatter
+    if shutil.which("ruff") is not None:
+        results.append(_result("ruff", True, "installed"))
+    else:
+        results.append(_skip("ruff", "not found — install with: pip install ruff"))
+
+    # markdownlint-cli2 — Markdown linter (used by pre-commit)
+    if shutil.which("markdownlint-cli2") is not None:
+        results.append(_result("markdownlint-cli2", True, "installed"))
+    else:
+        results.append(_skip("markdownlint-cli2", "not found — install with: npm install -g markdownlint-cli2"))
 
     return results
 
