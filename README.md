@@ -169,7 +169,7 @@ agentic-coding-playbook/
 ├── scripts/
 │   ├── playbook_validator/          # Python validation package (285 tests)
 │   └── tests/                       # TDD test suite
-├── skills/                          # 11 executable compliance procedures
+├── skills/                          # 12 executable compliance procedures
 ├── templates/                       # PROJECT_PLAN.md, AGENTS.md.template
 ├── examples/                        # Completed AGENTS.md example
 └── checklists/                      # 62-item pre-deployment checklist

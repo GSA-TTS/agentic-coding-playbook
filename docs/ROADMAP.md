@@ -18,7 +18,7 @@ Long-term plan for making the Agentic Coding Playbook a living, learnable resour
 | Metric | Count |
 |--------|-------|
 | Documents | 20 |
-| Skills | 11 |
+| Skills | 12 |
 | Tests | 285 |
 | Checklist items | 62 |
 | Landscape entries | 39 |
