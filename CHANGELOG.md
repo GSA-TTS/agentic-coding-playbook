@@ -4,6 +4,18 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.10.5](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.10.4...v0.10.5) (2026-06-02)
+
+
+### Bug Fixes
+
+* update doctor.py to check markdownlint-cli2 instead of pymarkdown ([#92](https://github.com/GSA-TTS/agentic-coding-playbook/issues/92)) ([750835b](https://github.com/GSA-TTS/agentic-coding-playbook/commit/750835be42e7b5fcc8b4c7073dd237718bbe6373)), closes [#85](https://github.com/GSA-TTS/agentic-coding-playbook/issues/85)
+
+
+### Documentation
+
+* fix skills count from 11 to 12 ([#90](https://github.com/GSA-TTS/agentic-coding-playbook/issues/90)) ([7166a2e](https://github.com/GSA-TTS/agentic-coding-playbook/commit/7166a2e7b47f8545509ed82880673c5d0cee0ef3))
+
 ## [0.10.4](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.10.3...v0.10.4) (2026-06-01)
 
 
