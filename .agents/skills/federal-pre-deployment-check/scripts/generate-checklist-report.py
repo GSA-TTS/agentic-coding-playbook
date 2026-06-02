@@ -17,7 +17,7 @@ If --output is omitted, writes to stdout.
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 MAX_FILE_SIZE = 1024 * 100  # 100KB
@@ -144,7 +144,7 @@ def merge_results(automated: dict, manual: dict) -> dict:
 
 def generate_report(status_map: dict, system_name: str, agent_used: str) -> str:
     """Generate a completed checklist report in markdown."""
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
 
     lines = [
         "# Pre-Deployment Security Checklist — Completed",
@@ -276,7 +276,12 @@ def main() -> None:
             f.write(report)
         print(f"Report written to: {args.output}", file=sys.stderr)
 
-        result = {"status": "success", "output": args.output, "passed": sum(1 for s, _ in status_map.values() if s == "Pass"), "failed": sum(1 for s, _ in status_map.values() if s == "Fail")}
+        result = {
+            "status": "success",
+            "output": args.output,
+            "passed": sum(1 for s, _ in status_map.values() if s == "Pass"),
+            "failed": sum(1 for s, _ in status_map.values() if s == "Fail"),
+        }
         print(json.dumps(result), file=sys.stderr)
     else:
         print(report)

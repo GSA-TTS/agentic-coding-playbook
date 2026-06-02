@@ -82,22 +82,26 @@ def validate(file_path: str) -> dict:
         if re.search(pattern, content, re.MULTILINE):
             results.append({"check": f"section:{section}", "pass": True})
         else:
-            results.append({
-                "check": f"section:{section}",
-                "pass": False,
-                "suggestion": f"Add '## {section}' section",
-            })
+            results.append(
+                {
+                    "check": f"section:{section}",
+                    "pass": False,
+                    "suggestion": f"Add '## {section}' section",
+                }
+            )
 
     # Check required fields appear somewhere in content
     for field, desc in REQUIRED_FIELDS:
         if field in content:
             results.append({"check": f"field:{desc}", "pass": True})
         else:
-            results.append({
-                "check": f"field:{desc}",
-                "pass": False,
-                "suggestion": f"Add {desc} to the document",
-            })
+            results.append(
+                {
+                    "check": f"field:{desc}",
+                    "pass": False,
+                    "suggestion": f"Add {desc} to the document",
+                }
+            )
 
     # Check for unfilled placeholders
     placeholders = re.findall(r"\[(?:Your |Specify |Name|Agency|Add )[^\]]*\]", content)
