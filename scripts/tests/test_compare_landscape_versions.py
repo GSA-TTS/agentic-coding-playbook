@@ -73,6 +73,18 @@ class TestExtractStatus:
         assert extract_status("Document has been revoked") == "revoked"
         assert extract_status("REVOKED effective immediately") == "revoked"
 
+    def test_rescinded_keyword(self):
+        """Test extraction of rescinded status."""
+        from scripts.compare_landscape_versions import extract_status
+
+        assert extract_status("This EO has been rescinded") == "rescinded"
+
+    def test_preliminary_keyword(self):
+        """Test extraction of preliminary status (maps to draft)."""
+        from scripts.compare_landscape_versions import extract_status
+
+        assert extract_status("Preliminary version for review") == "draft"
+
     def test_superseded_keyword(self):
         """Test extraction of superseded status."""
         from scripts.compare_landscape_versions import extract_status
@@ -97,6 +109,11 @@ class TestNormalizeTitle:
         result = normalize_title("NIST SP 800-218 v1.0")
         assert "1.0" not in result
         assert "v" not in result.split()
+        # Verify title content is preserved
+        assert "nist" in result
+        assert "sp" in result
+        assert "800" in result
+        assert "218" in result
 
     def test_removes_punctuation(self):
         """Test removal of punctuation."""
@@ -106,6 +123,11 @@ class TestNormalizeTitle:
         assert "(" not in result
         assert ")" not in result
         assert "!" not in result
+        # Verify content is preserved
+        assert "ai" in result
+        assert "artificial" in result
+        assert "intelligence" in result
+        assert "framework" in result
 
     def test_lowercases(self):
         """Test that result is lowercased."""
@@ -113,6 +135,7 @@ class TestNormalizeTitle:
 
         result = normalize_title("NIST Artificial Intelligence")
         assert result == result.lower()
+        assert "nist" in result
 
 
 class TestSimilarityScore:

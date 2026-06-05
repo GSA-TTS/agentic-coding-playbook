@@ -113,7 +113,8 @@ class TestSaveState:
         save_state(state_path, {"feed": ["id"]})
 
         captured = capsys.readouterr()
-        assert "Warning" in captured.err or "Could not save" in captured.err
+        assert "Warning" in captured.err
+        assert "Could not save" in captured.err
 
 
 class TestFetchFeed:
@@ -157,6 +158,8 @@ class TestFetchFeed:
         assert result == []
         captured = capsys.readouterr()
         assert "Warning" in captured.err
+        assert "test_feed" in captured.err  # Should include feed name
+        assert "Parse error" in captured.err  # Should include exception message
 
     def test_extracts_entry_fields(self):
         """Test that all expected fields are extracted from entries."""
@@ -246,8 +249,18 @@ class TestCheckFeeds:
         ):
             result = check_feeds(state_file)
 
+        # Verify complete result structure
+        assert "check_date" in result
+        assert "T" in result["check_date"]  # ISO format
+        assert result["feeds_checked"] == 1
         assert len(result["new_entries"]) == 1
-        assert result["new_entries"][0]["id"] == "new-entry"
+
+        # Verify complete entry structure
+        entry = result["new_entries"][0]
+        assert entry["id"] == "new-entry"
+        assert entry["title"] == "New Entry"
+        assert entry["feed"] == "test_feed"
+        assert "url" in entry
 
     def test_ignores_seen_entries(self, tmp_path, capsys):
         """Test that previously seen entries are not reported as new."""
@@ -400,3 +413,77 @@ class TestMain:
 
         # State file should be created at custom path
         assert custom_state.exists()
+
+    def test_uses_updated_when_published_missing(self):
+        """Test fallback to 'updated' field when 'published' is missing."""
+        from scripts.check_federal_landscape_rss import fetch_feed
+
+        mock_feed = MagicMock()
+        mock_feed.bozo = False
+        mock_feed.entries = [
+            {
+                "id": "entry1",
+                "title": "Test Entry",
+                "link": "https://example.com/1",
+                "updated": "2026-01-15T10:00:00Z",  # No 'published', has 'updated'
+                "summary": "Test summary",
+            }
+        ]
+
+        with patch("scripts.check_federal_landscape_rss.feedparser.parse", return_value=mock_feed):
+            result = fetch_feed("test_feed", "https://example.com/feed")
+
+        assert result[0]["published"] == "2026-01-15T10:00:00Z"
+
+    def test_uses_description_when_summary_missing(self):
+        """Test fallback to 'description' field when 'summary' is missing."""
+        from scripts.check_federal_landscape_rss import fetch_feed
+
+        mock_feed = MagicMock()
+        mock_feed.bozo = False
+        mock_feed.entries = [
+            {
+                "id": "entry1",
+                "title": "Test Entry",
+                "link": "https://example.com/1",
+                "description": "Entry description",  # No 'summary', has 'description'
+            }
+        ]
+
+        with patch("scripts.check_federal_landscape_rss.feedparser.parse", return_value=mock_feed):
+            result = fetch_feed("test_feed", "https://example.com/feed")
+
+        assert result[0]["summary"] == "Entry description"
+
+    def test_multiple_feeds(self, tmp_path, capsys):
+        """Test checking multiple feeds at once."""
+        from scripts.check_federal_landscape_rss import check_feeds
+
+        state_file = tmp_path / "state.json"
+
+        mock_feed1 = MagicMock()
+        mock_feed1.bozo = False
+        mock_feed1.entries = [{"id": "feed1-entry", "title": "Feed 1", "link": "https://example.com/1"}]
+
+        mock_feed2 = MagicMock()
+        mock_feed2.bozo = False
+        mock_feed2.entries = [{"id": "feed2-entry", "title": "Feed 2", "link": "https://example.com/2"}]
+
+        def mock_parse(url):
+            if "feed1" in url:
+                return mock_feed1
+            return mock_feed2
+
+        with (
+            patch("scripts.check_federal_landscape_rss.feedparser.parse", side_effect=mock_parse),
+            patch(
+                "scripts.check_federal_landscape_rss.FEEDS",
+                {"feed1": "https://example.com/feed1", "feed2": "https://example.com/feed2"},
+            ),
+        ):
+            result = check_feeds(state_file)
+
+        assert result["feeds_checked"] == 2
+        assert len(result["new_entries"]) == 2
+        feed_names = {e["feed"] for e in result["new_entries"]}
+        assert feed_names == {"feed1", "feed2"}
