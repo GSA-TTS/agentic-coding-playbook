@@ -366,37 +366,51 @@ Logging format:
 
 ### 10.3 Version Control and Release Management
 
+<!-- NIST SP 800-53: CM-2 (Baseline Configuration), CM-3 (Configuration Change Control), SA-10 (Developer Configuration Management), AU-10 (Non-repudiation) -->
+
 This section defines version control and release management requirements for federal software projects.
 
 #### Version Control Requirements
 
-- MUST follow Semantic Versioning (SemVer) for all releases:
+- MUST follow Semantic Versioning (SemVer 2.0.0) for all releases:
   - **MAJOR**: Breaking changes (incompatible API changes)
   - **MINOR**: New features (backward-compatible)
   - **PATCH**: Bug fixes (backward-compatible)
-  - Pre-release tags: `alpha`, `beta`, `rc` (e.g., `1.0.0-alpha.1`)
+  - Pre-release versions MAY use dot-separated identifiers (e.g., `1.0.0-alpha.1`, `1.0.0-rc.1`)
 
-- MUST use Conventional Commits format for all commit messages:
-  - Format: `<type>(<scope>): <subject>`
+- MUST use Conventional Commits 1.0.0 format for all commit messages:
+  - Format: `<type>[optional scope][!]: <description>`
+  - The `!` suffix indicates a breaking change
   - See AGENTS.md for complete commit message standards
+
+- SHOULD sign commits using GPG or SSH keys for non-repudiation
+- MUST sign release tags for production releases (`git tag -s`)
 
 - MUST maintain CHANGELOG.md following Keep a Changelog format:
   - Sections: Added, Changed, Deprecated, Removed, Fixed, Security
   - Version links to GitHub compare views
-  - Auto-generated from conventional commits via release-please
+  - SHOULD be auto-generated from conventional commits via release-please
+
+#### Branch Protection
+
+- MUST enable branch protection on default and release branches
+- MUST require pull request reviews before merging to protected branches
+- MUST require status checks to pass before merging
+- SHOULD require linear history for cleaner release automation
 
 #### Release Automation
 
 - MUST use automated release workflows (release-please + GitHub Actions)
 - Version bumps determined automatically from commit types:
   - `feat:` → Minor version bump
-  - `fix:`, `perf:`, `security:` → Patch version bump
+  - `fix:` → Patch version bump
   - `BREAKING CHANGE:` footer or `!` suffix → Major version bump
-  - `docs:`, `chore:`, `test:`, `ci:`, `build:`, `style:`, `refactor:` → No version bump
+  - `docs:`, `chore:`, `test:`, `ci:`, `build:`, `style:`, `refactor:`, `perf:` → No version bump (configurable)
 
 - MUST validate commit messages in CI (commitlint)
 - MUST create git tags for all releases (`v<version>`)
 - MUST generate GitHub releases with release notes from CHANGELOG
+- Release artifacts MUST be signed per §10.2
 
 #### Traceability Requirements
 
@@ -405,7 +419,7 @@ This section defines version control and release management requirements for fed
 - CHANGELOG.md MUST document all user-facing changes with version and date
 - Breaking changes MUST be clearly documented in CHANGELOG and commit messages
 
-> **Control Mapping:** CM-2 (Baseline Configuration), CM-3 (Configuration Change Control), SA-10 (Developer Configuration Management), SA-11 (Developer Testing)
+> **Control Mapping:** CM-2 (Baseline Configuration), CM-3 (Configuration Change Control), SA-10 (Developer Configuration Management), AU-10 (Non-repudiation), SI-7 (Software, Firmware, and Information Integrity)
 
 ---
 
