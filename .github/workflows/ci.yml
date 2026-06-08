@@ -78,6 +78,8 @@ jobs:
 
       - name: SCA vulnerability scan
         run: |
+          # Upgrade pip first to avoid self-referential vulnerability (PYSEC-2026-196)
+          pip install --upgrade pip
           pip install pip-audit
           # Audit the installed environment but skip pip/setuptools (CI tooling).
           # The --skip-editable flag ignores the local playbook-validator package.
