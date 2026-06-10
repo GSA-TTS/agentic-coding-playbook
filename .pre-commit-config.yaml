@@ -33,13 +33,8 @@ repos:
       - id: markdownlint-cli2
         args: ["--fix"]
 
-  # GitHub Actions security scanning (optional — skips if zizmor not installed)
-  # Install: cargo install zizmor OR brew install zizmor
-  - repo: local
-    hooks:
-      - id: zizmor
-        name: zizmor - GitHub Actions security scanner
-        entry: bash -c 'command -v zizmor >/dev/null 2>&1 && zizmor "$@" || exit 0' --
-        language: system
-        files: ^\.github/workflows/.*\.ya?ml$
-        pass_filenames: true
+  # NOTE: GitHub Actions security scanning (zizmor) runs in CI only —
+  # see .github/workflows/zizmor.yml. It is intentionally NOT a local
+  # pre-commit hook: the zizmor CLI hard-fails when GITHUB_TOKEN is set
+  # but empty (common in sandboxed shells), which made the local hook
+  # brittle. CI provides a valid token and scans on every workflow change.
