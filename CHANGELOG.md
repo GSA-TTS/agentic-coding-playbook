@@ -4,6 +4,39 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.11.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.10.5...v0.11.0) (2026-06-10)
+
+
+### Features
+
+* **coding-practices:** add version control and release management section ([#94](https://github.com/GSA-TTS/agentic-coding-playbook/issues/94)) ([9e43d8e](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9e43d8e779f34168b05586853bb27f880169ae2d))
+
+
+### Bug Fixes
+
+* **ci:** upgrade pip before pip-audit to avoid PYSEC-2026-196 ([#100](https://github.com/GSA-TTS/agentic-coding-playbook/issues/100)) ([345dcbe](https://github.com/GSA-TTS/agentic-coding-playbook/commit/345dcbe6a4bd002178e4d11e01cf77f870c8b02b))
+
+
+### Documentation
+
+* remove WORKFLOW_CONTRACT.md (documented deleted reusable workflows) ([#106](https://github.com/GSA-TTS/agentic-coding-playbook/issues/106)) ([d2fe567](https://github.com/GSA-TTS/agentic-coding-playbook/commit/d2fe5677d32d0d4ff96349f753d9c828d23a7444)), closes [#102](https://github.com/GSA-TTS/agentic-coding-playbook/issues/102)
+
+
+### Maintenance
+
+* **ci:** add zizmor CI workflow, drop brittle local hook ([#103](https://github.com/GSA-TTS/agentic-coding-playbook/issues/103)) ([#104](https://github.com/GSA-TTS/agentic-coding-playbook/issues/104)) ([b3d82e0](https://github.com/GSA-TTS/agentic-coding-playbook/commit/b3d82e07a16389dc1e7a2a43c0b0f95535b2e373))
+* **ci:** remove reusable workflows ([#99](https://github.com/GSA-TTS/agentic-coding-playbook/issues/99)) ([38a5ae9](https://github.com/GSA-TTS/agentic-coding-playbook/commit/38a5ae94417dcb3f8628b17e163efc94db508449))
+* **ci:** use lockfile for markdownlint supply chain security ([#101](https://github.com/GSA-TTS/agentic-coding-playbook/issues/101)) ([3d3dce6](https://github.com/GSA-TTS/agentic-coding-playbook/commit/3d3dce66571dbe2759340f9375bf3a10cf396921))
+* **deps:** bump actions/checkout from 6.0.2 to 6.0.3 ([#97](https://github.com/GSA-TTS/agentic-coding-playbook/issues/97)) ([aa5f617](https://github.com/GSA-TTS/agentic-coding-playbook/commit/aa5f617b233fd656015925b2d65bf78def0297ef))
+* **deps:** bump actions/setup-node from 4.4.0 to 6.4.0 ([#105](https://github.com/GSA-TTS/agentic-coding-playbook/issues/105)) ([f8328b4](https://github.com/GSA-TTS/agentic-coding-playbook/commit/f8328b4aeaf949e4ca752f4a591c7332ff8a0aa1))
+* **deps:** bump ruff from 0.15.15 to 0.15.16 ([#98](https://github.com/GSA-TTS/agentic-coding-playbook/issues/98)) ([570ffa9](https://github.com/GSA-TTS/agentic-coding-playbook/commit/570ffa9dd31072667324b1fc0ebe36e2be8acb52))
+
+
+### Tests
+
+* add coverage for skill scripts; refactor generate_agents_md ([#84](https://github.com/GSA-TTS/agentic-coding-playbook/issues/84)) ([#107](https://github.com/GSA-TTS/agentic-coding-playbook/issues/107)) ([d8c0208](https://github.com/GSA-TTS/agentic-coding-playbook/commit/d8c0208d3fc117de1eb83780453f3c65c5ecff5b))
+* **rss:** add test coverage for landscape RSS scripts ([#95](https://github.com/GSA-TTS/agentic-coding-playbook/issues/95)) ([bd9a884](https://github.com/GSA-TTS/agentic-coding-playbook/commit/bd9a88482eb63d7e930ab9fb410d6307e943cd98))
+
 ## [0.10.5](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.10.4...v0.10.5) (2026-06-02)
 
 
