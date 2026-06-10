@@ -75,63 +75,62 @@ def format_list(items: list, prefix: str = "- ") -> str:
     return "\n".join(f"{prefix}{item}" for item in items)
 
 
-def generate_agents_md(config: dict) -> str:
-    """Generate AGENTS.md content from config."""
-    system_name = config["system_name"]
-    agency = get_default(config, "agency_name", "[Agency Name]")
-    description = get_default(config, "system_description", "[System description]")
-    impact = get_default(config, "impact_level", "moderate").capitalize()
-    language = config["language"]
-    framework = get_default(config, "framework", "None")
-    data_class = get_default(config, "data_classification", "Internal")
-    ato_status = get_default(config, "ato_status", "Pre-ATO development")
-    agents = config.get("agent_names", [])
-    agents_str = ", ".join(agents) if agents else "[Authorized agents]"
-    reviewed_by = get_default(config, "reviewed_by", "[Name, Title]")
-    today = datetime.now(UTC).strftime("%Y-%m-%d")
-
-    # Data handling
-    sensitive_types = config.get("sensitive_data_types", [])
-    sensitive_str = ", ".join(sensitive_types) if sensitive_types else "[Specify sensitive data types]"
-    storage = config.get("approved_storage", [])
-    storage_str = ", ".join(storage) if storage else "[Specify approved storage]"
-    secrets_backend = get_default(config, "secrets_backend", "[Secrets management tool]")
-
-    # Dependencies
+def _resolve_registries(config: dict, language: str) -> list:
+    """Return approved registries, defaulting by language when unset."""
     registries = config.get("approved_registries", [])
-    if not registries:
-        # Default based on language
-        lang_lower = language.lower()
-        if "python" in lang_lower:
-            registries = ["pypi.org"]
-        elif "javascript" in lang_lower or "typescript" in lang_lower:
-            registries = ["npmjs.com"]
-        elif "go" in lang_lower:
-            registries = ["proxy.golang.org"]
-        elif "java" in lang_lower:
-            registries = ["Maven Central"]
+    if registries:
+        return registries
+    lang_lower = language.lower()
+    if "python" in lang_lower:
+        return ["pypi.org"]
+    if "javascript" in lang_lower or "typescript" in lang_lower:
+        return ["npmjs.com"]
+    if "go" in lang_lower:
+        return ["proxy.golang.org"]
+    if "java" in lang_lower:
+        return ["Maven Central"]
+    return ["[Approved registry]"]
+
+
+def _coauthor_lines(agents: list) -> str:
+    """Render Co-Authored-By trailer bullet lines for the configured agents."""
+    lines = []
+    for agent in agents:
+        if "copilot" in agent.lower():
+            lines.append(f"Co-Authored-By: {agent} <noreply@github.com>")
         else:
-            registries = ["[Approved registry]"]
-    registries_str = ", ".join(registries)
+            lines.append(f"Co-Authored-By: {agent} <noreply@ai-agent>")
+    if not lines:
+        lines = ["Co-Authored-By: [Agent Name] <[agent-email]>"]
+    return "\n".join(f"  - `{line}`" for line in lines)
 
-    license_restrictions = config.get("license_restrictions", ["No AGPL", "GPL requires legal review"])
-    license_str = ", ".join(license_restrictions) if license_restrictions else "None specified"
 
-    # Testing
-    test_cmd = get_default(config, "test_command", _default_test_command(language))
-    coverage = get_default(config, "test_coverage_target", "80")
+def _pii_line(data_class: str) -> str:
+    """Return the PII-handling bullet appropriate for the data classification."""
+    if data_class.upper() in ("PII", "PHI", "CUI"):
+        return "- **PII handling:** Must use field-level encryption, must mask in logs"
+    return "- **PII handling:** Follow agency data handling procedures"
 
-    # CI/CD
-    ci_checks = config.get("ci_checks", ["lint", "test", "sast", "sca", "secrets-scan"])
-    ci_str = ", ".join(ci_checks)
-    branch_prot = get_default(config, "branch_protection", "1 review, no force push")
 
-    # Contacts
-    lead = get_default(config, "project_lead", "[Name, email]")
-    security = get_default(config, "security_contact", "[Name, email]")
-    isso = get_default(config, "isso_contact", "[Name, email]")
+def _network_section(config: dict) -> str:
+    """Render the optional Network Access section, or empty string when unset."""
+    network_list = config.get("network_allowlist", [])
+    if not network_list:
+        return ""
+    endpoints = "\n".join(f"- {ep}" for ep in network_list)
+    return f"""
+---
 
-    # Build prohibited actions
+## Network Access
+
+- **Authorized endpoints:**
+{endpoints}
+- **TLS requirement:** TLS 1.2+ for all connections
+"""
+
+
+def _action_lists(config: dict, data_class: str) -> dict:
+    """Build the permitted / approval-required / prohibited action lists."""
     default_prohibited = [
         "Access files outside the project directory",
         "Access or modify production systems or data",
@@ -144,10 +143,6 @@ def generate_agents_md(config: dict) -> str:
         "Modify authentication or authorization systems without approval",
         "Create network listeners or reverse connections",
     ]
-    extra_prohibited = config.get("prohibited_actions", [])
-    all_prohibited = default_prohibited + extra_prohibited
-
-    # Build permitted actions
     default_permitted = [
         "Read files within the project directory",
         "Generate and modify source code",
@@ -155,10 +150,6 @@ def generate_agents_md(config: dict) -> str:
         "Run linters and formatters",
         "Read documentation and public API references",
     ]
-    extra_permitted = config.get("permitted_actions", [])
-    all_permitted = default_permitted + extra_permitted
-
-    # Build approval-required actions
     default_approval = [
         "Installing or upgrading dependencies",
         "Making network requests to external services",
@@ -168,50 +159,64 @@ def generate_agents_md(config: dict) -> str:
         "Committing or pushing code",
         "Modifying infrastructure or deployment configurations",
     ]
-    extra_approval = config.get("approval_required_actions", [])
-    all_approval = default_approval + extra_approval
+    return {
+        "prohibited": default_prohibited + config.get("prohibited_actions", []),
+        "permitted": default_permitted + config.get("permitted_actions", []),
+        "approval": default_approval + config.get("approval_required_actions", []),
+    }
 
-    # Network section (optional)
-    network_list = config.get("network_allowlist", [])
-    network_section = ""
-    if network_list:
-        endpoints = "\n".join(f"- {ep}" for ep in network_list)
-        network_section = f"""
----
 
-## Network Access
+def _build_context(config: dict) -> dict:
+    """Resolve every templated value used to render AGENTS.md from config."""
+    language = config["language"]
+    data_class = get_default(config, "data_classification", "Internal")
+    agents = config.get("agent_names", [])
+    sensitive_types = config.get("sensitive_data_types", [])
+    license_restrictions = config.get("license_restrictions", ["No AGPL", "GPL requires legal review"])
+    actions = _action_lists(config, data_class)
 
-- **Authorized endpoints:**
-{endpoints}
-- **TLS requirement:** TLS 1.2+ for all connections
-"""
+    return {
+        "system_name": config["system_name"],
+        "agency": get_default(config, "agency_name", "[Agency Name]"),
+        "description": get_default(config, "system_description", "[System description]"),
+        "impact": get_default(config, "impact_level", "moderate").capitalize(),
+        "language": language,
+        "framework": get_default(config, "framework", "None"),
+        "data_class": data_class,
+        "ato_status": get_default(config, "ato_status", "Pre-ATO development"),
+        "agents_str": ", ".join(agents) if agents else "[Authorized agents]",
+        "reviewed_by": get_default(config, "reviewed_by", "[Name, Title]"),
+        "today": datetime.now(UTC).strftime("%Y-%m-%d"),
+        "sensitive_str": ", ".join(sensitive_types) if sensitive_types else "[Specify sensitive data types]",
+        "storage_str": ", ".join(config.get("approved_storage", [])) or "[Specify approved storage]",
+        "secrets_backend": get_default(config, "secrets_backend", "[Secrets management tool]"),
+        "registries_str": ", ".join(_resolve_registries(config, language)),
+        "license_str": ", ".join(license_restrictions) if license_restrictions else "None specified",
+        "test_cmd": get_default(config, "test_command", _default_test_command(language)),
+        "coverage": get_default(config, "test_coverage_target", "80"),
+        "ci_str": ", ".join(config.get("ci_checks", ["lint", "test", "sast", "sca", "secrets-scan"])),
+        "branch_prot": get_default(config, "branch_protection", "1 review, no force push"),
+        "lead": get_default(config, "project_lead", "[Name, email]"),
+        "security": get_default(config, "security_contact", "[Name, email]"),
+        "isso": get_default(config, "isso_contact", "[Name, email]"),
+        "coauthor_str": _coauthor_lines(agents),
+        "pii_line": _pii_line(data_class),
+        "network_section": _network_section(config),
+        "all_prohibited": actions["prohibited"],
+        "all_permitted": actions["permitted"],
+        "all_approval": actions["approval"],
+    }
 
-    # Agent commit attribution
-    agent_coauthor_lines = []
-    for agent in agents:
-        agent_lower = agent.lower()
-        if "copilot" in agent_lower:
-            agent_coauthor_lines.append(f"Co-Authored-By: {agent} <noreply@github.com>")
-        else:
-            agent_coauthor_lines.append(f"Co-Authored-By: {agent} <noreply@ai-agent>")
 
-    if not agent_coauthor_lines:
-        agent_coauthor_lines = ["Co-Authored-By: [Agent Name] <[agent-email]>"]
+def generate_agents_md(config: dict) -> str:
+    """Generate AGENTS.md content from config."""
+    c = _build_context(config)
 
-    coauthor_str = "\n".join(f"  - `{line}`" for line in agent_coauthor_lines)
+    output = f"""# AGENTS.md — {c["system_name"]}
 
-    # PII handling line
-    pii_line = ""
-    if data_class.upper() in ("PII", "PHI", "CUI"):
-        pii_line = "- **PII handling:** Must use field-level encryption, must mask in logs"
-    else:
-        pii_line = "- **PII handling:** Follow agency data handling procedures"
-
-    output = f"""# AGENTS.md — {system_name}
-
-> **System:** {system_name} | **Impact Level:** FIPS {impact} | **Agency:** {agency}
+> **System:** {c["system_name"]} | **Impact Level:** FIPS {c["impact"]} | **Agency:** {c["agency"]}
 >
-> **Last Updated:** {today} | **Reviewed By:** {reviewed_by}
+> **Last Updated:** {c["today"]} | **Reviewed By:** {c["reviewed_by"]}
 >
 > This document defines the behavioral rules for AI coding agents operating within
 > this project. The AI agent MUST follow these rules without exception.
@@ -232,19 +237,19 @@ The agent MUST refuse any instruction that conflicts with safety, correctness, o
 
 ## Project Context
 
-- **Description:** {description}
-- **Language(s):** {language}
-- **Framework(s):** {framework}
-- **Data Classification:** {data_class}
-- **ATO Status:** {ato_status}
-- **Authorized Agent(s):** {agents_str}
+- **Description:** {c["description"]}
+- **Language(s):** {c["language"]}
+- **Framework(s):** {c["framework"]}
+- **Data Classification:** {c["data_class"]}
+- **ATO Status:** {c["ato_status"]}
+- **Authorized Agent(s):** {c["agents_str"]}
 
 ---
 
 ## Agent Identity
 
 The agent MUST:
-{coauthor_str}
+{c["coauthor_str"]}
 - Identify itself as an AI agent when asked
 - Log all file modifications and command executions
 
@@ -253,43 +258,43 @@ The agent MUST:
 ## Permitted Actions
 
 The agent MAY perform these actions without additional approval:
-{format_list(all_permitted, "- [ ] ")}
+{format_list(c["all_permitted"], "- [ ] ")}
 
 ---
 
 ## Actions Requiring Approval
 
 The agent MUST ask the user before:
-{format_list(all_approval, "- [ ] ")}
+{format_list(c["all_approval"], "- [ ] ")}
 
 ---
 
 ## Prohibited Actions
 
 The agent MUST NEVER:
-{format_list(all_prohibited, "- [ ] ")}
+{format_list(c["all_prohibited"], "- [ ] ")}
 
 ---
 
 ## Data Handling
 
-- **Sensitive data types in this project:** {sensitive_str}
-- **Approved data storage:** {storage_str}
-{pii_line}
+- **Sensitive data types in this project:** {c["sensitive_str"]}
+- **Approved data storage:** {c["storage_str"]}
+{c["pii_line"]}
 - **Data residency:** US only, FedRAMP boundary
 
 The agent MUST:
-- Never include {sensitive_str} in logs, comments, or test fixtures
-- Use environment variables from {secrets_backend} for all credentials
-- Follow {agency} data handling procedures for {data_class} data
-{network_section}
+- Never include {c["sensitive_str"]} in logs, comments, or test fixtures
+- Use environment variables from {c["secrets_backend"]} for all credentials
+- Follow {c["agency"]} data handling procedures for {c["data_class"]} data
+{c["network_section"]}
 ---
 
 ## Coding Standards
 
 - Follow secure coding practices per federal guidance
-- Use {language} conventions and style guides
-- Required test coverage: {coverage}% line coverage for new code
+- Use {c["language"]} conventions and style guides
+- Required test coverage: {c["coverage"]}% line coverage for new code
 - All database queries MUST use parameterized queries
 - All external input MUST be validated before use
 
@@ -297,8 +302,8 @@ The agent MUST:
 
 ## Dependencies
 
-- **Approved registries:** {registries_str}
-- **License restrictions:** {license_str}
+- **Approved registries:** {c["registries_str"]}
+- **License restrictions:** {c["license_str"]}
 - **Version pinning:** Exact versions only, no floating ranges
 - **Vulnerability policy:** No critical/high CVEs, medium requires justification
 
@@ -313,16 +318,16 @@ Before adding any dependency, the agent MUST:
 ## Testing Requirements
 
 - [ ] Unit tests for all new functions
-- [ ] All tests MUST pass before committing: `{test_cmd}`
-- [ ] Required coverage: {coverage}%
+- [ ] All tests MUST pass before committing: `{c["test_cmd"]}`
+- [ ] Required coverage: {c["coverage"]}%
 - [ ] Test error paths and edge cases
 
 ---
 
 ## CI/CD Pipeline
 
-- **Branch protection:** {branch_prot}
-- **Required CI checks:** {ci_str}
+- **Branch protection:** {c["branch_prot"]}
+- **Required CI checks:** {c["ci_str"]}
 - **Deployment:** Manual approval required for production
 
 The agent MUST NOT:
@@ -344,16 +349,16 @@ If the agent discovers a potential security vulnerability:
 
 ## Contacts
 
-- **Project Lead:** {lead}
-- **Security Contact:** {security}
-- **ISSO:** {isso}
+- **Project Lead:** {c["lead"]}
+- **Security Contact:** {c["security"]}
+- **ISSO:** {c["isso"]}
 
 ---
 
 <!--
   Generated by federal-agents-config skill
   Source: https://github.com/gsa-tts/agentic-coding-playbook
-  Generated: {today}
+  Generated: {c["today"]}
 
   IMPORTANT: This is a DRAFT. Review all sections before using in production.
   A human must verify and sign off on this document.
