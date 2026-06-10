@@ -73,7 +73,7 @@ jobs:
           npm audit --audit-level=high
 
       - name: Markdown lint
-        run: npx --prefix .github/linters markdownlint-cli2 "**/*.md" "#node_modules" "#.github/linters/node_modules"
+        run: npx --prefix .github/linters markdownlint-cli2 "**/*.md" "#node_modules" "#.github/linters/node_modules" "#CHANGELOG.md"
 
       - name: Ruff lint
         run: ruff check scripts/
