@@ -6,6 +6,10 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    # Wait before opening update PRs so freshly-published (possibly
+    # compromised) releases age out before adoption (zizmor dependabot-cooldown).
+    cooldown:
+      default-days: 5
     labels:
       - "dependencies"
       - "ci"
@@ -18,6 +22,8 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    cooldown:
+      default-days: 5
     labels:
       - "dependencies"
       - "python"
