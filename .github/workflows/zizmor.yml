@@ -1,0 +1,44 @@
+# GitHub Actions security scanning with zizmor.
+# Scoped to run only when workflow files (or this workflow) change, so the
+# scan executes in CI — coverage no longer depends on each contributor having
+# zizmor installed locally. (Issue #103)
+#
+# Advisory: advanced-security is disabled (works on public repos without the
+# paid GHAS feature) and the job does not block merges; it surfaces findings
+# in the run log + annotations.
+name: Actions Security (zizmor)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        with:
+          advanced-security: false
