@@ -3,8 +3,8 @@ title: "Control Traceability Matrix"
 description: "Bidirectional mapping between NIST 800-53 controls, OWASP risks, document sections, and checklist items"
 status: canonical
 tier: 2
-last_updated: "2026-02-25"
-nist_controls: ["AC-2", "AC-3", "AC-5", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3", "AU-6", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-2", "IA-5", "IA-8", "IR-4", "IR-6", "RA-3", "RA-5", "SA-4", "SA-5", "SA-8", "SA-11", "SA-12", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SC-28", "SI-2", "SI-3", "SI-10", "SI-11", "SI-17", "SR-3", "SR-11"]
+last_updated: "2026-06-12"
+nist_controls: ["AC-2", "AC-3", "AC-5", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3", "AU-6", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-2", "IA-5", "IA-8", "IR-4", "IR-6", "RA-3", "RA-5", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SC-28", "SI-2", "SI-3", "SI-10", "SI-11", "SI-17", "SR-3", "SR-11"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026", "NIST AI RMF 1.0"]
 audience: "isso"
 keywords: ["traceability", "audit", "cross-reference", "control-mapping"]
@@ -64,7 +64,6 @@ For each control referenced in this playbook, this table shows where implementat
 | RA-5 | Vulnerability Scanning | §9.2 | §5.2 | §3.6 | — | 9.4, 9.5 |
 | SA-4 | Acquisition Process | — | §5.1 | §3.7 | — | — |
 | SA-11 | Developer Testing | §8, §14.3, §14.4 | §1.1 | §3.7 | — | 9.1, 9.2, 9.3 |
-| SA-12 | Supply Chain Protection | §7 | §5 | §3.7 | — | 5.1-5.7 |
 | SA-15 | Development Process | §15.1, §15.2 | §1.1 | §3.7 | — | — |
 | SA-5 | System Documentation | §15.4 | — | — | — | — |
 | SA-8 | Security Engineering Principles | §15.1, §15.2 | — | §3.7 | — | — |
@@ -78,7 +77,7 @@ For each control referenced in this playbook, this table shows where implementat
 | SI-10 | Input Validation | §5.1, §11 | §2 | §3.9 | — | 3.1-3.6 |
 | SI-11 | Error Handling | — | §6.1 | §3.9 | — | 6.1, 6.2 |
 | SI-17 | Fail-Safe Procedures | §14.5, §14.6 | — | — | — | — |
-| SR-3 | Supply Chain Controls | §7 | §5.2 | §3.10 | — | 5.1-5.7 |
+| SR-3 | Supply Chain Controls (supersedes withdrawn SA-12) | §7 | §5.2 | §3.10 | — | 5.1-5.7 |
 | SR-11 | Component Authenticity | §7 | §5.2 | §3.10 | — | 5.5 |
 
 ---
@@ -91,7 +90,7 @@ For each control referenced in this playbook, this table shows where implementat
 |----------|------|-----------------|-----------|--------------------|-----------|
 | LLM01 | Prompt Injection | SI-10, SI-3 | §11 | §2.1 | 3.1 |
 | LLM02 | Sensitive Information Disclosure | SC-28, SI-12 | §4 | §4, §6.2 | 2.1-2.6, 6.3 |
-| LLM03 | Supply Chain Vulnerabilities | SA-12, SR-3 | §7 | §5 | 5.1-5.7 |
+| LLM03 | Supply Chain Vulnerabilities | SR-3 | §7 | §5 | 5.1-5.7 |
 | LLM04 | Data and Model Poisoning | SI-10 | §11 | — | — |
 | LLM05 | Improper Output Handling | SI-10, SI-15 | — | §2.2 | 3.1-3.6 |
 | LLM06 | Excessive Agency | AC-6, CM-7 | §3, §10 | — | 4.3 |
@@ -110,7 +109,7 @@ For each control referenced in this playbook, this table shows where implementat
 | Agentic-04 | Insecure Inter-Agent Communication | — | Out of scope (MVP) | — | — |
 | Agentic-05 | Human Agent Trust Exploitation | AC-6 | §3.2, §8.2 | §1.2 | 1.1, 1.5 |
 | Agentic-06 | Tool Misuse and Exploitation | AC-6, CM-7 | §3, §10 | — | 4.3 |
-| Agentic-07 | Agentic Supply Chain Vulnerabilities | SA-12, SR-3 | §7 | §5 | 5.1-5.7 |
+| Agentic-07 | Agentic Supply Chain Vulnerabilities | SR-3 | §7 | §5 | 5.1-5.7 |
 | Agentic-08 | Memory and Context Poisoning | SI-10 | §11 | — | — |
 | Agentic-09 | Cascading Failures | IR-4 | §9 | §6.1 | — |
 | Agentic-10 | Rogue Agents | CM-7, AU-2 | §10 | — | — |
@@ -145,13 +144,13 @@ This reverse mapping lets reviewers trace from a failed checklist item back to t
 | 4.3 | Least privilege applied | AC-6 | AGENTS.md §3.1 |
 | 4.4 | Secure session management | SC-23 | docs/CODING_PRACTICES.md §3.3 |
 | 4.5 | No hardcoded auth bypasses | AC-3 | docs/CODING_PRACTICES.md §3.2 |
-| 5.1 | Dependencies pinned to exact versions | SA-12, SR-3 | docs/CODING_PRACTICES.md §5.2 |
-| 5.2 | Lock file committed | SA-12 | docs/CODING_PRACTICES.md §5.2 |
+| 5.1 | Dependencies pinned to exact versions | SR-3 | docs/CODING_PRACTICES.md §5.2 |
+| 5.2 | Lock file committed | SR-3 | docs/CODING_PRACTICES.md §5.2 |
 | 5.3 | No critical/high dependency CVEs | RA-5, SR-3 | docs/CODING_PRACTICES.md §5.2 |
 | 5.4 | Dependency licenses reviewed | SA-4 | docs/CODING_PRACTICES.md §5.1 |
 | 5.5 | Package names verified (typosquatting) | SR-11 | docs/CODING_PRACTICES.md §5.1, AGENTS.md §7.1 |
 | 5.6 | Dependency scanning in CI/CD | RA-5 | docs/CODING_PRACTICES.md §5.2 |
-| 5.7 | SBOM generated/updated | SA-12 | docs/CODING_PRACTICES.md §5.2 |
+| 5.7 | SBOM generated/updated | SR-3 | docs/CODING_PRACTICES.md §5.2 |
 | 6.1 | Explicit error handling | SI-11 | docs/CODING_PRACTICES.md §6.1 |
 | 6.2 | No internal details in error messages | SI-11 | docs/CODING_PRACTICES.md §6.1 |
 | 6.3 | No sensitive data in logs | AU-3 | docs/CODING_PRACTICES.md §6.2 |
@@ -173,7 +172,7 @@ This reverse mapping lets reviewers trace from a failed checklist item back to t
 | 9.2 | All existing tests pass | SA-11 | AGENTS.md §8.1 |
 | 9.3 | Error paths and edge cases tested | SA-11 | AGENTS.md §8.1 |
 | 9.4 | SAST scan passed | RA-5, SA-11 | docs/CODING_PRACTICES.md §10.2 |
-| 9.5 | SCA scan passed | RA-5, SA-12 | docs/CODING_PRACTICES.md §5.2 |
+| 9.5 | SCA scan passed | RA-5, SR-3 | docs/CODING_PRACTICES.md §5.2 |
 | 9.6 | AI code reviewed for hallucinated APIs | SA-11 | docs/CODING_PRACTICES.md §1.2 |
 | 10.1 | Infrastructure changes version-controlled | CM-2, SA-10 | docs/CODING_PRACTICES.md §10.1 |
 | 10.2 | No default credentials | CM-6, IA-5 | docs/CODING_PRACTICES.md §10.1 |

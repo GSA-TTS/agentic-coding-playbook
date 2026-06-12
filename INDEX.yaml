@@ -66,7 +66,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: task-context
-    last_updated: "2026-02-25"
+    last_updated: "2026-06-12"
     audience: developers
     nist_controls_count: 8
     review_cycle: quarterly
@@ -88,7 +88,7 @@ documents:
     load_priority: always
     last_updated: "2026-06-11"
     audience: developers
-    nist_controls_count: 23
+    nist_controls_count: 22
     review_cycle: quarterly
 
   - path: "docs/CODING_STANDARDS_COMPACT.md"
@@ -106,9 +106,9 @@ documents:
     status: canonical
     tier: 1
     load_priority: task-context
-    last_updated: "2026-02-25"
+    last_updated: "2026-06-12"
     audience: isso
-    nist_controls_count: 36
+    nist_controls_count: 35
     review_cycle: quarterly
 
   # ── Tier 2: Supporting Documentation ─────────────────────────────
@@ -138,9 +138,9 @@ documents:
     status: canonical
     tier: 2
     load_priority: on-demand
-    last_updated: "2026-02-25"
+    last_updated: "2026-06-12"
     audience: isso
-    nist_controls_count: 40
+    nist_controls_count: 39
     review_cycle: quarterly
 
   - path: "templates/SKILL.md.template"
@@ -318,5 +318,5 @@ stats:
   tier_1_core: 8
   tier_2_supporting: 5
   tier_3_templates: 8
-  total_nist_controls_referenced: 55
+  total_nist_controls_referenced: 54
   frameworks_covered: 19

@@ -252,7 +252,7 @@ We follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/) to 
 | `chore` | Maintenance (deps, CI) | `chore(deps): update feedparser to 6.0.11` |
 | `refactor` | Code restructuring (no behavior change) | `refactor(validator): simplify frontmatter parsing` |
 | `perf` | Performance improvement | `perf(validator): cache INDEX.yaml reads` |
-| `ci` | CI/CD pipeline changes | `ci: add commitlint enforcement` |
+| `ci` | CI/CD pipeline changes | `ci: add PR-title lint action` |
 
 ### Common Scopes
 
@@ -305,12 +305,14 @@ WIP: testing stuff
 
 ### Line Length
 
-- **First line (subject):** ≤72 characters (recommended), ≤100 characters (enforced by commitlint)
+- **First line (subject):** ≤72 characters (recommended)
 - **Body lines:** ≤100 characters for readability
 
 ### AI Agent Attribution
 
-**When AI agents contribute to a commit**, include a `Co-authored-by:` trailer per [AGENTS.md section 2.1](AGENTS.md#21-agent-identification):
+This project follows **PR-level attribution as RECOMMENDED, commit-level as OPTIONAL**
+(see [AGENTS.md section 2.1](AGENTS.md#21-agent-identification)). When AI agents
+contribute to a commit, you MAY include a `Co-authored-by:` trailer:
 
 ```
 feat(skills): add new pattern
@@ -320,44 +322,31 @@ Implementation details...
 Co-authored-by: OpenCode Agent <user@gsa.gov>
 ```
 
-**Format Requirements:**
+**Format (when used):**
 - Trailer appears after a blank line following the commit body
 - Uses the format: `Co-authored-by: Agent Name <email@gsa.gov>`
-- Email MUST use `@gsa.gov` domain for federal compliance
+- Email SHOULD use the `@gsa.gov` domain
 - Multiple co-authors each get their own line
 
-**Why we require this:**
+**Why we use this:**
 - Maintains transparent audit trail per AU-2 (Audit Events)
 - Enables attribution in GitHub UI and contribution graphs
 - Distinguishes human-written from AI-assisted code
 - Supports future AI risk management analysis
 
-See [AGENTS.md](AGENTS.md#21-agent-identification) for full AI attribution requirements.
+See [AGENTS.md](AGENTS.md#21-agent-identification) for full AI attribution guidance.
 
 ### Validation
 
-Check your commit message locally before pushing:
+Conventional-commit format is enforced on the **pull request title** by a
+SHA-pinned GitHub Action (`amannn/action-semantic-pull-request`,
+`.github/workflows/pr-lint.yml`) — no local tooling required. **Squash-merge is
+required** (the repo allows squash only; the branch ruleset enforces linear
+history and one code-owner review), so the validated PR title becomes the
+squashed commit subject that release-please consumes.
 
-```bash
-# Option 1: Use commitlint (if installed via pre-commit hooks)
-npx commitlint --from=HEAD~1
-
-# Option 2: Run the full CI suite (includes commitlint)
-make ci
-```
-
-### Pre-commit Hook (Optional)
-
-Automate validation with our pre-commit config:
-
-```bash
-# Install pre-commit hooks
-make install-hooks
-
-# Your commits will now be validated automatically
-```
-
-The commitlint hook is already configured in `.pre-commit-config.yaml`.
+`commitlint-cli` MAY be used as optional local convenience tooling, but is not
+required and is not part of CI.
 
 ## Releases
 

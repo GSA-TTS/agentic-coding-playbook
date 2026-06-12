@@ -4,7 +4,7 @@ description: "Secure coding standards for AI-assisted development — input vali
 status: canonical
 tier: 1
 last_updated: "2026-06-11"
-nist_controls: ["SA-8", "SA-11", "SA-12", "SA-15", "SA-17", "SI-2", "SI-4", "SI-7", "SI-10", "SI-11", "SI-15", "SC-3", "SC-13", "SC-28", "CP-10", "CA-7", "CM-2", "CM-3", "IA-2", "IA-5", "AC-3", "AU-2", "SR-3"]
+nist_controls: ["SA-8", "SA-11", "SA-15", "SA-17", "SI-2", "SI-4", "SI-7", "SI-10", "SI-11", "SI-15", "SC-3", "SC-13", "SC-28", "CP-10", "CA-7", "CM-2", "CM-3", "IA-2", "IA-5", "AC-3", "AU-2", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218A", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026", "CISA Secure by Design"]
 audience: "developers"
 keywords: ["secure-coding", "input-validation", "secrets-management", "supply-chain", "SBOM", "OWASP", "SSDF", "TDD", "SOLID", "YAGNI", "DRY", "ADR", "design-by-contract", "bias-testing", "fairness", "model-evaluation", "continuous-monitoring", "model-drift"]
@@ -207,7 +207,7 @@ If a secret is accidentally committed to version control:
 ## 5. Dependency and Supply Chain Security
 
 <!-- NIST SP 800-218A: PS.1 (Protect All Forms of Code from Unauthorized Access) -->
-<!-- NIST SP 800-53: SA-12 (Supply Chain Protection), SR-3 (Supply Chain Controls) -->
+<!-- NIST SP 800-53: SR-3 (Supply Chain Controls; supersedes withdrawn SA-12) -->
 <!-- OWASP LLM: LLM03 (Supply Chain Vulnerabilities) -->
 <!-- OWASP Agentic: Agentic Supply Chain Vulnerabilities -->
 
@@ -242,7 +242,7 @@ If using containers:
 - MUST NOT run containers as root unless absolutely necessary
 - SHOULD use multi-stage builds to minimize attack surface
 
-> **Control Mapping:** SA-12 (Supply Chain Protection), SR-3 (Supply Chain Controls), SR-11 (Component Authenticity), SA-4 (Acquisition Process)
+> **Control Mapping:** SR-3 (Supply Chain Controls; supersedes withdrawn SA-12), SR-11 (Component Authenticity), SA-4 (Acquisition Process)
 
 ---
 

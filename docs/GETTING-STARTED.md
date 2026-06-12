@@ -564,7 +564,7 @@ Beyond the five required stages, you SHOULD consider adding:
 | SBOM generation | Generate Software Bill of Materials | Required by OMB for federal software |
 | License compliance | Check dependency licenses for federal compatibility | For projects with many dependencies |
 
-> **Control Mapping:** SA-11 (Developer Testing), SA-15 (Development Process), RA-5 (Vulnerability Monitoring), SI-3 (Malicious Code Protection), SA-12 (Supply Chain Protection)
+> **Control Mapping:** SA-11 (Developer Testing), SA-15 (Development Process), RA-5 (Vulnerability Monitoring), SI-3 (Malicious Code Protection), SR-3 (Supply Chain Controls; supersedes withdrawn SA-12)
 
 ---
 
@@ -684,7 +684,7 @@ You MUST document your tool selection decision, including:
 
 This documentation supports your ATO package and helps future team members understand why specific tools were chosen.
 
-> **Control Mapping:** SA-4 (Acquisition Process), SA-9 (External Information System Services), SA-12 (Supply Chain Protection), RA-3 (Risk Assessment)
+> **Control Mapping:** SA-4 (Acquisition Process), SA-9 (External Information System Services), SR-3 (Supply Chain Controls; supersedes withdrawn SA-12), RA-3 (Risk Assessment)
 
 ---
 

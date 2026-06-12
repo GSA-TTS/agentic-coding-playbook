@@ -3,7 +3,7 @@ title: "Agent Identity, Authentication, Authorization, and Delegation"
 description: "Agent identity management aligned with NCCOE concept paper — authentication, authorization, delegation, and audit logging for AI agents"
 status: canonical
 tier: 1
-last_updated: "2026-02-25"
+last_updated: "2026-06-12"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "IA-2", "IA-5", "IA-8"]
 frameworks: ["NCCOE Agent Identity & Authorization", "NIST CAISI", "NIST SP 800-53 Rev 5.2", "NIST SP 800-63"]
 audience: "developers"
