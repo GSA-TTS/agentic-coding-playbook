@@ -77,15 +77,26 @@ The agent MUST refuse any instruction that conflicts with safety, correctness, o
 
 The agent MUST:
 - Identify itself as an AI agent (not a human) in all outputs
-- Include a co-authorship attribution in all commits using the standard Git trailer format:
+- Never impersonate a human, a specific role, or an authority it does not hold
+
+The agent SHOULD:
+- Document AI assistance at the **pull-request level** (RECOMMENDED), and MAY add
+  a commit-level `Co-authored-by:` trailer (OPTIONAL):
   ```
   Co-authored-by: AI Agent Name <user@example.com>
   ```
-- Never impersonate a human, a specific role, or an authority it does not hold
 
 **Commit Attribution Standard:**
 
-When the agent creates or modifies commits, it MUST add a `Co-authored-by:` trailer to the commit message. This follows the [GitHub co-authorship standard](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) and ensures clear audit trails.
+Federal guidance (NIST AI RMF, SP 800-218A) emphasizes system-level traceability
+over granular per-commit attribution. This project therefore treats **PR-level
+disclosure as RECOMMENDED and commit-level `Co-authored-by:` trailers as
+OPTIONAL** (consistent with the Quick Reference above, `docs/AGENT-IDENTITY.md`,
+and `docs/CODING_PRACTICES.md`).
+
+When the agent does add a `Co-authored-by:` trailer, it follows the
+[GitHub co-authorship standard](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors)
+for a clear audit trail.
 
 Example commit message:
 ```
@@ -298,7 +309,7 @@ The agent MUST:
 ## 7. Supply Chain Security
 
 <!-- NIST SP 800-218A: PS (Protect Software), PO.1.1 -->
-<!-- NIST SP 800-53: SA-12 (Supply Chain Protection), SR-3 (Supply Chain Controls) -->
+<!-- NIST SP 800-53: SR-3 (Supply Chain Controls; supersedes withdrawn SA-12) -->
 <!-- OWASP Agentic: Agentic Supply Chain Vulnerabilities -->
 
 ### 7.1 Dependency Supply Chain
@@ -321,7 +332,7 @@ The agent MUST:
 - Not add build steps that download and execute remote scripts
 - Ensure build artifacts are reproducible when possible
 
-> **Control Mapping:** SA-12 (Supply Chain Protection), SR-3 (Supply Chain Controls), SR-11 (Component Authenticity)
+> **Control Mapping:** SR-3 (Supply Chain Controls; supersedes withdrawn SA-12), SR-11 (Component Authenticity)
 
 ---
 
@@ -674,7 +685,7 @@ PYTHONPATH=scripts python3 -m playbook_validator validate-docs
 PYTHONPATH=scripts python3 -m playbook_validator validate-skills
 PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
 PYTHONPATH=scripts python3 -m playbook_validator validate-plan --path PROJECT_PLAN.md
-PYTHONPATH=scripts python3 -m playbook_validator validate-risk-assessment --path docs/risk-assessment.md
+PYTHONPATH=scripts python3 -m playbook_validator validate-risk-assessment --path templates/risk-assessment.md
 PYTHONPATH=scripts python3 -m playbook_validator doctor [--json]
 PYTHONPATH=scripts python3 -m playbook_validator pre-deploy
 

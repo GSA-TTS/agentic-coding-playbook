@@ -23,41 +23,41 @@ review_cycle: "quarterly"
 3. **Load on demand** — do NOT load all documents preemptively
 4. **Security is non-negotiable** — when in doubt about a security requirement, load the relevant doc rather than guessing
 
-## Tier 1 — Always Load (~14,110 words)
+## Tier 1 — Always Load (~14,139 words)
 
 These define the behavioral contract. Load for **every task**.
 
 | Document | Words | What It Covers |
 |----------|-------|----------------|
-| `AGENTS.md` | 4,771 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
-| `PLAYBOOK.md` | 1,155 | Step-by-step guide: project setup → deployment (9 phases, 11 skills) |
-| `docs/CODING_PRACTICES.md` | 6,638 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
+| `AGENTS.md` | 4,803 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
+| `PLAYBOOK.md` | 1,155 | Step-by-step guide: project setup → deployment (9 phases, 12 skills) |
+| `docs/CODING_PRACTICES.md` | 6,635 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
 | `docs/CODING_STANDARDS_COMPACT.md` | 450 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
 | `docs/AGENT-INSTRUCTIONS.md` | 1,096 | Repo-specific tooling reference: canonical paths, validation commands, context budgets |
 
-## Tier 2 — Load When Task Matches (~12,868 words)
+## Tier 2 — Load When Task Matches (~12,840 words)
 
 | Document | Words | Load When Task Involves |
 |----------|-------|------------------------|
-| `docs/SECURITY-CONTROLS.md` | 7,212 | Security controls, ATO, FedRAMP, compliance assessment, ISSO review |
+| `docs/SECURITY-CONTROLS.md` | 7,184 | Security controls, ATO, FedRAMP, compliance assessment, ISSO review |
 | `docs/AGENT-IDENTITY.md` | 5,656 | Authentication, authorization, OAuth, RBAC, delegation, identity management |
 
-## Tier 3 — Load On Demand (~7,218 words)
+## Tier 3 — Load On Demand (~7,206 words)
 
 | Document | Words | Load When Task Involves |
 |----------|-------|------------------------|
-| `docs/GETTING-STARTED.md` | 4,876 | New repo setup, CI/CD configuration, environment hardening, pre-commit hooks |
+| `docs/GETTING-STARTED.md` | 4,882 | New repo setup, CI/CD configuration, environment hardening, pre-commit hooks |
 | `docs/FEDERAL-AI-LANDSCAPE.md` | — | Federal AI guidance catalog (39 entries, EOs, OMB, NIST) |
-| `docs/TRACEABILITY.md` | 2,342 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
+| `docs/TRACEABILITY.md` | 2,324 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
 
-## Tier 4 — Reference Only (~3,926 words)
+## Tier 4 — Reference Only (~3,928 words)
 
 Load only when the specific activity is being performed.
 
 | Document | Words | Load When |
 |----------|-------|-----------|
 | `templates/risk-assessment.md` | 1,727 | Performing a risk assessment |
-| `checklists/pre-deployment.md` | 2,199 | Running pre-deployment checklist |
+| `checklists/pre-deployment.md` | 2,201 | Running pre-deployment checklist |
 
 ## Skills — Load Only When Invoked
 
@@ -74,6 +74,7 @@ Skills are self-contained procedures. Load the relevant skill only when executin
 | `federal-risk-assessment` | Completing a risk assessment worksheet |
 | `federal-security-controls-lookup` | Looking up specific NIST/OWASP controls |
 | `federal-pre-deployment-check` | Running pre-deployment security checks |
+| `federal-landscape-update` | Monitoring federal AI guidance updates (RSS) and refreshing the landscape registry |
 | `cloudgov-deploy` | Deploying to cloud.gov |
 | `ato-package` | Assembling ATO submission artifacts |
 
