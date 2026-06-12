@@ -669,7 +669,7 @@ For detailed repo-specific reference (canonical paths, validation package, conte
 ### Quick Reference
 
 ```bash
-# Validation (Python package — 341 tests)
+# Validation (Python package — 368 tests)
 PYTHONPATH=scripts python3 -m playbook_validator validate-docs
 PYTHONPATH=scripts python3 -m playbook_validator validate-skills
 PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
