@@ -3,7 +3,7 @@ title: "Secure Coding Practices for AI-Assisted Federal Development"
 description: "Secure coding standards for AI-assisted development — input validation, secrets management, dependency security, architecture discipline, change safety, SOLID principles, OWASP/SSDF alignment"
 status: canonical
 tier: 1
-last_updated: "2026-06-05"
+last_updated: "2026-06-11"
 nist_controls: ["SA-8", "SA-11", "SA-12", "SA-15", "SA-17", "SI-2", "SI-4", "SI-7", "SI-10", "SI-11", "SI-15", "SC-3", "SC-13", "SC-28", "CP-10", "CA-7", "CM-2", "CM-3", "IA-2", "IA-5", "AC-3", "AU-2", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218A", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026", "CISA Secure by Design"]
 audience: "developers"
@@ -407,7 +407,16 @@ This section defines version control and release management requirements for fed
   - `BREAKING CHANGE:` footer or `!` suffix → Major version bump
   - `docs:`, `chore:`, `test:`, `ci:`, `build:`, `style:`, `refactor:`, `perf:` → No version bump (configurable)
 
-- MUST validate commit messages in CI (commitlint)
+- MUST validate conventional-commit format in CI. The recommended mechanism is a
+  pinned PR-title-linting GitHub Action (e.g. `amannn/action-semantic-pull-request`,
+  referenced by full commit SHA) rather than a local `commitlint` install:
+  - It requires **no local npm/commitlint dependency** (smaller supply-chain and
+    maintenance surface).
+  - **Squash-merge is the preferred merge strategy** — the validated PR title
+    becomes the squashed commit subject that release-please consumes for version
+    bumps. This also satisfies the "SHOULD require linear history" guidance below.
+  - `commitlint-cli` MAY be adopted as optional local convenience tooling, but
+    MUST NOT be required.
 - MUST create git tags for all releases (`v<version>`)
 - MUST generate GitHub releases with release notes from CHANGELOG
 - Release artifacts MUST be signed per §10.2
