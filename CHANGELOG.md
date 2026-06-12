@@ -4,6 +4,14 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.11.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.11.0...v0.11.1) (2026-06-12)
+
+
+### Documentation
+
+* codify PR-title Action as commit-validation standard + squash-merge preference ([#109](https://github.com/GSA-TTS/agentic-coding-playbook/issues/109)) ([aaf68b3](https://github.com/GSA-TTS/agentic-coding-playbook/commit/aaf68b3768126674acbd517a6526b98286d3c016)), closes [#108](https://github.com/GSA-TTS/agentic-coding-playbook/issues/108)
+* fix accuracy issues from cross-repo docs review ([#111](https://github.com/GSA-TTS/agentic-coding-playbook/issues/111)) ([9aa432f](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9aa432f7fdd963517ed4702802720746a3f92b8f))
+
 ## [0.11.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.10.5...v0.11.0) (2026-06-10)
 
 
