@@ -182,6 +182,7 @@ since this file is committed to git:
 
 ```bash
 # Database connection (use secrets manager in production; leave blank here)
+#   Secrets manager format will be: postgresql://user:password@localhost:5432/dbname
 DATABASE_URL=
 
 # API keys (NEVER commit actual values; populate via prompt or secrets manager)
