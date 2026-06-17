@@ -4,7 +4,7 @@ title: "Agent Environment Doctor"
 description: "Detect available credentials, diagnose gaps against PROJECT_PLAN.md, and guide setup for AI agents in any environment"
 status: canonical
 tier: 2
-last_updated: "2026-06-01"
+last_updated: "2026-06-17"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["permissions", "credentials", "secrets", "tokens", "API key", "access", "sandbox", "authentication", "doctor", "environment check"]
@@ -167,7 +167,9 @@ When the doctor reports a `[FAIL]`, use this reference to create the missing cre
 **Do NOT grant:** Admin, Secrets, Environments, Pages, Security alerts write
 
 ```bash
-export GITHUB_TOKEN=github_pat_<your-token>
+# Prompt for the token (no echo) so it never lands in shell history or the
+# process list. Alternatively, pipe it from a CLI: `gh auth token | ...`.
+read -rs GITHUB_TOKEN && export GITHUB_TOKEN
 ```
 
 ### cloud.gov — SSO Login (sandbox)
@@ -192,29 +194,34 @@ cf service-key <project-name>-deployer deployer-key
 1. Create token with scopes: `read_repository`, `write_repository`, `read_api`
 
 ```bash
-export GITLAB_TOKEN=glpat-<your-token>
+# Prompt for the token (no echo); keeps the literal out of shell history.
+read -rs GITLAB_TOKEN && export GITLAB_TOKEN
 export GITLAB_URL=https://<your-instance>.workshop.cloud.gov
 ```
 
 ## Environment Template
 
-Create a `.env.example` file (committed to git) showing required variables:
+Create a `.env.example` file (committed to git) showing required variables.
+Use empty values or obvious placeholders — never put real token literals (or
+realistic-looking ones) in a committed file:
 
 ```bash
 # .env.example — Required environment variables for AI agent
 # Copy to .env and fill in values. NEVER commit .env to git.
+# Set real values via a prompt (e.g. `read -rs GITHUB_TOKEN`) or a secrets
+# manager — not by editing literals into your shell history.
 
 # GitHub (required for code hosting)
-GITHUB_TOKEN=github_pat_YOUR_TOKEN_HERE
+GITHUB_TOKEN=
 
 # cloud.gov (required for deployment)
-# CF_USERNAME=your_service_account
-# CF_PASSWORD=your_service_password
-# CF_ORG=your_org
-# CF_SPACE=your_space
+# CF_USERNAME=
+# CF_PASSWORD=
+# CF_ORG=
+# CF_SPACE=
 
 # GitLab (if using workshop.cloud.gov)
-# GITLAB_TOKEN=glpat-YOUR_TOKEN_HERE
+# GITLAB_TOKEN=
 # GITLAB_URL=https://your-instance.workshop.cloud.gov
 ```
 
