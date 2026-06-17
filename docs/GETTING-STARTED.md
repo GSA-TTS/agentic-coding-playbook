@@ -3,7 +3,7 @@ title: "Getting Started: Repository Setup and Environment Hardening"
 description: "Step-by-step guide for setting up a development repository with security controls for AI coding agents"
 status: canonical
 tier: 2
-last_updated: "2026-02-25"
+last_updated: "2026-06-17"
 nist_controls: ["CM-2", "CM-6", "SA-10", "PO.1"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218"]
 audience: "developers"

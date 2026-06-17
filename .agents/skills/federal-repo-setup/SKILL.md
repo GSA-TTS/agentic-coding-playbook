@@ -4,7 +4,7 @@ title: "Federal Repository Setup"
 description: "Initialize a code repository with federal security compliance defaults including .gitignore, pre-commit hooks, .editorconfig, and CI/CD security baseline."
 status: canonical
 tier: 2
-last_updated: "2026-06-01"
+last_updated: "2026-06-17"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["repo setup", "repository", "federal compliance", "pre-commit", "security baseline", "hardening"]
@@ -176,19 +176,24 @@ See [references/TOOL_MATRIX.md](references/TOOL_MATRIX.md) for the recommended l
 
 ### Step 6: Create .env.example
 
-If the project uses environment variables, create `.env.example` with placeholder values:
+If the project uses environment variables, create `.env.example` with empty or
+clearly-fake placeholder values — never a real (or realistic-looking) secret,
+since this file is committed to git:
 
 ```bash
-# Database connection (use secrets manager in production)
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+# Database connection (use secrets manager in production; leave blank here)
+DATABASE_URL=
 
-# API keys (NEVER commit actual values)
-API_KEY=your-api-key-here
+# API keys (NEVER commit actual values; populate via prompt or secrets manager)
+API_KEY=
 
 # Application settings
 LOG_LEVEL=info
 DEBUG=false
 ```
+
+> Set real values at runtime without exposing them in shell history — e.g.
+> `read -rs API_KEY && export API_KEY`, or inject from your secrets manager.
 
 **Rule:** `.env.example` MUST be committed. `.env` MUST NOT be committed.
 **Policy reference:** `docs/GETTING-STARTED.md` Section 6 — Environment Variables.
