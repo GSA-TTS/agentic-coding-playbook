@@ -4,6 +4,13 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.11.2](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.11.1...v0.11.2) (2026-06-17)
+
+
+### Documentation
+
+* **security:** remove secret literals from credential examples ([#113](https://github.com/GSA-TTS/agentic-coding-playbook/issues/113)) ([f06ed5c](https://github.com/GSA-TTS/agentic-coding-playbook/commit/f06ed5c1d0baabe6b218de94d09c82299d167084))
+
 ## [0.11.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.11.0...v0.11.1) (2026-06-12)
 
 
