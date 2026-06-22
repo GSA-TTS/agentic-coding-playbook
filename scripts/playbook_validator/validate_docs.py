@@ -36,6 +36,7 @@ EXCLUDED_DIRS = frozenset(
         "skills",
         "data",
         "templates",
+        "decisions",
     }
 )
 

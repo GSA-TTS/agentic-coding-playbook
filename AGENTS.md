@@ -3,7 +3,7 @@ title: "Federal AI Agent Behavioral Best Practices"
 description: "Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements"
 status: canonical
 tier: 1
-last_updated: "2026-05-21"
+last_updated: "2026-06-22"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-8", "IR-4", "IR-6", "PL-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
@@ -611,7 +611,7 @@ When reviewing code (its own or human-written), the agent MUST flag violations o
 - Missing tests for new functionality (§12.1)
 - Missing regression tests for bug fixes (§12.3)
 - Cross-module boundary violations (§13.5)
-- Speculative or YAGNI code (§13.1)
+- Speculative or YAGNI code (§13.1) — apply the **Laziness Ladder** (§13.1.1): prefer the first rung that holds (skip it → stdlib → native feature → existing dependency → one line → minimum code), while never simplifying away validation, error handling, security, or accessibility
 
 The agent SHOULD:
 - Cite the specific rule being violated (e.g., "§13.3: function exceeds 50-line limit")
