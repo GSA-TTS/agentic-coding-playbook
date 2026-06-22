@@ -7,10 +7,10 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-06-17
+# Last generated: 2026-06-22
 
 schema_version: "1.0"
-generated: "2026-06-17"
+generated: "2026-06-22"
 repo: "gsa-tts/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
@@ -102,7 +102,7 @@ documents:
 
   - path: "docs/SECURITY-CONTROLS.md"
     title: "NIST SP 800-53 Rev 5.2 Control Overlay for Agentic AI Systems"
-    description: "800-53 control overlay mapping 36 security controls across 10 families to concrete AI agent behaviors and verification methods"
+    description: "800-53 control overlay mapping 35 security controls across 10 families to concrete AI agent behaviors and verification methods"
     status: canonical
     tier: 1
     load_priority: task-context

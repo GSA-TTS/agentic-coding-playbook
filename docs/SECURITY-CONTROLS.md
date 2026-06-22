@@ -1,6 +1,6 @@
 ---
 title: "NIST SP 800-53 Rev 5.2 Control Overlay for Agentic AI Systems"
-description: "800-53 control overlay mapping 36 security controls across 10 families to concrete AI agent behaviors and verification methods"
+description: "800-53 control overlay mapping 35 security controls across 10 families to concrete AI agent behaviors and verification methods"
 status: canonical
 tier: 1
 last_updated: "2026-06-12"
@@ -21,8 +21,7 @@ review_cycle: "quarterly"
 
 ## Quick Reference
 
-36 controls across 10 families. Key families for AI agent systems:
-
+35 controls across 10 families. Key families for AI agent systems:
 | Family | Controls | Agent-Specific Focus |
 |--------|----------|---------------------|
 | AC (Access Control) | AC-2, AC-3, AC-5, AC-6, AC-12, AC-17 | Agent identity, least privilege, session management |
