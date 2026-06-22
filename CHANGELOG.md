@@ -4,6 +4,15 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.11.3](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.11.2...v0.11.3) (2026-06-22)
+
+
+### Maintenance
+
+* **deps:** bump pytest from 9.0.3 to 9.1.0 ([#115](https://github.com/GSA-TTS/agentic-coding-playbook/issues/115)) ([c351875](https://github.com/GSA-TTS/agentic-coding-playbook/commit/c351875e81fa107718d006873e4cefa605873ec7))
+* **deps:** bump ruff from 0.15.16 to 0.15.17 ([#119](https://github.com/GSA-TTS/agentic-coding-playbook/issues/119)) ([7d47db8](https://github.com/GSA-TTS/agentic-coding-playbook/commit/7d47db86ec39b49573772f4b4ce18e193695313e))
+* **deps:** pin js-yaml 4.2.0 + markdown-it 14.2.0 in linters; add npm dependabot coverage ([#117](https://github.com/GSA-TTS/agentic-coding-playbook/issues/117)) ([0fdf9dd](https://github.com/GSA-TTS/agentic-coding-playbook/commit/0fdf9ddfc45b20ed09d3eeece482dff6d27a0271))
+
 ## [0.11.2](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.11.1...v0.11.2) (2026-06-17)
 
 
