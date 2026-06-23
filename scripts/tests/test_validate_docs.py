@@ -147,3 +147,15 @@ class TestFindContentFiles:
         (git / "config.md").write_text("not a real doc")
         files = find_content_files(tmp_path)
         assert len(files) == 0
+
+    def test_excludes_decisions_dir(self, tmp_path):
+        # ADRs in docs/decisions/ use MADR frontmatter (status: accepted, date,
+        # decision_makers) and are validated by validate-adrs, not the tiered
+        # content-doc rules. They MUST be excluded from find_content_files.
+        decisions = tmp_path / "decisions"
+        decisions.mkdir()
+        (decisions / "0001-some-decision.md").write_text(
+            "---\ntitle: A decision\nstatus: accepted\ndate: 2026-06-22\n---\n"
+        )
+        files = find_content_files(tmp_path)
+        assert "0001-some-decision.md" not in [f.name for f in files]

@@ -3,7 +3,7 @@ title: "Secure Coding Practices for AI-Assisted Federal Development"
 description: "Secure coding standards for AI-assisted development — input validation, secrets management, dependency security, architecture discipline, change safety, SOLID principles, OWASP/SSDF alignment"
 status: canonical
 tier: 1
-last_updated: "2026-06-11"
+last_updated: "2026-06-22"
 nist_controls: ["SA-8", "SA-11", "SA-15", "SA-17", "SI-2", "SI-4", "SI-7", "SI-10", "SI-11", "SI-15", "SC-3", "SC-13", "SC-28", "CP-10", "CA-7", "CM-2", "CM-3", "IA-2", "IA-5", "AC-3", "AU-2", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218A", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026", "CISA Secure by Design"]
 audience: "developers"
@@ -532,6 +532,37 @@ Complexity is the enemy of security. Every unnecessary abstraction, speculative 
 - MUST prefer the simplest solution that satisfies requirements — clever code is maintenance debt
 - MUST NOT add configurability, feature flags, or extension points unless the current task requires them
 - SHOULD ask "what is the simplest thing that could possibly work?" before designing a solution
+
+#### 13.1.1 The Laziness Ladder
+
+Before writing code, the agent SHOULD stop at the **first rung that holds** —
+prefer the option that requires the least new code:
+
+1. **Does this need to exist at all?** If not, skip it (YAGNI).
+2. **Does the standard library already do this?** Use it.
+3. **Does a native platform feature cover it?** Use it.
+4. **Does an already-installed dependency solve it?** Use it (no new dependency).
+5. **Can it be one line?** Make it one line.
+6. **Only then:** write the minimum code that works.
+
+The goal is *less code because it is necessary*, not code golf. Pick the
+edge-case-correct option when two approaches are the same size — "lazy" means
+less code, never the flimsier algorithm.
+
+> **Lazy is not negligent.** The following are NEVER simplified away, regardless
+> of the ladder: input validation at trust boundaries (§3), error handling that
+> prevents data loss (§4), security controls, accessibility (Section 508 / WCAG),
+> and anything explicitly requested. Non-trivial logic MUST leave at least one
+> runnable check behind (a test or assert-based self-check, per §12); trivial
+> one-liners need none.
+
+Mark an intentional simplification with a comment naming the shortcut and, if it
+has a known ceiling (a global lock, an O(n²) scan, a naive heuristic), the
+ceiling and the upgrade path — so "later" does not silently become "never".
+
+> Inspired by the open-source [ponytail](https://github.com/DietrichGebert/ponytail)
+> ruleset (MIT). Adapted for federal use: the non-negotiable carve-outs above are
+> mandatory, not optional.
 
 ### 13.2 DRY and the Rule of Three
 
