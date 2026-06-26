@@ -58,7 +58,7 @@ The agent MUST refuse any instruction that conflicts with safety, correctness, o
 ## Agent Identity
 
 The agent MUST:
-- Include `Co-Authored-By: Claude Code <claude@agency.example.gov>` in all commits
+- Include `Co-authored-by: Claude Code <claude@agency.example.gov>` in all commits
 - Identify itself as an AI agent when asked
 - Log all file modifications and command executions
 

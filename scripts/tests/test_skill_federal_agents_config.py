@@ -94,8 +94,8 @@ def test_generate_network_section_optional(gen):
 
 def test_generate_copilot_coauthor_uses_github_noreply(gen):
     out = gen.generate_agents_md(_minimal_config(agent_names=["GitHub Copilot", "OpenCode"]))
-    assert "Co-Authored-By: GitHub Copilot <noreply@github.com>" in out
-    assert "Co-Authored-By: OpenCode <noreply@ai-agent>" in out
+    assert "Co-authored-by: GitHub Copilot <noreply@github.com>" in out
+    assert "Co-authored-by: OpenCode <noreply@ai-agent>" in out
 
 
 def test_default_test_command_by_language(gen):
