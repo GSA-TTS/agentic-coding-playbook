@@ -93,15 +93,15 @@ def _resolve_registries(config: dict, language: str) -> list:
 
 
 def _coauthor_lines(agents: list) -> str:
-    """Render Co-Authored-By trailer bullet lines for the configured agents."""
+    """Render Co-authored-by trailer bullet lines for the configured agents."""
     lines = []
     for agent in agents:
         if "copilot" in agent.lower():
-            lines.append(f"Co-Authored-By: {agent} <noreply@github.com>")
+            lines.append(f"Co-authored-by: {agent} <noreply@github.com>")
         else:
-            lines.append(f"Co-Authored-By: {agent} <noreply@ai-agent>")
+            lines.append(f"Co-authored-by: {agent} <noreply@ai-agent>")
     if not lines:
-        lines = ["Co-Authored-By: [Agent Name] <[agent-email]>"]
+        lines = ["Co-authored-by: [Agent Name] <[agent-email]>"]
     return "\n".join(f"  - `{line}`" for line in lines)
 
 

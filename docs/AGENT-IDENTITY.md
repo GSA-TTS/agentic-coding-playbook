@@ -138,12 +138,12 @@ Per NIST AI RMF and SP 800-218A, AI-generated code requires **traceability** but
 | Level | Required? | How |
 |-------|-----------|-----|
 | **PR Description** | RECOMMENDED | Include "AI-assisted" disclosure in PR description |
-| **Commit Message** | OPTIONAL | `Co-Authored-By: AI Agent <ai-agent@gsa.gov>` in footer |
+| **Commit Message** | OPTIONAL | `Co-authored-by: AI Agent <ai-agent@gsa.gov>` in footer |
 | **Documentation** | REQUIRED | AGENTS.md documents AI agent authorization for the project |
 
 When per-commit attribution IS used, include a co-authorship trailer:
 ```
-Co-Authored-By: AI Agent <ai-agent@gsa.gov>
+Co-authored-by: AI Agent <ai-agent@gsa.gov>
 ```
 
 Additional version control guidance:
