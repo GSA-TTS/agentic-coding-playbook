@@ -34,6 +34,14 @@ make generate-check    # Verify INDEX.yaml is up to date
 # Testing
 PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v
 
+# Local CI (mirrors .github/workflows/ci.yml — ruff, markdownlint, pytest,
+# validators, INDEX freshness, Semgrep SAST, pip-audit SCA). Useful for a fast
+# inner loop or when GitHub Actions is unavailable. Builds an invocation-scoped
+# CA bundle so it works behind a TLS-intercepting proxy (e.g. ZScaler); runs
+# pip-audit in an ephemeral venv to match CI isolation.
+scripts/ci-local.sh              # run everything
+scripts/ci-local.sh --no-net    # skip the network steps (Semgrep, pip-audit)
+
 # Federal AI Landscape Monitoring (Phase 1)
 python scripts/check_federal_landscape_rss.py           # Check RSS feeds for new publications
 python scripts/check_federal_landscape_rss.py | \
