@@ -4,6 +4,22 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.12.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.12.0...v0.12.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* **docs:** use canonical 'Co-authored-by:' casing so GitHub links co-authors ([#133](https://github.com/GSA-TTS/agentic-coding-playbook/issues/133)) ([5335350](https://github.com/GSA-TTS/agentic-coding-playbook/commit/5335350a858d0703221b09449ade1605d4e609a3))
+
+
+### Maintenance
+
+* **ci:** add scripts/ci-local.sh to run the CI gate locally ([#138](https://github.com/GSA-TTS/agentic-coding-playbook/issues/138)) ([d421669](https://github.com/GSA-TTS/agentic-coding-playbook/commit/d421669e1f2f26596ee3c2c30c11922dbcbcbd58))
+* **deps:** bump actions/checkout from 6.0.3 to 7.0.0 ([#134](https://github.com/GSA-TTS/agentic-coding-playbook/issues/134)) ([03844aa](https://github.com/GSA-TTS/agentic-coding-playbook/commit/03844aa3868b83c5cbb9e3deefb9586e6ad3e3e5))
+* **deps:** bump pytest from 9.1.0 to 9.1.1 ([#137](https://github.com/GSA-TTS/agentic-coding-playbook/issues/137)) ([24bf0b5](https://github.com/GSA-TTS/agentic-coding-playbook/commit/24bf0b50715a03c7b2da86354ca804027c701a7d))
+* **deps:** bump ruff from 0.15.17 to 0.15.18 ([#136](https://github.com/GSA-TTS/agentic-coding-playbook/issues/136)) ([fd5de21](https://github.com/GSA-TTS/agentic-coding-playbook/commit/fd5de2193e876bd1dd2cc810c882051ecdc84ac7))
+* **deps:** bump zizmorcore/zizmor-action from 0.5.6 to 0.5.7 ([#135](https://github.com/GSA-TTS/agentic-coding-playbook/issues/135)) ([e59be37](https://github.com/GSA-TTS/agentic-coding-playbook/commit/e59be37cb52245a52903fedd47d32e1a14c4cca7))
+
 ## [0.12.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.11.4...v0.12.0) (2026-06-23)
 
 
