@@ -4,6 +4,13 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.12.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.11.4...v0.12.0) (2026-06-23)
+
+
+### Features
+
+* **docs:** add Laziness Ladder simplicity guidance + ADR (ponytail-inspired) ([#126](https://github.com/GSA-TTS/agentic-coding-playbook/issues/126)) ([ef56304](https://github.com/GSA-TTS/agentic-coding-playbook/commit/ef56304f31b182964d4778d3511f838d22a5c61c))
+
 ## [0.11.4](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.11.3...v0.11.4) (2026-06-22)
 
 
