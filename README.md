@@ -103,7 +103,7 @@ Skills convert best practices into step-by-step workflows that any AI coding age
 
 ## Developer Tools
 
-All validation and generation tools live in the `scripts/playbook_validator/` Python package (369 tests).
+All validation and generation tools live in the `scripts/playbook_validator/` Python package (370 tests).
 
 ```bash
 make help              # Show all available commands
@@ -144,7 +144,7 @@ Every practice maps to one or more authoritative sources:
 | [OMB M-25-21](https://www.whitehouse.gov/wp-content/uploads/2025/02/M-25-21-Accelerating-Federal-Use-of-AI-through-Innovation-Governance-and-Public-Trust.pdf) | Apr 2025 | Federal AI governance |
 | [CISA Secure by Design](https://www.cisa.gov/securebydesign) | 2025 | Secure-by-default principles |
 
-Full catalog of 39 federal AI guidance documents: [docs/FEDERAL-AI-LANDSCAPE.md](./docs/FEDERAL-AI-LANDSCAPE.md)
+Full catalog of 42 federal AI guidance documents: [docs/FEDERAL-AI-LANDSCAPE.md](./docs/FEDERAL-AI-LANDSCAPE.md)
 
 ---
 
@@ -167,7 +167,7 @@ agentic-coding-playbook/
 ├── data/
 │   └── federal-ai-landscape.yaml    # Machine-readable guidance registry
 ├── scripts/
-│   ├── playbook_validator/          # Python validation package (369 tests)
+│   ├── playbook_validator/          # Python validation package (370 tests)
 │   └── tests/                       # TDD test suite
 ├── skills/                          # 12 executable compliance procedures
 ├── templates/                       # PROJECT_PLAN.md, AGENTS.md.template
