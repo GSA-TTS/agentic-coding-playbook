@@ -1,15 +1,15 @@
 # federal-ai-landscape.yaml — Machine-readable registry of federal AI guidance
 #
 # Schema: Each entry has: id, title, category, source, date, status, relevance, url
-# Categories: executive_order, omb_memo, nist_standard, legislation, agency_strategy, industry_standard, white_house_plan
+# Categories: executive_order, omb_memo, nist_standard, legislation, agency_strategy, agency_report, industry_standard, white_house_plan
 # Statuses: active, revoked, rescinded, draft, final
 #
 # This file is the single source of truth. docs/FEDERAL-AI-LANDSCAPE.md is generated from it.
 # Last reviewed: 2026-04-06
 
 version: "1.0"
-last_reviewed: "2026-04-06"
-total_entries: 39
+last_reviewed: "2026-06-29"
+total_entries: 42
 
 entries:
 
@@ -165,6 +165,16 @@ entries:
     relevance: "Historical. Established AI acquisition safeguards."
     url: "https://www.whitehouse.gov/wp-content/uploads/2024/10/M-24-18-AI-Acquisition-Memorandum.pdf"
     playbook_phases: []
+
+  - id: m-16-21
+    title: "Federal Source Code Policy: Achieving Efficiency, Transparency, and Innovation through Reusable and Open Source Software"
+    category: omb_memo
+    source: "OMB"
+    date: "2016-08-08"
+    status: active
+    relevance: "Establishes the federal default to release custom-developed code as open source and dedicate it to the public. Basis for publishing GSA-TTS repositories publicly and for the CC0/public-domain posture used by the community-hub repo."
+    url: "https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2016/m_16_21.pdf"
+    playbook_phases: ["0"]
 
   # ── NIST Standards ────────────────────────────────────────────────
 
@@ -358,7 +368,7 @@ entries:
 
   - id: gao-ai-framework
     title: "GAO AI Accountability Framework"
-    category: agency_strategy
+    category: agency_report
     source: "GAO"
     publication_id: "GAO-21-519SP"
     date: "2021-06-01"
@@ -423,7 +433,7 @@ entries:
 
   - id: nist-ssdf
     title: "Secure Software Development Framework (SSDF) v1.1"
-    category: industry_standard
+    category: nist_standard
     source: "NIST"
     publication_id: "SP 800-218"
     date: "2022-02-01"
@@ -442,6 +452,29 @@ entries:
     relevance: "Build provenance and dependency verification for AI supply chain security."
     url: "https://slsa.dev/"
     playbook_phases: ["1"]
+
+  - id: dco-1-1
+    title: "Developer Certificate of Origin 1.1"
+    category: industry_standard
+    source: "Linux Foundation"
+    version: "1.1"
+    date: "2004-05-01"
+    status: active
+    relevance: "Lightweight per-commit provenance attestation (the Signed-off-by sign-off). Basis for requiring that a human — not an agent — certifies the origin and contribution rights of AI-assisted contributions."
+    url: "https://developercertificate.org/"
+    playbook_phases: []
+
+  # ── Agency Reports ────────────────────────────────────────────────
+
+  - id: usco-ai-part2-copyrightability
+    title: "Copyright and Artificial Intelligence, Part 2: Copyrightability"
+    category: agency_report
+    source: "U.S. Copyright Office"
+    date: "2025-01-29"
+    status: active
+    relevance: "States the Office's position that purely AI-generated material lacks the human authorship required for copyright protection. Informs the public-domain / CC0 posture for AI-assisted contributions. Agency position for context, not legal advice."
+    url: "https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf"
+    playbook_phases: ["0"]
 
   # ── White House Plans ─────────────────────────────────────────────
 
