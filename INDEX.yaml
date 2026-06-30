@@ -112,6 +112,17 @@ documents:
     review_cycle: quarterly
 
   # ── Tier 2: Supporting Documentation ─────────────────────────────
+  - path: "docs/AI-CONTRIBUTION-POLICY.md"
+    title: "AI-Assisted Contribution Policy"
+    description: "Canonical policy governing AI-assisted contributions — human accountability, disclosure, provenance, verification, data handling, security review, and licensing posture for federal AI-assisted development"
+    status: canonical
+    tier: 2
+    load_priority: task-context
+    last_updated: "2026-06-30"
+    audience: [developers, managers, isso]
+    nist_controls_count: 14
+    review_cycle: quarterly
+
   - path: "docs/FEDERAL-AI-LANDSCAPE.md"
     title: "Federal AI Landscape"
     description: "Canonical catalog of federal AI guidance, executive orders, standards, and legislation relevant to AI-assisted software development"
@@ -313,10 +324,10 @@ skills:
     has_scripts: false
 
 stats:
-  total_documents: 21
+  total_documents: 22
   total_skills: 12
   tier_1_core: 8
-  tier_2_supporting: 5
+  tier_2_supporting: 6
   tier_3_templates: 8
-  total_nist_controls_referenced: 54
-  frameworks_covered: 19
+  total_nist_controls_referenced: 56
+  frameworks_covered: 21

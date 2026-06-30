@@ -8,7 +8,7 @@ nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3",
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
 keywords: ["agent-rules", "behavioral-contract", "least-privilege", "audit-logging", "prompt-injection", "prohibited-actions", "meta-constraints", "plan-before-execute", "verification-transcript", "engineering-discipline"]
-related_files: ["docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md", "templates/AGENTS.md.template", "CONTEXT-GUIDE.md", "docs/TRACEABILITY.md", "docs/AGENT-INSTRUCTIONS.md"]
+related_files: ["docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md", "docs/AI-CONTRIBUTION-POLICY.md", "templates/AGENTS.md.template", "CONTEXT-GUIDE.md", "docs/TRACEABILITY.md", "docs/AGENT-INSTRUCTIONS.md"]
 load_priority: "always"
 review_cycle: "quarterly"
 ---
@@ -97,6 +97,12 @@ and `docs/CODING_PRACTICES.md`).
 When the agent does add a `Co-authored-by:` trailer, it follows the
 [GitHub co-authorship standard](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors)
 for a clear audit trail.
+
+> **Full contribution policy:** For the complete behavioral and accountability
+> expectations governing AI-assisted contributions — human ownership, disclosure,
+> provenance / right-to-contribute, verification, data handling, security review,
+> and licensing — see [`docs/AI-CONTRIBUTION-POLICY.md`](docs/AI-CONTRIBUTION-POLICY.md)
+> (the canonical policy that downstream repositories reference).
 
 Example commit message:
 ```
