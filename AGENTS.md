@@ -100,9 +100,9 @@ for a clear audit trail.
 
 > **Full contribution policy:** For the complete behavioral and accountability
 > expectations governing AI-assisted contributions — human ownership, disclosure,
-> provenance (DCO), verification, data handling, security review, and licensing —
-> see [`docs/AI-CONTRIBUTION-POLICY.md`](docs/AI-CONTRIBUTION-POLICY.md) (the
-> canonical policy that downstream repositories reference).
+> provenance / right-to-contribute, verification, data handling, security review,
+> and licensing — see [`docs/AI-CONTRIBUTION-POLICY.md`](docs/AI-CONTRIBUTION-POLICY.md)
+> (the canonical policy that downstream repositories reference).
 
 Example commit message:
 ```

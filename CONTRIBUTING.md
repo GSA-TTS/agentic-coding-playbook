@@ -338,11 +338,11 @@ See [AGENTS.md](AGENTS.md#21-agent-identification) for full AI attribution guida
 
 > **AI-assisted contributions:** If you used an AI coding agent to help author a
 > contribution, the full behavioral and accountability expectations — human
-> ownership, disclosure, provenance (only a human may certify a DCO sign-off),
-> verification, data handling, security review, and licensing — are defined in
-> the canonical [AI-Assisted Contribution Policy](docs/AI-CONTRIBUTION-POLICY.md).
-> In short: **you own the work, you must be able to explain it, and it meets the
-> same review/test/security bar as any other contribution.**
+> ownership, disclosure, provenance / your right to contribute, verification,
+> data handling, security review, and licensing — are defined in the canonical
+> [AI-Assisted Contribution Policy](docs/AI-CONTRIBUTION-POLICY.md). In short:
+> **you own the work, you must be able to explain it, and it meets the same
+> review/test/security bar as any other contribution.**
 
 ### Validation
 
