@@ -4,7 +4,7 @@ title: "Project Bootstrap"
 description: "Automatically set up a new federal coding project from a PROJECT_PLAN.md file"
 status: canonical
 tier: 2
-last_updated: "2026-06-01"
+last_updated: "2026-07-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["new project", "bootstrap", "setup repo", "initialize", "scaffolding"]
@@ -33,13 +33,20 @@ This skill copies the following files from the playbook repo into the target rep
 
 | Source (this repo) | Destination (target repo) | Purpose |
 |---|---|---|
-| `templates/AGENTS.md.template` | `AGENTS.md` | Agent behavioral contract (customized per project) |
+| `templates/AGENTS.md.template` | `AGENTS.md` | Thin project-layer agent contract (references the universal contract; customized per project) |
 | `docs/CODING_PRACTICES.md` | `docs/CODING_PRACTICES.md` | Secure coding standards |
-| `CONTEXT-GUIDE.md` | `CONTEXT-GUIDE.md` | Agent context routing |
+| `templates/CONTEXT-GUIDE.project.md` | `CONTEXT-GUIDE.md` | Agent context routing (project-scoped) |
 | `templates/risk-assessment.md` | `docs/risk-assessment.md` | Risk assessment (pre-filled from plan) |
 | `checklists/pre-deployment.md` | `checklists/pre-deployment.md` | 62-item pre-deployment checklist |
 
-The agent must have access to these files — either via the playbook repo cloned locally, or by fetching from the [playbook repository](https://github.com/gsa-tts/agentic-coding-playbook).
+The agent must have access to these files — either via the playbook repo cloned locally, or by fetching from the [playbook repository](https://github.com/GSA-TTS/agentic-coding-playbook).
+
+> **Note:** The universal `AGENTS.md` is deliberately **not** copied into the
+> target repo. It is the single source of truth for the universal behavioral
+> rules and is expected to be made available to the agent globally. The thin
+> project `AGENTS.md` emitted here declares that universal contract as a
+> prerequisite and instructs the agent to STOP — and require the user's
+> affirmative permission to proceed — if it is unavailable.
 
 ## Procedure
 
@@ -118,11 +125,12 @@ docs/
 go.mod
 ```
 
-### Step 3: Generate AGENTS.md
+### Step 3: Generate the project AGENTS.md
 
 Copy `templates/AGENTS.md.template` from the playbook repo to the target repo root as `AGENTS.md`. If `AGENTS.md` already exists, ask the user before overwriting.
 
-Customize based on PROJECT_PLAN.md:
+This is the **thin project layer** — it references the universal contract as a prerequisite and must NOT restate the universal rules. Customize based on PROJECT_PLAN.md:
+- Confirm the Prerequisite section's universal-contract source URL is correct for your org
 - Set the compliance level in the header
 - Add project-specific prohibited actions based on data classifications
 - If PII: add "MUST NOT log PII fields" to prohibited actions
@@ -133,7 +141,7 @@ Customize based on PROJECT_PLAN.md:
 
 Copy these files from the playbook repo to the target repo (skip any that already exist unless the user confirms overwrite):
 - `docs/CODING_PRACTICES.md` → target `docs/CODING_PRACTICES.md`
-- `CONTEXT-GUIDE.md` → target `CONTEXT-GUIDE.md`
+- `templates/CONTEXT-GUIDE.project.md` → target `CONTEXT-GUIDE.md`
 - `templates/risk-assessment.md` → target `docs/risk-assessment.md`
 - `checklists/pre-deployment.md` → target `checklists/pre-deployment.md`
 
@@ -198,7 +206,7 @@ Files created: {count}
 
 Created:
   ✓ Directory structure ({language} conventions)
-  ✓ AGENTS.md (behavioral contract)
+  ✓ AGENTS.md (thin project layer — references universal contract)
   ✓ CODING_PRACTICES.md (secure coding standards)
   ✓ CONTEXT-GUIDE.md (agent routing)
   ✓ ADR-001 (initial architecture decision)

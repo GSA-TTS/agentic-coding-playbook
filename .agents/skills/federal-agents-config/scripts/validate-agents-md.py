@@ -16,9 +16,9 @@ from pathlib import Path
 MAX_FILE_SIZE = 1024 * 500  # 500KB
 
 REQUIRED_SECTIONS = [
-    "Core Principles",
+    "Prerequisite: Universal Behavioral Contract",
     "Project Context",
-    "Agent Identity",
+    "Project-Specific Identity",
     "Permitted Actions",
     "Actions Requiring Approval",
     "Prohibited Actions",
@@ -27,7 +27,6 @@ REQUIRED_SECTIONS = [
     "Dependencies",
     "Testing Requirements",
     "CI/CD Pipeline",
-    "Incident Response",
     "Contacts",
 ]
 
@@ -109,22 +108,15 @@ def validate(file_path: str) -> dict:
         unique = list(set(placeholders))[:10]
         warnings.append(f"Found {len(placeholders)} unfilled placeholder(s): {', '.join(unique)}")
 
-    # Check priority order is correct
-    if "safety > correctness > compliance > simplicity > performance" not in content:
-        warnings.append("Core Principles priority order may be missing or modified")
-
-    # Check for prohibited actions section content
-    prohibited_section = re.search(
-        r"## Prohibited Actions\n(.*?)(?=\n---|\n## |\Z)",
-        content,
-        re.DOTALL,
-    )
-    if prohibited_section:
-        prohibited_text = prohibited_section.group(1)
-        must_have = ["secrets", "security controls", "classified"]
-        for term in must_have:
-            if term.lower() not in prohibited_text.lower():
-                warnings.append(f"Prohibited Actions may be missing standard prohibition: {term}")
+    # The thin project layer MUST reference the universal contract as a
+    # prerequisite and instruct the agent to stop / require affirmative
+    # permission when it is unavailable.
+    if "affirmatively" not in content.lower() and "affirmative" not in content.lower():
+        warnings.append(
+            "Prerequisite section may be missing the affirmative-permission-to-proceed instruction"
+        )
+    if "agentic-coding-playbook" not in content:
+        warnings.append("Prerequisite section may be missing the universal contract source URL")
 
     # Calculate pass/fail
     pass_count = sum(1 for r in results if r["pass"])

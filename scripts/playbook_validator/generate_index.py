@@ -409,7 +409,9 @@ def generate_index(root: Path) -> None:
     (root / "INDEX.yaml").write_text(yaml_content, encoding="utf-8")
 
     table = render_skills_table(skills)
-    for target in ["README.md", "AGENTS.md", "docs/AGENT-INSTRUCTIONS.md"]:
+    # Note: the universal AGENTS.md deliberately carries no skills table — the
+    # skills inventory lives in the repo-specific docs/AGENT-INSTRUCTIONS.md.
+    for target in ["README.md", "docs/AGENT-INSTRUCTIONS.md"]:
         inject_readme_table(root / target, table)
 
     update_context_guide_word_counts(root)

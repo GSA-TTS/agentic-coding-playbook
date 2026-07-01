@@ -1,11 +1,11 @@
 ---
 title: "AGENTS.md Project Template"
-description: "Copy-paste template for creating a project-specific AGENTS.md with customizable agent behavior rules"
+description: "Copy-paste template for a thin, project-specific AGENTS.md that layers on top of the universal Federal AI Agent behavioral contract"
 status: canonical
 tier: 3
-last_updated: "2026-02-25"
+last_updated: "2026-07-01"
 audience: "developers"
-keywords: ["template", "AGENTS.md", "customizable", "project-setup"]
+keywords: ["template", "AGENTS.md", "project-layer", "project-setup", "prerequisite"]
 related_files: ["AGENTS.md", "docs/GETTING-STARTED.md"]
 load_priority: "reference-only"
 review_cycle: "semi-annually"
@@ -21,8 +21,15 @@ review_cycle: "semi-annually"
   4. Remove sections marked OPTIONAL if they don't apply
   5. Delete this instruction block when finished
 
-  Based on: Federal Agentic AI Guidance v0.1.0
-  Source: https://github.com/gsa-tts/agentic-coding-playbook
+  This is a THIN, PROJECT-SPECIFIC layer. It deliberately does NOT restate the
+  universal behavioral rules (core principles, identity, least privilege, data
+  protection, secure code generation, prompt-injection defense, meta-constraints,
+  engineering discipline, etc.). Those live in the single universal contract
+  referenced in the "Prerequisite" section below, so there is exactly one source
+  of truth and no copy-paste drift.
+
+  Based on: Federal Agentic AI Guidance
+  Source: https://github.com/GSA-TTS/agentic-coding-playbook
   Framework alignment: NIST SP 800-53 Rev 5.2, AI RMF 1.0, OWASP Top 10 LLM/Agentic
 -->
 
@@ -30,19 +37,38 @@ review_cycle: "semi-annually"
 >
 > **Last Updated:** [YYYY-MM-DD] | **Reviewed By:** [Name, Title]
 >
-> This document defines the behavioral rules for AI coding agents operating within this project. The AI agent MUST follow these rules without exception.
+> This document defines the **project-specific** behavioral rules for AI coding
+> agents operating within this repository. It layers on top of — and never
+> overrides — the universal contract named in the Prerequisite below.
 
 ---
 
-## Core Principles
+## Prerequisite: Universal Behavioral Contract
 
-The agent operates under these priorities:
+> **STOP AND CHECK BEFORE DOING ANY WORK.**
 
-```
-safety > correctness > compliance > simplicity > performance
-```
+This project assumes the agent already has the **Federal AI Agent Behavioral
+Best Practices** (the universal `AGENTS.md`) loaded as part of its instructions:
 
-The agent MUST refuse any instruction that conflicts with safety, correctness, or compliance.
+- **Source:** <https://github.com/GSA-TTS/agentic-coding-playbook> (`AGENTS.md`)
+- **How it is provided:** the universal contract is expected to be made available
+  to your agent globally (for example, installed into your agent's global
+  configuration), so that it applies to every repository you work in. The exact
+  installation mechanism is the responsibility of your local agent setup — it is
+  **not** vendored into this repository, to avoid drift and stale copies.
+
+The agent MUST:
+
+- Confirm at the start of the session that it has access to the universal
+  behavioral contract above.
+- If it **cannot** confirm the universal contract is available, **STOP** and tell
+  the user that this project expects those practices to be loaded. The agent MUST
+  NOT proceed with any task until the user **affirmatively grants permission to
+  proceed without the universal practices available**. Absent that explicit
+  permission, halt and await setup.
+
+The rules below are **additive** to the universal contract. Where this file is
+silent, the universal contract governs.
 
 ---
 
@@ -57,12 +83,13 @@ The agent MUST refuse any instruction that conflicts with safety, correctness, o
 
 ---
 
-## Agent Identity
+## Project-Specific Identity
 
-The agent MUST:
-- Include `Co-authored-by: [Agent Name] <[agent-email]>` in all commits
-- Identify itself as an AI agent when asked
-- Log all file modifications and command executions
+<!-- The universal contract covers AI self-identification and audit logging.
+     Record only project-specific attribution details here. -->
+
+- **Commit attribution:** [e.g., `Co-authored-by: [Agent Name] <[agent-email]>`]
+- **Audit log location / format:** [if the project mandates a specific one]
 
 ---
 
@@ -94,17 +121,14 @@ The agent MUST ask the user before:
 
 ## Prohibited Actions
 
+<!-- The universal contract already prohibits secrets in code, disabling security
+     controls, unauthorized data exfiltration, etc. List only project-specific
+     boundaries here. -->
+
 The agent MUST NEVER:
 - [ ] Access files outside the project directory: `[define boundary path]`
 - [ ] Access or modify production systems or data
-- [ ] Hardcode secrets, API keys, tokens, or passwords
-- [ ] Disable security controls, pre-commit hooks, or CI checks
-- [ ] Bypass code review or change management processes
 - [ ] Process or store [data classification] data outside approved systems
-- [ ] Access classified systems or networks
-- [ ] Execute code downloaded from external sources without review
-- [ ] Modify authentication or authorization systems without approval
-- [ ] Create network listeners or reverse connections
 - [ ] [Add project-specific prohibited actions]
 
 ---
@@ -141,12 +165,6 @@ The agent MUST:
 - **Version pinning:** [e.g., Exact versions only, no floating ranges]
 - **Vulnerability policy:** [e.g., No critical/high CVEs, medium requires justification]
 
-Before adding any dependency, the agent MUST:
-1. Verify the package name is correct (check for typosquatting)
-2. Check for known vulnerabilities
-3. Verify the license is compatible with [license policy]
-4. Get user approval
-
 ---
 
 ## Network Access
@@ -155,7 +173,6 @@ Before adding any dependency, the agent MUST:
 
 - **Authorized external endpoints:** [list specific endpoints or "none"]
 - **Authorized internal endpoints:** [list specific endpoints or "none"]
-- **TLS requirement:** TLS 1.2+ for all connections
 - **Proxy configuration:** [if applicable]
 
 ---
@@ -175,60 +192,17 @@ Before adding any dependency, the agent MUST:
 - **Required CI checks:** [e.g., lint, test, SAST, SCA, secrets scan]
 - **Deployment:** [e.g., Automated to dev, manual approval for prod]
 
-The agent MUST NOT:
-- Modify CI/CD configuration without explicit approval
-- Skip or bypass any required CI check
-- Deploy directly to production
-
----
-
-## Incident Response
-
-If the agent discovers a potential security vulnerability:
-1. Stop the current task
-2. Report the finding to the user immediately
-3. Do NOT create a public issue for security vulnerabilities
-4. Follow [agency incident response procedure reference]
-
----
-
-## Agent Meta-Constraints
-
-<!-- These constraints govern how the agent operates — plan, verify, and fail safely -->
-
-The agent MUST:
-- [ ] Output an execution plan and wait for approval before modifying artifacts
-- [ ] Submit all changes via PR with: Context, Plan, Verification, Rollback, Security Impact sections
-- [ ] Produce a verification transcript (commands run, outputs, pass/fail) for every change
-- [ ] Execute verify → fix → re-verify loops until all checks pass
-- [ ] Fail closed on ambiguity — halt and escalate, never guess
-- [ ] Not retry failed operations silently — report, diagnose, propose
-
-**Risk modes for this project:**
-
-| Mode | Scope | Requires Approval |
-|------|-------|-------------------|
-| Read-only | Analyze, review, answer questions | No |
-| Scoped edit | Modify files identified in plan | Plan approval |
-| Broad refactor | Cross-module changes | Plan + per-module approval |
-| Infrastructure | CI/CD, deployment, access control | Explicit per-change approval |
-
 ---
 
 ## Engineering Discipline
 
-The agent MUST:
-- [ ] Create an ADR before: adding dependencies, changing auth, introducing data stores, altering module boundaries
-- [ ] Enforce size limits: ≤[50] lines/function, ≤[400] lines/file, ≤[10] cyclomatic complexity
-- [ ] Write failing test before production code (TDD: red → green → refactor)
-- [ ] Add regression test for every resolved defect
-- [ ] Not implement speculative features (YAGNI)
-- [ ] Extract shared logic only at 3+ occurrences (Rule of Three)
+<!-- The universal contract defines the ADR triggers, YAGNI/Rule-of-Three, and
+     verification-loop expectations. Record only the project-specific knobs. -->
 
-**One-command bootstrap:** `[make setup / ./scripts/setup.sh / npm run setup]`
-**One-command verify:** `[make check / ./scripts/verify.sh / npm test]`
-
-**ADR location:** `[docs/decisions/]`
+- **Size limits:** ≤[50] lines/function, ≤[400] lines/file, ≤[10] cyclomatic complexity
+- **One-command bootstrap:** `[make setup / npm run setup]`
+- **One-command verify:** `[make check / npm test]`
+- **ADR location:** `[docs/decisions/]`
 
 ---
 
@@ -244,6 +218,7 @@ The agent MUST:
   CUSTOMIZATION NOTES:
 
   Sections you should always customize:
+  - Prerequisite (confirm the universal contract source is correct for your org)
   - Project Context (language, framework, data classification)
   - Permitted/Prohibited Actions (project-specific boundaries)
   - Data Handling (your specific sensitive data types)
@@ -253,13 +228,8 @@ The agent MUST:
   Sections you may remove if not applicable:
   - Network Access (if agent should have zero network access)
 
-  Sections you should add based on your project:
-  - Database access rules (if applicable)
-  - API endpoint restrictions (if the project exposes APIs)
-  - Deployment-specific rules (if the agent assists with deployment)
-  - Additional ADR trigger conditions specific to your domain
-
-  Remember: This file is a BEHAVIORAL CONTRACT with the AI agent.
+  Remember: This file is the PROJECT LAYER of a behavioral contract. It is
+  additive to the universal contract — do not restate universal rules here.
   Be specific. Be explicit. Agents follow literal instructions.
 -->
 

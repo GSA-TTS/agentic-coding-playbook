@@ -3,7 +3,7 @@ title: "Getting Started: Repository Setup and Environment Hardening"
 description: "Step-by-step guide for setting up a development repository with security controls for AI coding agents"
 status: canonical
 tier: 2
-last_updated: "2026-06-17"
+last_updated: "2026-07-01"
 nist_controls: ["CM-2", "CM-6", "SA-10", "PO.1"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218"]
 audience: "developers"
@@ -24,7 +24,7 @@ review_cycle: "semi-annually"
 Setup steps in order (each maps to an 800-53 control family):
 
 1. **Repository init** — `.gitignore` with secrets exclusions, `.editorconfig`, branch protection (CM-2)
-2. **AGENTS.md** — Copy template, customize for your project (PL-4)
+2. **AGENTS.md** — Ensure the universal contract is available to your agent, then add a thin project AGENTS.md (PL-4)
 3. **Pre-commit hooks** — Secrets scanner (gitleaks/detect-secrets), linter, formatter (IA-5, SA-11)
 4. **CI/CD pipeline** — SAST, SCA, secrets scan, test suite, human approval gate (SA-11, CM-5)
 5. **Environment hardening** — Least-privilege agent credentials, network allowlist, TLS enforcement (AC-6, SC-8)
@@ -211,42 +211,71 @@ your-project/
 
 `AGENTS.md` is a file placed in the root of your repository that tells AI coding agents what rules to follow. Most AI coding agents automatically detect and read files like `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, or similar configuration files in your repository. The filename and format vary by tool — `AGENTS.md` is used here as a tool-agnostic convention.
 
-The file defines:
-- What the agent is allowed and prohibited from doing
-- Security controls the agent must follow
-- Data handling requirements
-- Testing and review expectations
-- Incident escalation procedures
+This playbook splits agent rules into **two layers**:
+
+- **Universal contract** — the *Federal AI Agent Behavioral Best Practices*
+  (the `AGENTS.md` at the root of this playbook). It contains the behavioral
+  rules that apply to **every** project: core principles, identity, least
+  privilege, data protection, secure code generation, prompt-injection defense,
+  meta-constraints, and engineering discipline. It is intended to be made
+  available to your agent **globally** (for example, installed into your agent's
+  global configuration) so it applies everywhere you work. It is **not** copied
+  into individual repositories, so there is a single source of truth and no
+  drift.
+- **Project layer** — a thin `AGENTS.md` in your repository root that declares
+  the universal contract as a prerequisite and then adds only the
+  project-specific rules (context, permitted/prohibited actions, data handling,
+  dependencies, engineering-discipline knobs, contacts).
+
+The project layer defines:
+- What the agent is allowed and prohibited from doing **in this project**
+- Project-specific data handling requirements
+- Project-specific testing, dependency, and CI/CD expectations
+- Project contacts and escalation paths
 
 ### 3.2 Setting Up AGENTS.md
 
-1. Copy the template from this repository into your project root:
+1. **Make the universal contract available to your agent.** Obtain the universal
+   `AGENTS.md` from the playbook repository
+   (<https://github.com/GSA-TTS/agentic-coding-playbook>) and make it available
+   to your agent using your team's standard setup (typically by installing it
+   into your agent's global configuration). The exact mechanism depends on your
+   agent; the goal is that the universal rules load for every session, in every
+   repository, without being copied into each repo.
+
+2. **Add a thin project `AGENTS.md`.** Start from the project-layer template:
 
    ```bash
    # From the agentic-coding-playbook repository
    cp templates/AGENTS.md.template /path/to/your-project/AGENTS.md
    ```
 
-   See [templates/AGENTS.md.template](../templates/AGENTS.md.template) for the full template.
+   See [templates/AGENTS.md.template](../templates/AGENTS.md.template) for the
+   full template. The template's **Prerequisite** section instructs the agent to
+   STOP and require your affirmative permission before proceeding if it cannot
+   confirm the universal contract is available — so a fresh clone on a machine
+   that has not installed the universal contract fails safe rather than running
+   with only the project layer.
 
-2. Customize the template for your project:
+3. Customize the project layer for your project:
    - Replace placeholder values (agency name, system name, impact level) with your specifics
    - Review each section and remove anything not applicable to your project
    - Add project-specific rules (e.g., required frameworks, coding conventions, approved libraries)
+   - Do **not** paste the universal rules back in — reference them via the Prerequisite section
 
-3. Commit the file to your repository:
+4. Commit the file to your repository:
 
    ```bash
    git add AGENTS.md
-   git commit -m "Add agent behavior rules"
+   git commit -m "Add project-specific agent behavior rules"
    ```
 
 ### 3.3 How Agents Read the File
 
 AI coding agents typically read configuration files at session start — when you open a project or begin a conversation. The agent treats the rules in AGENTS.md as behavioral constraints for the session. Key behaviors to understand:
 
-- **Scope:** The rules apply to the repository where the file is located
-- **Priority:** Agent rules files are additive — the agent follows its built-in safety rules plus your custom rules
+- **Scope:** The project rules apply to the repository where the file is located; the universal contract applies globally
+- **Priority:** Agent rules files are additive — the agent follows its built-in safety rules, plus the universal contract, plus your project layer
 - **Limitations:** An AGENTS.md file is a behavioral guide, not a technical enforcement mechanism. It relies on the agent's compliance. Enforcement comes from the other controls in this guide (branch protection, CI checks, pre-commit hooks)
 - **Updates:** When you change the file, agents pick up the changes on the next session or when the file is re-read
 
@@ -694,11 +723,11 @@ With the controls in this guide implemented, your repository has a security base
 
 | Document | What It Covers | When to Read |
 |----------|---------------|--------------|
-| [AGENTS.md](../AGENTS.md) | Complete agent behavior rules — the rules your AI agent follows | Before your first AI-assisted coding session |
+| [AGENTS.md](../AGENTS.md) | Universal agent behavior rules — apply to every project, made available to your agent globally | Before your first AI-assisted coding session |
 | [docs/CODING_PRACTICES.md](../docs/CODING_PRACTICES.md) | Secure coding standards for AI-generated and human-written code | Before writing or reviewing any code |
 | [docs/SECURITY-CONTROLS.md](./SECURITY-CONTROLS.md) | NIST 800-53 control overlay specific to agentic AI systems | When building your SSP or preparing for ATO |
 | [docs/AGENT-IDENTITY.md](./AGENT-IDENTITY.md) | Agent identity, authentication, and delegation (NCCOE-aligned) | When configuring agent service accounts or tokens |
-| [templates/AGENTS.md.template](../templates/AGENTS.md.template) | Copy-paste AGENTS.md for new projects | When starting a new repository |
+| [templates/AGENTS.md.template](../templates/AGENTS.md.template) | Thin project-layer AGENTS.md for new projects | When starting a new repository |
 | [checklists/pre-deployment.md](../checklists/pre-deployment.md) | Pre-deployment security checklist | Before deploying to staging or production |
 
 ### Summary Checklist

@@ -29,13 +29,14 @@ cp agentic-coding-playbook/templates/PROJECT_PLAN.md /your-repo/PROJECT_PLAN.md
 
 # 4. Tell your AI agent: "Bootstrap this project from PROJECT_PLAN.md"
 #    The agent copies standards files from the playbook and sets up:
-#    - AGENTS.md, CODING_PRACTICES.md, directory structure
+#    - a thin project AGENTS.md (referencing the universal contract),
+#      CODING_PRACTICES.md, directory structure
 #    - CI/CD, risk assessment, ADRs, security docs
 
 # 5. Start coding — the agent follows the standards automatically
 ```
 
-The bootstrap skill copies key files from this playbook into your repo (AGENTS.md, CODING_PRACTICES.md, CONTEXT-GUIDE.md, risk assessment template, pre-deployment checklist). See the [project-bootstrap skill](skills/project-bootstrap/SKILL.md) for the full file list.
+The bootstrap skill copies key files from this playbook into your repo (a thin project AGENTS.md, CODING_PRACTICES.md, a project-scoped CONTEXT-GUIDE.md, risk assessment template, pre-deployment checklist). The universal `AGENTS.md` is **not** copied — it is expected to be available to your agent globally, and the thin project AGENTS.md references it as a prerequisite. See the [project-bootstrap skill](skills/project-bootstrap/SKILL.md) for the full file list.
 
 ## The Path
 
@@ -91,13 +92,13 @@ What happens:
 **Skill:** `federal-agents-config`
 
 What happens:
-- Generates or validates your AGENTS.md
+- Generates or validates your thin project AGENTS.md (references the universal contract as a prerequisite)
 - Ensures NIST 800-53 control mappings are present
-- Configures prohibited actions (no eval with external data, no production DB access)
+- Configures project-specific prohibited actions
 - Sets up human-in-the-loop approval gates
 
 **Key files produced/validated:**
-- `AGENTS.md` — behavioral contract for AI agents
+- `AGENTS.md` — thin project-layer contract for AI agents (universal rules referenced, not copied)
 - `CONTEXT-GUIDE.md` — tiered loading configuration
 
 ### Phase 3: Write Code

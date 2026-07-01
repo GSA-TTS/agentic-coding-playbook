@@ -67,7 +67,7 @@ Designed for **FIPS Moderate** systems, **single-agent** architectures, and **in
 | **0. Plan** | Human fills out [PROJECT_PLAN.md](./templates/PROJECT_PLAN.md) | — |
 | **0.5. Doctor** | Agent checks environment readiness | `agent-permissions` |
 | **1. Repo Setup** | Directory structure, .gitignore, CI/CD templates | `federal-repo-setup` |
-| **2. Agent Config** | Generate [AGENTS.md](./AGENTS.md) behavioral contract | `federal-agents-config` |
+| **2. Agent Config** | Generate a thin project [AGENTS.md](./AGENTS.md) that layers on the universal contract | `federal-agents-config` |
 | **3. Code** | Write code following [CODING_PRACTICES.md](./docs/CODING_PRACTICES.md) | — |
 | **4. Decisions** | Document architecture decisions as ADRs | `federal-decision-records` |
 | **5. Risk** | Assess against threat catalog | `federal-risk-assessment` |
@@ -152,7 +152,7 @@ Full catalog of 39 federal AI guidance documents: [docs/FEDERAL-AI-LANDSCAPE.md]
 
 ```
 agentic-coding-playbook/
-├── AGENTS.md                        # Agent behavior rules (AGENTS.md standard)
+├── AGENTS.md                        # Universal agent behavior rules (AGENTS.md standard)
 ├── PLAYBOOK.md                      # Step-by-step guide: setup → deploy
 ├── CONTEXT-GUIDE.md                 # Agent entry point — routes to right docs
 ├── INDEX.yaml                       # Machine-readable document index

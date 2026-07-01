@@ -14,13 +14,22 @@ Usage:
 import shutil
 from pathlib import Path
 
-# Files copied from playbook to new project
+# Files copied from playbook to new project.
+#
+# The bootstrapped project deliberately does NOT receive a copy of the universal
+# AGENTS.md. Instead it gets the thin, project-specific AGENTS.md template (which
+# declares the universal contract as a prerequisite), keeping a single source of
+# truth for the universal rules and avoiding drift.
+#
+# CONTEXT-GUIDE is sourced from templates/CONTEXT-GUIDE.project.md — a trimmed
+# guide that references only the files a bootstrapped project actually contains,
+# so a fresh project has no dangling references.
 FILES_TO_COPY = [
     ("templates/PROJECT_PLAN.md", "PROJECT_PLAN.md"),
     ("templates/AGENTS.md.template", "AGENTS.md"),
     ("docs/CODING_PRACTICES.md", "docs/CODING_PRACTICES.md"),
     ("docs/CODING_STANDARDS_COMPACT.md", "docs/CODING_STANDARDS_COMPACT.md"),
-    ("CONTEXT-GUIDE.md", "CONTEXT-GUIDE.md"),
+    ("templates/CONTEXT-GUIDE.project.md", "CONTEXT-GUIDE.md"),
     ("templates/risk-assessment.md", "docs/risk-assessment.md"),
     ("checklists/pre-deployment.md", "checklists/pre-deployment.md"),
 ]

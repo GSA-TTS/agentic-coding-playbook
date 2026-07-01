@@ -44,9 +44,9 @@ def _minimal_config(**overrides):
 def test_generate_includes_required_sections(gen):
     out = gen.generate_agents_md(_minimal_config())
     for heading in (
-        "## Core Principles",
+        "## Prerequisite: Universal Behavioral Contract",
         "## Project Context",
-        "## Agent Identity",
+        "## Project-Specific Identity",
         "## Permitted Actions",
         "## Actions Requiring Approval",
         "## Prohibited Actions",
@@ -55,16 +55,27 @@ def test_generate_includes_required_sections(gen):
         "## Dependencies",
         "## Testing Requirements",
         "## CI/CD Pipeline",
-        "## Incident Response",
         "## Contacts",
     ):
         assert heading in out, f"missing {heading}"
 
 
-def test_generate_uses_system_name_and_priority_order(gen):
+def test_generate_is_thin_layer_not_universal_copy(gen):
+    """The generated file must be the thin project layer, not a copy of the
+    universal contract prose."""
+    out = gen.generate_agents_md(_minimal_config())
+    # Does NOT restate the universal core-principles prose.
+    assert "safety > correctness > compliance > simplicity > performance" not in out
+    # DOES reference the universal contract as a prerequisite and require
+    # affirmative permission to proceed without it.
+    assert "agentic-coding-playbook" in out
+    assert "affirmatively" in out.lower()
+    assert "STOP" in out
+
+
+def test_generate_uses_system_name(gen):
     out = gen.generate_agents_md(_minimal_config(system_name="Acme Portal"))
     assert "AGENTS.md — Acme Portal" in out
-    assert "safety > correctness > compliance > simplicity > performance" in out
 
 
 def test_generate_defaults_registry_by_language(gen):
@@ -164,13 +175,13 @@ def test_validate_flags_missing_sections(validate_mod, tmp_path):
     assert result["status"] == "partial"
     assert result["failed"] > 0
     failed_checks = [r["check"] for r in result["results"] if not r["pass"]]
-    assert any("Core Principles" in c for c in failed_checks)
+    assert any("Prerequisite" in c for c in failed_checks)
 
 
 def test_validate_warns_on_unfilled_placeholders(validate_mod, tmp_path):
     doc = tmp_path / "AGENTS.md"
     doc.write_text(
-        "## Core Principles\n[Your Name] should fill this in.\n",
+        "## Prerequisite: Universal Behavioral Contract\n[Your Name] should fill this in.\n",
         encoding="utf-8",
     )
     result = validate_mod.validate(str(doc))
