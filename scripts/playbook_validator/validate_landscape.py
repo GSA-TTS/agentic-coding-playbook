@@ -18,6 +18,7 @@ VALID_CATEGORIES = frozenset(
         "nist_standard",
         "legislation",
         "agency_strategy",
+        "agency_report",
         "industry_standard",
         "white_house_plan",
     }

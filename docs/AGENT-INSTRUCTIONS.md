@@ -16,7 +16,7 @@ Model-agnostic reference for any AI coding agent working in this repository. Rea
 ## Quick Reference
 
 ```bash
-# Validation (Python package — 368 tests)
+# Validation (Python package — 370 tests)
 PYTHONPATH=scripts python3 -m playbook_validator validate-docs
 PYTHONPATH=scripts python3 -m playbook_validator validate-skills
 PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
@@ -117,7 +117,7 @@ keywords: ["security", "NIST"]    # Optional — used for context routing
 
 ## Federal AI Landscape
 
-The `data/federal-ai-landscape.yaml` registry tracks 39 federal AI guidance documents. Key active references:
+The `data/federal-ai-landscape.yaml` registry tracks 42 federal AI guidance documents. Key active references:
 
 - **EO 14179** — Removing Barriers to AI Leadership (Jan 2025)
 - **M-25-21** — AI Governance (Apr 2025, compliance deadline Apr 2026)
@@ -200,3 +200,5 @@ Before completing any task:
 - [ ] Tests pass
 - [ ] No real credentials in any file
 - [ ] NIST controls cited where applicable
+- [ ] Wiring complete + downstream consumers updated (§14.4)
+- [ ] Deferred / out-of-scope work captured as tracked issues (§9.3, §15.5)

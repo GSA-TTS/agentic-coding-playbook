@@ -3,12 +3,12 @@ title: "Federal AI Agent Behavioral Best Practices"
 description: "Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements"
 status: canonical
 tier: 1
-last_updated: "2026-06-22"
+last_updated: "2026-06-26"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-8", "IR-4", "IR-6", "PL-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
 keywords: ["agent-rules", "behavioral-contract", "least-privilege", "audit-logging", "prompt-injection", "prohibited-actions", "meta-constraints", "plan-before-execute", "verification-transcript", "engineering-discipline"]
-related_files: ["docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md", "docs/AGENT-INSTRUCTIONS.md", "templates/AGENTS.md.template"]
+related_files: ["docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md", "docs/AI-CONTRIBUTION-POLICY.md", "templates/AGENTS.md.template", "CONTEXT-GUIDE.md", "docs/TRACEABILITY.md", "docs/AGENT-INSTRUCTIONS.md"]
 load_priority: "always"
 review_cycle: "quarterly"
 last_updated: "2026-07-01"
@@ -18,7 +18,7 @@ last_updated: "2026-07-01"
 
 # AGENTS.md — Federal AI Agent Behavioral Best Practices
 
-> **Version:** 0.1.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
+> **Version:** 0.2.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
 
 ## Quick Reference
 
@@ -98,6 +98,12 @@ and `docs/CODING_PRACTICES.md`).
 When the agent does add a `Co-authored-by:` trailer, it follows the
 [GitHub co-authorship standard](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors)
 for a clear audit trail.
+
+> **Full contribution policy:** For the complete behavioral and accountability
+> expectations governing AI-assisted contributions — human ownership, disclosure,
+> provenance / right-to-contribute, verification, data handling, security review,
+> and licensing — see [`docs/AI-CONTRIBUTION-POLICY.md`](docs/AI-CONTRIBUTION-POLICY.md)
+> (the canonical policy that downstream repositories reference).
 
 Example commit message:
 ```
@@ -371,6 +377,26 @@ The agent SHOULD:
 
 ---
 
+## 8.3 Periodic End-to-End Validation
+
+<!-- NIST SP 800-53: CA-2 (Control Assessments), CA-7 (Continuous Monitoring), SA-11 (Developer Testing) -->
+
+Unit and integration tests prove individual functions; they do **not** prove that the real, end-to-end flow still works, and "fixed" claims drift from reality between releases.
+
+The agent MUST, in addition to the unit/integration testing in §8.1:
+- Validate the real end-to-end flow on a defined **cadence** — after each release, after three or more behavior-affecting fixes have landed since the last validation, or on demand when a claimed behavior is in doubt
+- Use **live execution, not mocks or simulations**, for the validation run — a mocked pass proves nothing about the real loop
+- **Capture the actual observed output** at each step and judge it against the documented or claimed behavior
+- File a tracked issue (per §15.5) when reality diverges from a "fixed"/"working" claim — a bug that reproduces, a stage that no longer runs, or documentation that no longer matches behavior
+
+The agent SHOULD record `BLOCKED` (and not fabricate a pass) when live validation cannot run for an environmental reason.
+
+> This catches what unit tests miss: live integration, credential/auth paths, and wiring between stages. It is the assessment ritual behind the run-and-verify loop in §14.4.
+>
+> **Control Mapping:** CA-2 (Control Assessments), CA-7 (Continuous Monitoring), SA-11 (Developer Testing)
+
+---
+
 ## 9. Incident Response
 
 <!-- NIST SP 800-53: IR-4 (Incident Handling), IR-6 (Incident Reporting) -->
@@ -391,6 +417,17 @@ When the agent discovers a potential vulnerability in the codebase:
 - The agent MUST NOT create public issues for security vulnerabilities
 - The agent SHOULD suggest remediation aligned with the applicable CWE
 - The agent SHOULD reference the relevant NIST control for the vulnerability class
+
+### 9.3 Discovered Non-Security Defects (Out-of-Scope Findings)
+
+For **non-security** defects or technical debt the agent notices *outside* the scope of the current task, the agent SHOULD file a tracked issue (per §15.5) — but only when the finding passes a filing gate, to avoid both lost findings and issue spam. File only if the finding is:
+
+1. **Real** — reproducible or clearly evidenced, not speculative
+2. **In scope** — a defect in this repository (not an upstream dependency the project does not own)
+3. **Not already tracked** — no existing open issue covers it
+4. **Actionable** — there is a concrete change that would resolve it
+
+The agent SHOULD NOT exceed a small, documented number of such issues per session (rate-limit to avoid noise). **Security vulnerabilities are exempt from this path** and remain governed by §9.2 — reported privately, never filed as public issues.
 
 > **Control Mapping:** IR-4 (Incident Handling), IR-6 (Incident Reporting), SI-2 (Flaw Remediation), RA-5 (Vulnerability Monitoring)
 
@@ -520,7 +557,16 @@ The agent SHOULD:
 - Present the plan as a checklist that the user can review item by item
 - Estimate the blast radius of proposed changes (number of files, lines, dependencies affected)
 
-### 14.2 Pull Request Discipline
+#### 14.1.1 Proportionality and Expedited Mode
+
+The plan-before-execute discipline MUST scale with risk, not be applied uniformly:
+
+- For **non-trivial** work (three or more steps, architecture- or security-relevant, cross-module, or anything warranting an audit trail), the agent MUST produce the structured plan above and wait for approval.
+- For **trivial, low-blast-radius, reversible** changes (a single-file typo fix, a comment, a docs tweak), the agent MAY proceed without a separate plan, provided the change still satisfies the verification requirements in §14.3–§14.4.
+- The human MAY explicitly authorize an **expedited mode** (e.g. "just do it", "one-shot", "dry-run"). When ambiguous, the agent MUST default to the full plan and offer the expedited path rather than assume it.
+- The agent MUST record which mode was used so the choice is auditable.
+
+> Rationale: a heavyweight gate applied to every keystroke loses credibility and gets ignored where it matters. Proportionality keeps the mandatory plan meaningful for the changes that carry real risk.
 
 The agent MUST ensure all changes are submitted via pull requests that include:
 
@@ -559,6 +605,10 @@ The agent MUST NOT:
 - Modify tests solely to make them pass without fixing the underlying issue
 - Disable or skip checks to avoid failures
 - Accept partial verification ("3 of 5 checks passed, good enough")
+
+Before declaring any task complete, the agent MUST additionally confirm:
+- **Wiring complete** — every new capability is registered at *all* of its dispatch points (exports, routing/dispatch tables, indexes, configuration registries), not just defined. A feature that is implemented but unwired is silently inert.
+- **Downstream consumers updated** — when configuration values, scoring weights, thresholds, or shared data change, the agent MUST locate and update every dependent assertion, fixture, or consumer before declaring done.
 
 ### 14.5 No Silent Failures
 
@@ -641,6 +691,25 @@ The agent SHOULD:
 
 > **Control Mapping:** SA-5 (System Documentation), SA-8 (Security Engineering Principles), SA-15 (Development Process), SA-17 (Developer Security Architecture), CM-2 (Baseline Configuration), CM-6 (Configuration Settings)
 
+### 15.5 Track All Identified Work — Deferring Is Fine, Untracked Is Not
+
+<!-- NIST SP 800-53: CM-3 (Configuration Change Control), SA-5 (System Documentation), AU-12 (Audit Generation) -->
+
+Every piece of identified work — **including work the agent is explicitly deferring** — MUST be captured in a durable tracking system (a GitHub issue, or the project's equivalent change-tracking record). Memory notes, PR-description "follow-up" bullets, code `TODO` comments, and conversation summaries are NOT tracking — they get forgotten.
+
+The agent MUST:
+- File a tracked item the moment a piece of deferred or out-of-scope work is **named**, not when it later becomes convenient
+- Apply this especially to the most-forgotten case — **dependency-blocked / sequenced work** ("do X once Y lands", "start increment B after increment A merges"). File blocked work *when you name it*, recording the blocking dependency and the trigger that should unblock it
+- Treat a multi-step effort as "tracked" only when *every* step — including not-yet-startable ones — has its own tracked item, not merely a prose mention
+
+The agent SHOULD:
+- **Close the loop on unblock** — when completing or merging a deliverable, search for work that was blocked on it and surface or re-prioritize whatever the completion just unblocked
+- Keep the issue body honest: what was identified, why, what would change, and the trigger condition for pickup
+
+This does NOT apply to: findings that fail the §9.3 filing gate; speculative "what if" ideas with no concrete trigger (YAGNI, §15.2); or work the user explicitly said to skip.
+
+> **Control Mapping:** CM-3 (Configuration Change Control), SA-5 (System Documentation), AU-12 (Audit Generation)
+
 ---
 
 ## NIST Control Cross-Reference
@@ -655,6 +724,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-06-26 | 0.2.0 | Add §8.3 periodic end-to-end validation, §9.3 discovered-defect filing gate, §14.1.1 plan proportionality + expedited mode, §15.5 track-all-work, wiring/downstream self-check items; reconcile version banner + related_files; drop hardcoded test count |
 | 2026-02-25 | 0.1.0 | Initial release — MVP scope (single-agent, FIPS Moderate, internal enterprise) |
 
 ## Framework References

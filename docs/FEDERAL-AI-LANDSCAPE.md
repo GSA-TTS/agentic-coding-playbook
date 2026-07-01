@@ -3,18 +3,18 @@ title: "Federal AI Landscape"
 description: "Canonical catalog of federal AI guidance, executive orders, standards, and legislation relevant to AI-assisted software development"
 status: canonical
 tier: 2
-last_updated: "2026-06-01"
+last_updated: "2026-06-29"
 load_priority: on-demand
 audience: ["developers", "isso", "managers", "agents"]
 keywords: ["federal", "AI", "guidance", "executive order", "NIST", "OMB", "OWASP", "compliance", "legislation"]
-last_reviewed: "2026-03-24"
+last_reviewed: "2026-06-29"
 ---
 
 # Federal AI Landscape
 
 Canonical reference for all federal AI guidance relevant to AI-assisted software development. Each entry includes current status, relevance to this playbook, and official source URL.
 
-> **Last reviewed:** 2026-03-24. Federal AI policy is evolving rapidly. Verify status before citing in compliance documents.
+> **Last reviewed:** 2026-06-29. Federal AI policy is evolving rapidly. Verify status before citing in compliance documents.
 >
 > **Machine-readable data:** [`data/federal-ai-landscape.yaml`](../data/federal-ai-landscape.yaml) — structured registry with IDs, dates, statuses, cross-references, and compliance deadlines. Use the YAML for programmatic access; this document is the human-readable companion.
 
@@ -23,13 +23,16 @@ Canonical reference for all federal AI guidance relevant to AI-assisted software
 | Category | Active | Revoked/Rescinded | Draft |
 |---|---|---|---|
 | Executive Orders | 5 | 1 | 0 |
-| OMB Memoranda | 3 | 2 | 0 |
-| NIST Standards | 6 | 0 | 2 |
+| OMB Memoranda | 5 | 2 | 0 |
+| NIST Standards | 8 | 0 | 3 |
 | Federal Legislation | 4 | 0 | 0 |
-| Agency Strategies | 5 | 0 | 0 |
+| Agency Strategies | 4 | 0 | 0 |
+| Agency Reports | 2 | 0 | 0 |
 | Industry Standards | 6 | 0 | 0 |
-| White House Plans | 1 | 0 | 0 |
-| **Total** | **30** | **3** | **2** |
+| White House Plans | 2 | 0 | 0 |
+| **Total** | **36** | **3** | **3** |
+
+> Counts reflect `data/federal-ai-landscape.yaml` (42 entries total; "final" standards counted as Active). `status: final` and `status: active` both denote in-effect references.
 
 ---
 
@@ -98,6 +101,12 @@ Canonical reference for all federal AI guidance relevant to AI-assisted software
 - Two enforceable procurement principles: Truth-Seeking and Ideological Neutrality. Agencies update procurement policies by March 11, 2026. Requires model cards, acceptable use policies, feedback mechanisms from vendors.
 - **Relevance:** All new LLM procurements must comply. Vendors must demonstrate factual accuracy and nonpartisan outputs.
 - **Source:** [whitehouse.gov (PDF)](https://www.whitehouse.gov/wp-content/uploads/2025/12/M-26-04-Increasing-Public-Trust-in-Artificial-Intelligence-Through-Unbiased-AI-Principles-1.pdf)
+
+**M-16-21 — Federal Source Code Policy**
+- **Issued:** August 8, 2016 | **Status:** Active
+- Establishes the federal default to release custom-developed code as open source and to share reusable code across government. Predates the AI memos but remains the policy basis for publishing federal repositories publicly.
+- **Relevance:** Basis for publishing these GSA-TTS repositories in the open and for the CC0 / public-domain dedication posture used by the community-hub repo. Underpins the AI-assisted contribution policy's licensing terms.
+- **Source:** [obamawhitehouse.archives.gov (PDF)](https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2016/m_16_21.pdf)
 
 ### Rescinded
 
@@ -215,17 +224,31 @@ Canonical reference for all federal AI guidance relevant to AI-assisted software
 - **Relevance:** Relevant for defense-adjacent projects. RAI principles align with this playbook's AGENTS.md behavioral contracts.
 - **Source:** [defense.gov (PDF)](https://media.defense.gov/2024/Oct/26/2003571790/-1/-1/0/2024-06-RAI-STRATEGYIMPLEMENTATION-PATHWAY.PDF)
 
+**National Security Memorandum on AI (NSM-25)**
+- **Issued by:** White House/NSC | **Published:** October 24, 2024 | **Status:** Active (Biden-era, not yet revoked)
+- First-ever NSM on AI. Directs government to lead safe AI development, harness AI for national security, advance international AI governance. Companion Framework for AI Governance and Risk Management in National Security.
+- **Relevance:** Sets national security AI requirements that may apply to defense and intelligence-adjacent projects.
+- **Source:** [whitehouse.gov (archived)](https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/10/24/fact-sheet-biden-harris-administration-outlines-coordinated-approach-to-harness-power-of-ai-for-u-s-national-security/)
+
+---
+
+## Agency Reports
+
+Reports and accountability frameworks issued by federal agencies. These state agency
+positions and analysis; they are authoritative as the issuing agency's view but are not
+themselves binding law. Provided for context — not legal advice.
+
 **GAO AI Accountability Framework**
 - **Issued by:** GAO | **Published:** June 2021 (GAO-21-519SP) | **Status:** Active
 - Four pillars: governance, data, performance, monitoring. Used for federal AI audits. 35 recommendations to 19 agencies.
 - **Relevance:** Audit framework. Projects may be evaluated against these pillars.
 - **Source:** [gao.gov](https://www.gao.gov/products/gao-21-519sp)
 
-**National Security Memorandum on AI (NSM-25)**
-- **Issued by:** White House/NSC | **Published:** October 24, 2024 | **Status:** Active (Biden-era, not yet revoked)
-- First-ever NSM on AI. Directs government to lead safe AI development, harness AI for national security, advance international AI governance. Companion Framework for AI Governance and Risk Management in National Security.
-- **Relevance:** Sets national security AI requirements that may apply to defense and intelligence-adjacent projects.
-- **Source:** [whitehouse.gov (archived)](https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/10/24/fact-sheet-biden-harris-administration-outlines-coordinated-approach-to-harness-power-of-ai-for-u-s-national-security/)
+**Copyright and Artificial Intelligence, Part 2: Copyrightability**
+- **Issued by:** U.S. Copyright Office | **Published:** January 29, 2025 | **Status:** Active
+- The Office's position that copyright protection requires human authorship, and that purely AI-generated material is not copyrightable; human creative contribution determines protectability.
+- **Relevance:** Informs the public-domain / CC0 posture for AI-assisted contributions and the licensing terms in the AI-assisted contribution policy. Agency position for context, not legal advice.
+- **Source:** [copyright.gov (PDF)](https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf)
 
 ---
 
@@ -269,7 +292,7 @@ These complement federal guidance and are referenced throughout this playbook.
 
 **NIST SP 800-218 — Secure Software Development Framework (SSDF) v1.1**
 - **Organization:** NIST | **Version:** 1.1 (February 2022) | **Status:** Final
-- Baseline secure development practices mandated by EO 14028 for all federal software.
+- Baseline secure development practices mandated by EO 14028 for all federal software. (Categorized as a NIST standard in the registry; listed here for proximity to the supply-chain references it underpins.)
 - **Relevance:** Foundation for CODING_PRACTICES.md. SP 800-218A extends this for AI-specific practices.
 - **Source:** [csrc.nist.gov](https://csrc.nist.gov/publications/detail/sp/800-218/final)
 
@@ -278,6 +301,12 @@ These complement federal guidance and are referenced throughout this playbook.
 - Build provenance, source integrity, and dependency verification framework.
 - **Relevance:** Model provenance and training data integrity for AI supply chain security.
 - **Source:** [slsa.dev](https://slsa.dev/)
+
+**Developer Certificate of Origin (DCO) 1.1**
+- **Organization:** Linux Foundation | **Version:** 1.1 (2004) | **Status:** Active
+- Lightweight per-commit provenance attestation — the `Signed-off-by` sign-off by which a contributor certifies they have the right to submit the contribution.
+- **Relevance:** Basis for requiring that a human (not an agent) certifies the origin and contribution rights of AI-assisted contributions. Used by the AI-assisted contribution policy.
+- **Source:** [developercertificate.org](https://developercertificate.org/)
 
 ---
 

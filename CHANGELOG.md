@@ -4,6 +4,19 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.13.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.12.1...v0.13.0) (2026-06-30)
+
+
+### Features
+
+* **landscape:** add agency_report category + source-code/IP/provenance entries ([#141](https://github.com/GSA-TTS/agentic-coding-playbook/issues/141)) ([540a548](https://github.com/GSA-TTS/agentic-coding-playbook/commit/540a548a1d90f669b84ecdfd1e8dc6a0a48c531c))
+
+
+### Documentation
+
+* **agents:** add work-tracking, e2e-validation, and plan-proportionality disciplines ([#131](https://github.com/GSA-TTS/agentic-coding-playbook/issues/131)) ([0bcab52](https://github.com/GSA-TTS/agentic-coding-playbook/commit/0bcab5272999d443de451d2034d0302c8eaca557))
+* **policy:** add canonical AI-Assisted Contribution Policy ([#143](https://github.com/GSA-TTS/agentic-coding-playbook/issues/143)) ([a7300a2](https://github.com/GSA-TTS/agentic-coding-playbook/commit/a7300a2f08f224664d21ff52861fa1a67f72e9b3))
+
 ## [0.12.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.12.0...v0.12.1) (2026-06-29)
 
 

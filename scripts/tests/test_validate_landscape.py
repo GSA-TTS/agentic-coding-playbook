@@ -69,6 +69,27 @@ class TestValidateLandscape:
         errors, warnings, _count = validate_landscape(_write_yaml(tmp_path, data))
         assert any("category" in e for e in errors)
 
+    def test_agency_report_category_is_valid(self, tmp_path):
+        """agency_report is an accepted category (GAO/USCO-style reports)."""
+        data = {
+            "version": "1.0",
+            "total_entries": 1,
+            "entries": [
+                {
+                    "id": "usco-test",
+                    "title": "Copyright and Artificial Intelligence, Part 2",
+                    "category": "agency_report",
+                    "source": "U.S. Copyright Office",
+                    "date": "2025-01-29",
+                    "status": "active",
+                    "relevance": "Agency position for context; not legal advice.",
+                    "url": "https://www.copyright.gov/ai/",
+                }
+            ],
+        }
+        errors, warnings, _count = validate_landscape(_write_yaml(tmp_path, data))
+        assert not any("category" in e for e in errors)
+
     def test_invalid_status(self, tmp_path):
         data = {
             "version": "1.0",
