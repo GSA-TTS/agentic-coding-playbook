@@ -73,6 +73,18 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[dev]"
 
+      - name: Provision universal behavioral contract (ADR-0003)
+        # Model the intended steady state: the contract is provided by the
+        # environment at the conventional home path, then verified offline.
+        # In this repo the contract IS our own AGENTS.md, so we install it to
+        # the home path rather than fetching over the network.
+        run: |
+          mkdir -p "$HOME/.agentic-coding-playbook"
+          cp AGENTS.md "$HOME/.agentic-coding-playbook/AGENTS.md"
+
+      - name: Ensure universal contract is available (fail-closed)
+        run: PYTHONPATH=scripts python3 -m playbook_validator ensure-contract --root . --no-fetch
+
       - name: Install linter dependencies
         working-directory: .github/linters
         run: |

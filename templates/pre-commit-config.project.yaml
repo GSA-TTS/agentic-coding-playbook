@@ -1,0 +1,13 @@
+# Universal behavioral contract prerequisite (fail-closed).
+# Blocks the commit if the universal Federal AI Agent Behavioral Contract is
+# not available. Uses the self-contained probe copied into this project
+# (scripts/ensure-contract.py) — no playbook-validator install required.
+repos:
+  - repo: local
+    hooks:
+      - id: ensure-contract
+        name: Ensure universal behavioral contract is available
+        entry: python3 scripts/ensure-contract.py --root .
+        language: system
+        pass_filenames: false
+        always_run: true

@@ -66,11 +66,14 @@ def test_generate_is_thin_layer_not_universal_copy(gen):
     out = gen.generate_agents_md(_minimal_config())
     # Does NOT restate the universal core-principles prose.
     assert "safety > correctness > compliance > simplicity > performance" not in out
-    # DOES reference the universal contract as a prerequisite and require
-    # affirmative permission to proceed without it.
+    # DOES reference the universal contract as a fail-closed prerequisite,
+    # mandate the deterministic probe, and offer NO "proceed without" option.
     assert "agentic-coding-playbook" in out
-    assert "affirmatively" in out.lower()
+    assert "ensure-contract" in out
     assert "STOP" in out
+    normalized = " ".join(out.lower().split())
+    assert "no option to proceed without the universal" in normalized
+    assert "affirmatively grants permission to proceed without" not in normalized
 
 
 def test_generate_uses_system_name(gen):

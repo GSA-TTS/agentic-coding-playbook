@@ -27,6 +27,7 @@ REQUIRED_SECTIONS = [
     "Dependencies",
     "Testing Requirements",
     "CI/CD Pipeline",
+    "Engineering Discipline",
     "Contacts",
 ]
 
@@ -109,12 +110,15 @@ def validate(file_path: str) -> dict:
         warnings.append(f"Found {len(placeholders)} unfilled placeholder(s): {', '.join(unique)}")
 
     # The thin project layer MUST reference the universal contract as a
-    # prerequisite and instruct the agent to stop / require affirmative
-    # permission when it is unavailable.
-    if "affirmatively" not in content.lower() and "affirmative" not in content.lower():
-        warnings.append(
-            "Prerequisite section may be missing the affirmative-permission-to-proceed instruction"
-        )
+    # fail-closed prerequisite: mandate the deterministic probe, offer NO
+    # "proceed without" option, and cite the source.
+    normalized = " ".join(content.lower().split())
+    if "ensure-contract" not in content:
+        warnings.append("Prerequisite section may be missing the deterministic ensure-contract probe")
+    if "no option to proceed without the universal" not in normalized:
+        warnings.append("Prerequisite section may be missing the fail-closed 'no option to proceed without' statement")
+    if "affirmatively grants permission to proceed without" in normalized:
+        warnings.append("Prerequisite still contains the removed fail-open 'proceed without' escape hatch")
     if "agentic-coding-playbook" not in content:
         warnings.append("Prerequisite section may be missing the universal contract source URL")
 

@@ -11,7 +11,7 @@
 
 schema_version: "1.0"
 generated: "2026-07-01"
-repo: "gsa-tts/agentic-coding-playbook"
+repo: "GSA-TTS/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
 # Frontmatter schema — all .md content files MUST include at minimum:

@@ -48,6 +48,44 @@ A set of markdown files, templates, and validation tools that help AI coding age
 
 Designed for **FIPS Moderate** systems, **single-agent** architectures, and **internal enterprise** environments.
 
+## The Two-Layer Contract
+
+Agent behavioral rules are split into two layers:
+
+- **Universal contract** — this repository's [`AGENTS.md`](./AGENTS.md), the
+  *Federal AI Agent Behavioral Best Practices*. It applies to **every** project
+  and is the single source of truth for the universal rules (core principles,
+  identity, least privilege, data protection, prompt-injection defense,
+  meta-constraints, engineering discipline). It is **not** copied into
+  individual projects — that would let copies drift.
+- **Project layer** — a thin `AGENTS.md` in each project (see
+  [`templates/AGENTS.md.template`](./templates/AGENTS.md.template)) that declares
+  the universal contract as a **prerequisite** and adds only project-specific
+  rules.
+
+### Making the universal contract available
+
+Because the universal contract is not vendored per-project, each project expects
+it to be provided by the environment at a conventional location:
+
+```
+~/.agentic-coding-playbook/AGENTS.md      # (override with $AGENTIC_CODING_PLAYBOOK_HOME)
+```
+
+The supported way to provision it is the **`agentic-coding-patterns` sbx mixin
+kit**, which makes the contract available to agents in a sandboxed environment:
+
+<https://github.com/GSA-TTS/agentic-coding-patterns/tree/main/integrations/isolation/sbx-kits>
+
+If the home path is unavailable, projects bootstrapped by this playbook ship a
+self-contained probe (`scripts/ensure-contract.py`) that populates a
+**git-ignored fallback cache** at `.agents/cache/AGENTS.universal.md` from the
+pinned release, warning that the copy is a fallback. Presence is a
+**deterministic, fail-closed** check enforced at session start, in a pre-commit
+hook, and in CI — if the contract cannot be obtained, work does not proceed.
+See [ADR-0002](./docs/decisions/0002-universal-vs-project-agents-md.md) and
+[ADR-0003](./docs/decisions/0003-enforce-contract-prerequisite.md).
+
 ## Who This Is For
 
 | Role | Start Here |

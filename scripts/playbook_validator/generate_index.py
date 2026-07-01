@@ -257,7 +257,7 @@ def _render_header(today: str) -> list[str]:
         "",
         'schema_version: "1.0"',
         f'generated: "{today}"',
-        'repo: "gsa-tts/agentic-coding-playbook"',
+        'repo: "GSA-TTS/agentic-coding-playbook"',
         'scope: "FIPS Moderate | Single-agent | Internal enterprise"',
         "",
     ]
