@@ -7,19 +7,19 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-07-01
+# Last generated: 2026-07-06
 
 schema_version: "1.0"
-generated: "2026-07-01"
+generated: "2026-07-06"
 repo: "GSA-TTS/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
 # Frontmatter schema — all .md content files MUST include at minimum:
 #   description (required), status (required), tier (required), title (required)
-# Optional: audience, frameworks, keywords, last_updated, load_priority, nist_controls, related_files, review_cycle
+# Optional: agents_contract, audience, frameworks, keywords, last_updated, load_priority, nist_controls, related_files, review_cycle
 frontmatter_schema:
   required: ["description", "status", "tier", "title"]
-  optional: ["audience", "frameworks", "keywords", "last_updated", "load_priority", "nist_controls", "related_files", "review_cycle"]
+  optional: ["agents_contract", "audience", "frameworks", "keywords", "last_updated", "load_priority", "nist_controls", "related_files", "review_cycle"]
   status_values: ["canonical", "deprecated", "draft"]
   tier_values:
     1: "Core guidance — authoritative rules and control mappings"
@@ -38,7 +38,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: always
-    last_updated: "2026-07-01"
+    last_updated: "2026-07-06"
     audience: all
     nist_controls_count: 26
     review_cycle: quarterly
@@ -218,7 +218,7 @@ documents:
     status: canonical
     tier: 3
     load_priority: reference-only
-    last_updated: "2026-07-01"
+    last_updated: "2026-07-06"
     audience: developers
     review_cycle: semi-annually
 
@@ -228,7 +228,7 @@ documents:
     status: canonical
     tier: 3
     load_priority: reference-only
-    last_updated: "2026-07-01"
+    last_updated: "2026-07-06"
     audience: developers
     review_cycle: semi-annually
 

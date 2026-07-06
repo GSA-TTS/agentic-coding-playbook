@@ -121,6 +121,15 @@ def validate(file_path: str) -> dict:
         warnings.append("Prerequisite still contains the removed fail-open 'proceed without' escape hatch")
     if "agentic-coding-playbook" not in content:
         warnings.append("Prerequisite section may be missing the universal contract source URL")
+    # The thin project layer must NOT claim the canonical universal-contract
+    # role (that marker belongs only to the real contract); otherwise a
+    # bootstrapped project's own AGENTS.md could self-satisfy the probe (#151).
+    if re.search(r"^\s*agents_contract:\s*universal\s*$", content, re.MULTILINE):
+        warnings.append(
+            "Frontmatter declares 'agents_contract: universal' — a thin project layer must use "
+            "'agents_contract: project' (only the universal contract may claim 'universal'); "
+            "this would let the project self-satisfy the contract probe (#151)"
+        )
 
     # Calculate pass/fail
     pass_count = sum(1 for r in results if r["pass"])

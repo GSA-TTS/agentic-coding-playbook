@@ -1,5 +1,7 @@
 """Tests for the ensure-contract deterministic availability check."""
 
+import subprocess
+import sys
 from pathlib import Path
 from unittest import mock
 
@@ -12,6 +14,9 @@ from playbook_validator.ensure_contract import (
 )
 
 CONTRACT_TEXT = "# AGENTS.md — Federal AI Agent Behavioral Best Practices\n\nrules...\n"
+
+# Repository root = two levels up from scripts/tests/
+PLAYBOOK_ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture
@@ -164,11 +169,18 @@ def test_no_proceed_without_option_exists():
 
 # ── 7. Self-hosting — the playbook's own AGENTS.md satisfies the check ───────
 
+# Frontmatter carrying the canonical marker; the thin layer legitimately *names*
+# the contract title in prose but never declares this role.
+UNIVERSAL_FM = (
+    "---\ntitle: x\nagents_contract: universal\n---\n# AGENTS.md — Federal AI Agent Behavioral Best Practices\n"
+)
+
 
 def test_playbook_own_contract_satisfies(repo):
-    """Inside the playbook repo, the repo's own AGENTS.md IS the contract."""
+    """Inside the playbook repo, the repo's own AGENTS.md IS the contract —
+    recognized by its explicit agents_contract: universal marker."""
     repo.mkdir(parents=True)
-    (repo / "AGENTS.md").write_text("---\ntitle: x\n---\n# AGENTS.md — Federal AI Agent Behavioral Best Practices\n")
+    (repo / "AGENTS.md").write_text(UNIVERSAL_FM)
     with mock.patch.object(ec, "_fetch_contract", side_effect=AssertionError("should not fetch")):
         result = ensure_contract(repo, allow_fetch=False)
     assert result.ok
@@ -178,10 +190,107 @@ def test_playbook_own_contract_satisfies(repo):
 
 def test_unrelated_agents_md_does_not_satisfy(repo):
     """A downstream project's own thin AGENTS.md must NOT be mistaken for the
-    universal contract (it lacks the distinctive title)."""
+    universal contract (it lacks the canonical marker)."""
     repo.mkdir(parents=True)
     (repo / "AGENTS.md").write_text("# AGENTS.md — My Project\n\nProject-specific rules.\n")
     result = ensure_contract(repo, allow_fetch=False)
     # No home, no cache, and the local AGENTS.md is not the contract → halt.
     assert not result.ok
     assert result.status is ContractStatus.ABSENT
+
+
+def test_title_substring_alone_does_not_satisfy(repo):
+    """Regression for #151: an AGENTS.md that merely *names* the contract title
+    (as the thin layer does) but does not declare agents_contract: universal
+    must NOT self-satisfy the probe."""
+    repo.mkdir(parents=True)
+    # Title present in body AND in a frontmatter description — but role is not
+    # 'universal'. This mirrors the thin template's shape.
+    (repo / "AGENTS.md").write_text(
+        "---\n"
+        'description: "layers on the Federal AI Agent Behavioral Best Practices"\n'
+        "agents_contract: project\n"
+        "---\n"
+        "# AGENTS.md — My Project\n\n"
+        "This project layers on the **Federal AI Agent Behavioral Best Practices**.\n"
+    )
+    result = ensure_contract(repo, allow_fetch=False)
+    assert not result.ok
+    assert result.status is ContractStatus.ABSENT
+
+
+@pytest.mark.parametrize(
+    "thin_rel",
+    ["templates/AGENTS.md.template", "examples/AGENTS.md.example"],
+)
+def test_real_thin_layer_does_not_self_satisfy(repo, thin_rel):
+    """Feed the ACTUAL committed thin template / example through the probe as a
+    project's own AGENTS.md and assert it does NOT self-satisfy when the real
+    contract is absent (issue #151 acceptance criterion — real output, not a
+    hand-written stub)."""
+    repo.mkdir(parents=True)
+    thin_text = (PLAYBOOK_ROOT / thin_rel).read_text(encoding="utf-8")
+    (repo / "AGENTS.md").write_text(thin_text)
+    with mock.patch.object(ec, "_fetch_contract", side_effect=AssertionError("should not fetch")):
+        result = ensure_contract(repo, allow_fetch=False)
+    assert not result.ok, f"{thin_rel} self-satisfied the contract probe (#151 regression)"
+    assert result.status is ContractStatus.ABSENT
+
+
+def test_real_universal_contract_self_satisfies(repo, monkeypatch):
+    """The actual committed universal AGENTS.md, placed as a repo's own
+    AGENTS.md, IS recognized as the contract via its canonical marker."""
+    repo.mkdir(parents=True)
+    universal_text = (PLAYBOOK_ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    (repo / "AGENTS.md").write_text(universal_text)
+    result = ensure_contract(repo, allow_fetch=False)
+    assert result.ok
+    assert result.status is ContractStatus.HOME
+
+
+# ── 8. Module and copied-template probes behave consistently (#151) ──────────
+
+
+def _run_copied_probe(repo_root: Path, home: Path) -> int:
+    """Run the self-contained templates/ensure-contract.py against repo_root,
+    with an isolated (empty) home so only the self-host branch can match."""
+    env = {
+        "HOME": str(home),
+        "PATH": __import__("os").environ.get("PATH", ""),
+        ec.HOME_OVERRIDE_ENV: str(home / ".agentic-coding-playbook"),
+    }
+    proc = subprocess.run(  # noqa: S603
+        [
+            sys.executable,
+            str(PLAYBOOK_ROOT / "templates" / "ensure-contract.py"),
+            "--root",
+            str(repo_root),
+            "--no-fetch",
+        ],
+        capture_output=True,
+        env=env,
+        text=True,
+    )
+    return proc.returncode
+
+
+def test_copied_probe_rejects_thin_layer(repo, tmp_path):
+    """The copied self-contained probe must also reject a thin project layer —
+    consistent with the module probe (#151 acceptance criterion)."""
+    repo.mkdir(parents=True)
+    thin_text = (PLAYBOOK_ROOT / "templates/AGENTS.md.template").read_text(encoding="utf-8")
+    (repo / "AGENTS.md").write_text(thin_text)
+    empty_home = tmp_path / "copied-empty-home"
+    empty_home.mkdir()
+    assert _run_copied_probe(repo, empty_home) != 0
+
+
+def test_copied_probe_accepts_universal_contract(repo, tmp_path):
+    """The copied probe recognizes the real universal contract by its marker —
+    consistent with the module probe (#151 acceptance criterion)."""
+    repo.mkdir(parents=True)
+    universal_text = (PLAYBOOK_ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    (repo / "AGENTS.md").write_text(universal_text)
+    empty_home = tmp_path / "copied-empty-home2"
+    empty_home.mkdir()
+    assert _run_copied_probe(repo, empty_home) == 0

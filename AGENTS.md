@@ -3,7 +3,8 @@ title: "Federal AI Agent Behavioral Best Practices"
 description: "Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements"
 status: canonical
 tier: 1
-last_updated: "2026-06-26"
+agents_contract: universal
+last_updated: "2026-07-06"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-8", "IR-4", "IR-6", "PL-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
@@ -11,7 +12,6 @@ keywords: ["agent-rules", "behavioral-contract", "least-privilege", "audit-loggi
 related_files: ["docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md", "docs/AI-CONTRIBUTION-POLICY.md", "templates/AGENTS.md.template", "CONTEXT-GUIDE.md", "docs/TRACEABILITY.md", "docs/AGENT-INSTRUCTIONS.md"]
 load_priority: "always"
 review_cycle: "quarterly"
-last_updated: "2026-07-01"
 ---
 
 <!-- LOAD: always — This is the core behavioral best practices document. Agents MUST load this document for every task. -->

@@ -192,3 +192,32 @@ def test_frontmatter_valid_on_generated_docs(bootstrapped_project: Path):
         errors, _warnings = validate_doc_frontmatter(f)
         all_errors.extend(errors)
     assert not all_errors, "frontmatter errors in bootstrapped project:\n" + "\n".join(all_errors)
+
+
+def test_bootstrapped_agents_md_does_not_self_satisfy_contract(bootstrapped_project: Path, monkeypatch):
+    """Regression for #151: the generated project's own AGENTS.md must NOT
+    self-satisfy the contract probe when no real contract is present. The thin
+    layer names the universal contract in prose, but only the real contract
+    carries agents_contract: universal."""
+    from playbook_validator import ensure_contract as ec
+    from playbook_validator.ensure_contract import ContractStatus, ensure_contract
+
+    # Isolate home so only the self-host branch could (incorrectly) match.
+    monkeypatch.delenv(ec.HOME_OVERRIDE_ENV, raising=False)
+    empty_home = bootstrapped_project.parent / "empty-home"
+    empty_home.mkdir(exist_ok=True)
+    monkeypatch.setattr(ec, "DEFAULT_HOME", empty_home)
+
+    result = ensure_contract(bootstrapped_project, allow_fetch=False)
+    assert not result.ok, "bootstrapped thin AGENTS.md self-satisfied the contract probe (#151)"
+    assert result.status is ContractStatus.ABSENT
+
+
+def test_bootstrapped_agents_md_declares_project_role(bootstrapped_project: Path):
+    """The generated project AGENTS.md must declare the non-canonical role so
+    its non-universal status is explicit and validated."""
+    from playbook_validator.config import CONTRACT_ROLE_UNIVERSAL
+    from playbook_validator.frontmatter import extract_frontmatter
+
+    role = extract_frontmatter(bootstrapped_project / "AGENTS.md").get("agents_contract")
+    assert role != CONTRACT_ROLE_UNIVERSAL, "bootstrapped project must not claim the universal contract role"

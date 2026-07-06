@@ -9,8 +9,17 @@ enforced (session start, pre-commit hook, and CI) without installing anything.
 It mirrors ``playbook_validator/ensure_contract.py`` in the agentic-coding
 playbook. Keep the two in sync; the playbook is the source of truth.
 
+The universal contract is recognized as canonical by its explicit
+``agents_contract: universal`` frontmatter marker — never by a title substring
+or section heading (which a thin project layer legitimately reproduces). This
+mirrors the module probe and prevents a bootstrapped project's own AGENTS.md
+from self-satisfying the check (playbook issue #151).
+
 Precedence (first match wins), all deterministic filesystem facts:
 
+  0. Self-host: this project's own AGENTS.md IS the universal contract only if
+     its frontmatter declares agents_contract: universal (the thin project
+     layer never does), so this branch is effectively inert downstream.
   1. Home (environment-provided): $AGENTIC_CODING_PLAYBOOK_HOME/AGENTS.md,
      else ~/.agentic-coding-playbook/AGENTS.md
   2. Fresh cache: .agents/cache/AGENTS.universal.md whose sibling .stamp
@@ -40,12 +49,15 @@ CONTRACT_FILENAME = "AGENTS.md"
 CACHE_RELPATH = Path(".agents/cache/AGENTS.universal.md")
 STAMP_RELPATH = Path(".agents/cache/AGENTS.universal.stamp")
 
+# Canonical designation: the universal contract declares agents_contract:
+# universal in its frontmatter. The thin project layer never does, so the
+# self-host branch below is inert downstream (mirrors the module probe; #151).
+CONTRACT_ROLE_FIELD = "agents_contract"
+CONTRACT_ROLE_UNIVERSAL = "universal"
+
 # Pinned release the cache is fetched from and measured against. Hard-coded.
 PINNED_RELEASE_TAG = "v0.13.0"
-CONTRACT_RAW_URL = (
-    "https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/"
-    f"{PINNED_RELEASE_TAG}/AGENTS.md"
-)
+CONTRACT_RAW_URL = f"https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/{PINNED_RELEASE_TAG}/AGENTS.md"
 _FETCH_TIMEOUT_SECONDS = 15
 
 
@@ -60,6 +72,40 @@ def _is_present(path: Path) -> bool:
         return path.is_file() and path.stat().st_size > 0
     except OSError:
         return False
+
+
+def _frontmatter_role(path: Path) -> str | None:
+    """Return the ``agents_contract`` frontmatter value, if any.
+
+    Dependency-free: scans the leading ``---`` fenced block for a simple
+    ``key: value`` line rather than importing a YAML parser. Sufficient for the
+    single scalar marker we care about.
+    """
+    if not _is_present(path):
+        return None
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    if not text.startswith("---"):
+        return None
+    end = text.find("\n---", 3)
+    if end == -1:
+        return None
+    for line in text[4:end].splitlines():
+        key, sep, value = line.partition(":")
+        if sep and key.strip() == CONTRACT_ROLE_FIELD:
+            return value.strip().strip("\"'")
+    return None
+
+
+def _is_playbook_contract(path: Path) -> bool:
+    """True only if ``path`` explicitly declares ``agents_contract: universal``.
+
+    Recognizes the universal contract by a deliberate frontmatter marker, never
+    by a title substring — so a downstream project's thin AGENTS.md (which
+    *names* the contract but is not it) never self-satisfies (#151)."""
+    return _frontmatter_role(path) == CONTRACT_ROLE_UNIVERSAL
 
 
 def _read_stamp_tag(stamp_path: Path) -> str | None:
@@ -100,6 +146,15 @@ def _fetch_contract() -> str | None:
 
 def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> int:
     """Return 0 if the contract is available, non-zero to halt (fail-closed)."""
+    # 0. Self-host: this project's own AGENTS.md IS the universal contract only
+    #    if it explicitly declares agents_contract: universal. The thin project
+    #    layer never does, so this is inert downstream — it exists solely so the
+    #    copied probe stays behaviorally consistent with the module probe (#151).
+    self_contract = repo_root / CONTRACT_FILENAME
+    if _is_playbook_contract(self_contract):
+        print(f"present-home: universal contract is this repository's own {self_contract.name}")
+        return 0
+
     home_path = _home_contract_path()
     if _is_present(home_path):
         print(f"present-home: universal contract at {home_path}")

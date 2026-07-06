@@ -7,6 +7,9 @@ with required fields and valid enum values.
 from pathlib import Path
 
 from playbook_validator.config import (
+    CONTRACT_ROLE_FIELD,
+    CONTRACT_ROLE_UNIVERSAL,
+    CONTRACT_ROLE_VALUES,
     DOC_LOAD_PRIORITY_VALUES,
     DOC_STATUS_VALUES,
     DOC_TIER_VALUES,
@@ -94,5 +97,61 @@ def validate_doc_frontmatter(path: Path) -> tuple[list[str], list[str]]:
         errors.append(
             f"{path} — invalid load_priority: '{load_priority}' (must be one of {sorted(DOC_LOAD_PRIORITY_VALUES)})"
         )
+
+    # Behavioral-contract role validation (optional field). When present it must
+    # be a recognized value; the universal-vs-thin invariant is checked in
+    # validate_contract_role() at the repository level.
+    contract_role = fm.get(CONTRACT_ROLE_FIELD)
+    if contract_role is not None and contract_role not in CONTRACT_ROLE_VALUES:
+        errors.append(
+            f"{path} — invalid {CONTRACT_ROLE_FIELD}: '{contract_role}' (must be one of {sorted(CONTRACT_ROLE_VALUES)})"
+        )
+
+    return errors, warnings
+
+
+# Paths (repo-root-relative) that MUST NOT claim the canonical universal role —
+# they are thin project layers that only *reference* the universal contract.
+_THIN_LAYER_PATHS = (
+    "templates/AGENTS.md.template",
+    "examples/AGENTS.md.example",
+)
+
+
+def validate_contract_role(root: Path) -> tuple[list[str], list[str]]:
+    """Enforce the canonical-designation invariant across the repository.
+
+    The universal behavioral contract (repo-root ``AGENTS.md``) MUST declare
+    ``agents_contract: universal`` so tooling recognizes it by an explicit,
+    version-controlled marker (issue #151, ADR-0003). The thin project layers
+    (template and example) MUST NOT claim that role — otherwise a bootstrapped
+    project's own AGENTS.md could self-satisfy the contract probe.
+
+    Returns (errors, warnings).
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    universal = root / "AGENTS.md"
+    if universal.is_file():
+        role = extract_frontmatter(universal).get(CONTRACT_ROLE_FIELD)
+        if role != CONTRACT_ROLE_UNIVERSAL:
+            errors.append(
+                f"{universal} — universal contract MUST declare "
+                f"{CONTRACT_ROLE_FIELD}: {CONTRACT_ROLE_UNIVERSAL} (found: {role!r})"
+            )
+
+    for rel in _THIN_LAYER_PATHS:
+        thin = root / rel
+        if not thin.is_file():
+            continue
+        role = extract_frontmatter(thin).get(CONTRACT_ROLE_FIELD)
+        if role == CONTRACT_ROLE_UNIVERSAL:
+            errors.append(
+                f"{thin} — thin project layer MUST NOT declare "
+                f"{CONTRACT_ROLE_FIELD}: {CONTRACT_ROLE_UNIVERSAL} "
+                "(only the universal contract may); this would let a bootstrapped "
+                "project self-satisfy the contract probe (#151)"
+            )
 
     return errors, warnings

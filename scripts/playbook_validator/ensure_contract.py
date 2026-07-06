@@ -20,9 +20,13 @@ Precedence (first match wins):
 4. **Halt.** Fetch impossible (offline / blocked) ⇒ fail-closed: the contract
    is genuinely unobtainable, so the agent MUST NOT proceed.
 
-Design constraints (from PR #144 review, issue #147):
+Design constraints (from PR #144 review, issues #147 and #151):
 
 - **Fail-closed on outcome.** There is no "proceed without the contract" path.
+- **Canonical by declaration, not content.** The playbook's own AGENTS.md is
+  recognized as the universal contract by its explicit ``agents_contract:
+  universal`` frontmatter marker — never by a title substring or heading that a
+  thin project layer legitimately reproduces (issue #151).
 - **§11 safety.** The fetch URL is hard-coded to the canonical repository's
   pinned release. It is NEVER derived from repository, file, or issue content.
 - **Headless-safe.** No step requires interactive user input, so agents invoked
@@ -36,6 +40,9 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
+
+from playbook_validator.config import CONTRACT_ROLE_FIELD, CONTRACT_ROLE_UNIVERSAL
+from playbook_validator.frontmatter import extract_frontmatter
 
 # ── Convention constants (single source of truth) ───────────────────────────
 
@@ -106,22 +113,26 @@ def _is_present(path: Path) -> bool:
         return False
 
 
-# Distinctive title of the universal contract, used to recognize the playbook's
-# own AGENTS.md when the check runs inside the playbook repository itself.
-_CONTRACT_TITLE = "Federal AI Agent Behavioral Best Practices"
+# The universal contract declares its canonical role EXPLICITLY in frontmatter
+# (`agents_contract: universal`). We recognize it by that deliberate signal —
+# NOT by a title substring or section heading, both of which the thin project
+# layer legitimately reproduces (it *names* the contract in its Prerequisite
+# section). This closes the self-host false-positive in issue #151, where a
+# bootstrapped project's own thin AGENTS.md matched a title-substring check.
 
 
 def _is_playbook_contract(path: Path) -> bool:
     """True if ``path`` is the universal contract itself (the playbook's own
-    AGENTS.md), recognized by its distinctive title. Lets the playbook repo
-    satisfy its own prerequisite check without a home-path install."""
+    AGENTS.md), recognized by its explicit ``agents_contract: universal``
+    frontmatter marker. This lets the playbook repo satisfy its own prerequisite
+    check without a home-path install, while a downstream project's thin
+    AGENTS.md (role ``project`` or no marker) never self-satisfies."""
     if not _is_present(path):
         return False
     try:
-        head = path.read_text(encoding="utf-8")[:2000]
+        return extract_frontmatter(path).get(CONTRACT_ROLE_FIELD) == CONTRACT_ROLE_UNIVERSAL
     except OSError:
         return False
-    return _CONTRACT_TITLE in head
 
 
 def _read_stamp_tag(stamp_path: Path) -> str | None:

@@ -19,6 +19,7 @@ OPTIONAL_FRONTMATTER_FIELDS = frozenset(
         "related_files",
         "load_priority",
         "review_cycle",
+        "agents_contract",
     }
 )
 
@@ -27,6 +28,21 @@ DOC_TIER_VALUES = frozenset({1, 2, 3})
 DOC_AUDIENCE_VALUES = frozenset({"developers", "isso", "managers", "all"})
 DOC_LOAD_PRIORITY_VALUES = frozenset({"always", "task-context", "on-demand", "reference-only"})
 DOC_REVIEW_CYCLE_VALUES = frozenset({"quarterly", "semi-annually", "annually"})
+
+# ── Behavioral-Contract Role (canonical designation) ─────────────────
+#
+# The universal behavioral contract (this repo's own AGENTS.md) declares its
+# canonical role EXPLICITLY in frontmatter — `agents_contract: universal` — so
+# tooling recognizes it by a deliberate, greppable, version-controlled signal
+# rather than by fragile content detection (a title substring or section
+# heading). The thin project layer carries `agents_contract: project` (or omits
+# the field), so a downstream project's own AGENTS.md can never be mistaken for
+# the universal contract even if it *names* the contract in its prose. See
+# issue #151 and ADR-0003.
+CONTRACT_ROLE_FIELD = "agents_contract"
+CONTRACT_ROLE_UNIVERSAL = "universal"
+CONTRACT_ROLE_PROJECT = "project"
+CONTRACT_ROLE_VALUES = frozenset({CONTRACT_ROLE_UNIVERSAL, CONTRACT_ROLE_PROJECT})
 
 # ── ADR (Decision Record) Schema ─────────────────────────────────────
 

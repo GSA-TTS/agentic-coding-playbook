@@ -22,7 +22,11 @@ logger = logging.getLogger("playbook_validator")
 
 
 def cmd_validate_docs(args: argparse.Namespace) -> int:
-    from playbook_validator.validate_docs import find_content_files, validate_doc_frontmatter
+    from playbook_validator.validate_docs import (
+        find_content_files,
+        validate_contract_role,
+        validate_doc_frontmatter,
+    )
 
     root = Path(args.root)
     files = find_content_files(root)
@@ -38,6 +42,16 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
             print(f"WARNING: {w}")
         if not errors:
             print(f"  OK: {f.relative_to(root)}")
+
+    print("\n=== Contract-Role Designation ===")
+    role_errors, role_warnings = validate_contract_role(root)
+    for e in role_errors:
+        print(f"ERROR: {e}")
+        total_errors += 1
+    for w in role_warnings:
+        print(f"WARNING: {w}")
+    if not role_errors:
+        print("  OK: canonical universal contract designated; thin layers do not claim it")
 
     print(f"\n=== Summary ===\nErrors: {total_errors}")
     if total_errors > 0:
