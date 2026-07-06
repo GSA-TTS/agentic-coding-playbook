@@ -18,7 +18,7 @@ review_cycle: "quarterly"
 
 # AGENTS.md — Federal AI Agent Behavioral Best Practices
 
-> **Version:** 0.2.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
+> **Version:** 0.3.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
 
 ## Quick Reference
 
@@ -724,6 +724,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-07-06 | 0.3.0 | Split into universal contract + thin project layer; add fail-closed contract-prerequisite probe; designate canonical via `agents_contract: universal` frontmatter marker; SHA-256-verify fetched contract |
 | 2026-06-26 | 0.2.0 | Add §8.3 periodic end-to-end validation, §9.3 discovered-defect filing gate, §14.1.1 plan proportionality + expedited mode, §15.5 track-all-work, wiring/downstream self-check items; reconcile version banner + related_files; drop hardcoded test count |
 | 2026-02-25 | 0.1.0 | Initial release — MVP scope (single-agent, FIPS Moderate, internal enterprise) |
 

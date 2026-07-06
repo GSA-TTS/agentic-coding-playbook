@@ -60,7 +60,9 @@ cache + stamp). It is enforced at three layers:
    present in the environment) rather than relying on the fetch fallback.
 
 The probe's fetch URL is hard-coded to the canonical repository's pinned release
-tag — never derived from repository, file, or issue content (SI-10, §11).
+tag — never derived from repository, file, or issue content (SI-10, §11). A
+fetched contract is accepted only if its bytes match a pinned SHA-256 constant
+(SI-7); an unverifiable fetch is treated as unobtainable and fails closed.
 
 The universal contract is designated canonical by an explicit frontmatter marker
 — `agents_contract: universal` — and the probe recognizes it by that marker

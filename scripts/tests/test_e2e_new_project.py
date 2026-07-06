@@ -134,6 +134,28 @@ def test_excluded_skills_absent(bootstrapped_project: Path):
         )
 
 
+def test_skill_partition_is_exhaustive():
+    """DOWNSTREAM_SKILLS ∪ EXCLUDED_SKILLS must exactly equal the set of skills
+    in the playbook. This is the guard that forces a deliberate include/exclude
+    decision for every NEW skill: add one without classifying it and this fails,
+    rather than the skill silently leaking downstream (or silently vanishing).
+
+    (Non-blocking nit from the PR #144 re-review.)"""
+    skills_dir = PLAYBOOK_ROOT / "skills"
+    actual = {p.name for p in skills_dir.iterdir() if (p / "SKILL.md").is_file()}
+    classified = set(DOWNSTREAM_SKILLS) | set(EXCLUDED_SKILLS)
+
+    unclassified = actual - classified
+    stale = classified - actual
+    assert not unclassified, (
+        f"skills present in skills/ but not classified as downstream or excluded: {sorted(unclassified)}"
+    )
+    assert not stale, f"skills classified in new_project.py but absent from skills/: {sorted(stale)}"
+    # No skill may be in both lists.
+    both = set(DOWNSTREAM_SKILLS) & set(EXCLUDED_SKILLS)
+    assert not both, f"skills classified as BOTH downstream and excluded: {sorted(both)}"
+
+
 def test_no_dangling_markdown_links_including_skills(bootstrapped_project: Path):
     """Every relative markdown link in the generated project — including the
     copied skills/ tree — resolves to a file that exists inside the project.

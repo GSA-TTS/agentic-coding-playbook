@@ -29,10 +29,13 @@ Design constraints (from PR #144 review, issues #147 and #151):
   thin project layer legitimately reproduces (issue #151).
 - **§11 safety.** The fetch URL is hard-coded to the canonical repository's
   pinned release. It is NEVER derived from repository, file, or issue content.
+- **Fetch integrity.** A fetched contract is accepted only if it matches the
+  pinned SHA-256 (SI-7); an unverifiable fetch is treated as unobtainable.
 - **Headless-safe.** No step requires interactive user input, so agents invoked
   non-interactively (``agent -p "..."``) work without a human in the loop.
 """
 
+import hashlib
 import os
 import urllib.error
 import urllib.request
@@ -60,6 +63,12 @@ STAMP_RELPATH = Path(".agents/cache/AGENTS.universal.stamp")
 # hard-coded (never taken from untrusted content) per §11.
 PINNED_RELEASE_TAG = "v0.13.0"
 CONTRACT_RAW_URL = f"https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/{PINNED_RELEASE_TAG}/AGENTS.md"
+
+# SHA-256 of the pinned-release AGENTS.md. A fetched contract is only accepted
+# if it hashes to this value, so a compromised CDN/MITM cannot substitute a
+# different "contract" (SI-7 integrity). Regenerate on each release bump:
+#   git show <tag>:AGENTS.md | sha256sum
+PINNED_CONTRACT_SHA256 = "cd8786c0a785739b571f38b82ae6941ee4de30c157a1d709f55c17019b9b3ce7"
 
 _FETCH_TIMEOUT_SECONDS = 15
 
@@ -162,8 +171,11 @@ def _write_cache(cache_path: Path, stamp_path: Path, content: str) -> None:
 def _fetch_contract() -> str | None:
     """Fetch the pinned contract from the hard-coded canonical URL.
 
-    Returns the contract text, or None on any network/HTTP failure. The URL is a
-    module constant — never derived from caller input or repository content.
+    Returns the contract text, or None on any network/HTTP failure OR if the
+    fetched bytes do not match the pinned SHA-256 (SI-7 integrity): a fetch that
+    cannot be verified is treated as unobtainable, so the caller fails closed.
+    The URL is a module constant — never derived from caller input or
+    repository content.
     """
     try:
         # URL is a hard-coded https constant, not caller-supplied (§11).
@@ -171,10 +183,13 @@ def _fetch_contract() -> str | None:
         with urllib.request.urlopen(req, timeout=_FETCH_TIMEOUT_SECONDS) as resp:  # noqa: S310
             if resp.status != 200:
                 return None
-            data = resp.read().decode("utf-8")
-            return data if data.strip() else None
+            raw = resp.read()
     except (urllib.error.URLError, TimeoutError, ValueError, OSError):
         return None
+    if hashlib.sha256(raw).hexdigest() != PINNED_CONTRACT_SHA256:
+        return None
+    data = raw.decode("utf-8")
+    return data if data.strip() else None
 
 
 def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractResult:

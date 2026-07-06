@@ -32,9 +32,11 @@ the fail-closed halt: DO NOT proceed. There is no "proceed without" path.
 
 The fetch URL is hard-coded to the canonical repository's pinned release and is
 NEVER derived from repository, file, or issue content (prompt-injection safety).
+A fetched contract is accepted only if it matches the pinned SHA-256 (SI-7).
 """
 
 import argparse
+import hashlib
 import os
 import sys
 import urllib.error
@@ -58,6 +60,10 @@ CONTRACT_ROLE_UNIVERSAL = "universal"
 # Pinned release the cache is fetched from and measured against. Hard-coded.
 PINNED_RELEASE_TAG = "v0.13.0"
 CONTRACT_RAW_URL = f"https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/{PINNED_RELEASE_TAG}/AGENTS.md"
+# SHA-256 of the pinned-release AGENTS.md. A fetched contract is accepted only
+# if it hashes to this value (SI-7 integrity). Regenerate on each release bump:
+#   git show <tag>:AGENTS.md | sha256sum
+PINNED_CONTRACT_SHA256 = "cd8786c0a785739b571f38b82ae6941ee4de30c157a1d709f55c17019b9b3ce7"
 _FETCH_TIMEOUT_SECONDS = 15
 
 
@@ -133,15 +139,20 @@ def _write_cache(cache_path: Path, stamp_path: Path, content: str) -> None:
 
 
 def _fetch_contract() -> str | None:
+    # Fetch is accepted only if the bytes match the pinned SHA-256 (SI-7); an
+    # unverifiable fetch is treated as unobtainable so the caller fails closed.
     try:
         req = urllib.request.Request(CONTRACT_RAW_URL, method="GET")  # noqa: S310
         with urllib.request.urlopen(req, timeout=_FETCH_TIMEOUT_SECONDS) as resp:  # noqa: S310
             if resp.status != 200:
                 return None
-            data = resp.read().decode("utf-8")
-            return data if data.strip() else None
+            raw = resp.read()
     except (urllib.error.URLError, TimeoutError, ValueError, OSError):
         return None
+    if hashlib.sha256(raw).hexdigest() != PINNED_CONTRACT_SHA256:
+        return None
+    data = raw.decode("utf-8")
+    return data if data.strip() else None
 
 
 def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> int:

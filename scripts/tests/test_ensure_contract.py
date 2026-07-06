@@ -159,6 +159,65 @@ def test_fetch_url_is_pinned_canonical_constant():
     assert PINNED_RELEASE_TAG in ec.CONTRACT_RAW_URL
 
 
+# ── 6a. Fetch integrity — pinned SHA-256 (SI-7) ──────────────────────────────
+
+
+def _mock_urlopen(body: bytes):
+    """Build an object usable as a mock urlopen() return (context manager)."""
+    resp = mock.MagicMock()
+    resp.status = 200
+    resp.read.return_value = body
+    cm = mock.MagicMock()
+    cm.__enter__.return_value = resp
+    cm.__exit__.return_value = False
+    return cm
+
+
+def test_fetch_rejects_hash_mismatch(repo):
+    """A fetched body that does not match the pinned SHA-256 is treated as
+    unobtainable → fail-closed halt (no cache written)."""
+    with mock.patch.object(ec.urllib.request, "urlopen", return_value=_mock_urlopen(b"# tampered\n")):
+        result = ensure_contract(repo)
+    assert not result.ok
+    assert result.status is ContractStatus.ABSENT
+    assert not (repo / ec.CACHE_RELPATH).exists()
+
+
+def test_fetch_accepts_matching_hash(repo):
+    """A fetched body whose SHA-256 matches the pin is accepted and cached."""
+    body = b"# the real pinned contract bytes\n"
+    with (
+        mock.patch.object(ec, "PINNED_CONTRACT_SHA256", ec.hashlib.sha256(body).hexdigest()),
+        mock.patch.object(ec.urllib.request, "urlopen", return_value=_mock_urlopen(body)),
+    ):
+        result = ensure_contract(repo)
+    assert result.ok
+    assert result.status is ContractStatus.FETCHED
+    assert (repo / ec.CACHE_RELPATH).read_text() == body.decode()
+
+
+def test_pinned_sha_matches_pinned_release_tag():
+    """The pinned SHA-256 must match the AGENTS.md at the pinned RELEASE TAG —
+    i.e. the exact bytes the probe fetches from CONTRACT_RAW_URL. (Not the
+    working-tree AGENTS.md, which may be mid-edit ahead of the next release.)
+    Skips if the tag isn't present locally (e.g. shallow CI checkout)."""
+    import subprocess
+
+    try:
+        raw = subprocess.run(  # noqa: S603
+            ["git", "show", f"{PINNED_RELEASE_TAG}:AGENTS.md"],  # noqa: S607
+            cwd=PLAYBOOK_ROOT,
+            capture_output=True,
+            check=True,
+        ).stdout
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pytest.skip(f"pinned tag {PINNED_RELEASE_TAG} not available locally")
+    assert ec.hashlib.sha256(raw).hexdigest() == ec.PINNED_CONTRACT_SHA256, (
+        f"PINNED_CONTRACT_SHA256 does not match AGENTS.md at {PINNED_RELEASE_TAG}; "
+        "regenerate: git show <tag>:AGENTS.md | sha256sum"
+    )
+
+
 def test_no_proceed_without_option_exists():
     """There must be no code path where ok=True while the contract is absent."""
     repo = Path("/nonexistent-project-root-xyz")
