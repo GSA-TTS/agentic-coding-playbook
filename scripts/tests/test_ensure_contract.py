@@ -15,6 +15,13 @@ from playbook_validator.ensure_contract import (
 
 CONTRACT_TEXT = "# AGENTS.md — Federal AI Agent Behavioral Best Practices\n\nrules...\n"
 
+# Frontmatter carrying the structured, versioned contract block. The thin layer
+# legitimately *names* the contract title in prose but declares project-layer.
+UNIVERSAL_FM = (
+    '---\ntitle: x\ncontract:\n  role: universal\n  version: "1.0.0"\n---\n'
+    "# AGENTS.md — Federal AI Agent Behavioral Best Practices\n"
+)
+
 # Repository root = two levels up from scripts/tests/
 PLAYBOOK_ROOT = Path(__file__).resolve().parents[2]
 
@@ -159,7 +166,7 @@ def test_fetch_url_is_pinned_canonical_constant():
     assert PINNED_RELEASE_TAG in ec.CONTRACT_RAW_URL
 
 
-# ── 6a. Fetch integrity — pinned SHA-256 (SI-7) ──────────────────────────────
+# ── 6a. Fetch self-declaration — fetched bytes must declare the contract ─────
 
 
 def _mock_urlopen(body: bytes):
@@ -173,49 +180,34 @@ def _mock_urlopen(body: bytes):
     return cm
 
 
-def test_fetch_rejects_hash_mismatch(repo):
-    """A fetched body that does not match the pinned SHA-256 is treated as
-    unobtainable → fail-closed halt (no cache written)."""
-    with mock.patch.object(ec.urllib.request, "urlopen", return_value=_mock_urlopen(b"# tampered\n")):
+def test_fetch_rejects_body_not_declaring_universal(repo):
+    """A fetched body that does not self-declare contract.role: universal (wrong
+    file, HTML error page, garbage) is treated as unobtainable → fail-closed
+    halt (no cache written)."""
+    body = b"<html><body>404 Not Found</body></html>\n"
+    with mock.patch.object(ec.urllib.request, "urlopen", return_value=_mock_urlopen(body)):
         result = ensure_contract(repo)
     assert not result.ok
     assert result.status is ContractStatus.ABSENT
     assert not (repo / ec.CACHE_RELPATH).exists()
 
 
-def test_fetch_accepts_matching_hash(repo):
-    """A fetched body whose SHA-256 matches the pin is accepted and cached."""
-    body = b"# the real pinned contract bytes\n"
-    with (
-        mock.patch.object(ec, "PINNED_CONTRACT_SHA256", ec.hashlib.sha256(body).hexdigest()),
-        mock.patch.object(ec.urllib.request, "urlopen", return_value=_mock_urlopen(body)),
-    ):
+def test_fetch_accepts_body_declaring_universal(repo):
+    """A fetched body whose frontmatter declares contract.role: universal is
+    accepted and cached."""
+    body = UNIVERSAL_FM.encode()
+    with mock.patch.object(ec.urllib.request, "urlopen", return_value=_mock_urlopen(body)):
         result = ensure_contract(repo)
     assert result.ok
     assert result.status is ContractStatus.FETCHED
     assert (repo / ec.CACHE_RELPATH).read_text() == body.decode()
 
 
-def test_pinned_sha_matches_pinned_release_tag():
-    """The pinned SHA-256 must match the AGENTS.md at the pinned RELEASE TAG —
-    i.e. the exact bytes the probe fetches from CONTRACT_RAW_URL. (Not the
-    working-tree AGENTS.md, which may be mid-edit ahead of the next release.)
-    Skips if the tag isn't present locally (e.g. shallow CI checkout)."""
-    import subprocess
-
-    try:
-        raw = subprocess.run(  # noqa: S603
-            ["git", "show", f"{PINNED_RELEASE_TAG}:AGENTS.md"],  # noqa: S607
-            cwd=PLAYBOOK_ROOT,
-            capture_output=True,
-            check=True,
-        ).stdout
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        pytest.skip(f"pinned tag {PINNED_RELEASE_TAG} not available locally")
-    assert ec.hashlib.sha256(raw).hexdigest() == ec.PINNED_CONTRACT_SHA256, (
-        f"PINNED_CONTRACT_SHA256 does not match AGENTS.md at {PINNED_RELEASE_TAG}; "
-        "regenerate: git show <tag>:AGENTS.md | sha256sum"
-    )
+def test_real_contract_bytes_declare_universal():
+    """The committed universal AGENTS.md self-declares contract.role: universal,
+    so the fetch-path acceptance check passes for the real released bytes."""
+    text = (PLAYBOOK_ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    assert ec._text_declares_universal(text)
 
 
 def test_no_proceed_without_option_exists():
@@ -228,16 +220,10 @@ def test_no_proceed_without_option_exists():
 
 # ── 7. Self-hosting — the playbook's own AGENTS.md satisfies the check ───────
 
-# Frontmatter carrying the canonical marker; the thin layer legitimately *names*
-# the contract title in prose but never declares this role.
-UNIVERSAL_FM = (
-    "---\ntitle: x\nagents_contract: universal\n---\n# AGENTS.md — Federal AI Agent Behavioral Best Practices\n"
-)
-
 
 def test_playbook_own_contract_satisfies(repo):
     """Inside the playbook repo, the repo's own AGENTS.md IS the contract —
-    recognized by its explicit agents_contract: universal marker."""
+    recognized by its structured contract.role: universal block."""
     repo.mkdir(parents=True)
     (repo / "AGENTS.md").write_text(UNIVERSAL_FM)
     with mock.patch.object(ec, "_fetch_contract", side_effect=AssertionError("should not fetch")):
@@ -260,15 +246,17 @@ def test_unrelated_agents_md_does_not_satisfy(repo):
 
 def test_title_substring_alone_does_not_satisfy(repo):
     """Regression for #151: an AGENTS.md that merely *names* the contract title
-    (as the thin layer does) but does not declare agents_contract: universal
-    must NOT self-satisfy the probe."""
+    (as the thin layer does) but declares contract.role: project-layer must NOT
+    self-satisfy the probe."""
     repo.mkdir(parents=True)
-    # Title present in body AND in a frontmatter description — but role is not
-    # 'universal'. This mirrors the thin template's shape.
+    # Title present in body AND in a frontmatter description — but the contract
+    # role is project-layer. This mirrors the thin template's shape.
     (repo / "AGENTS.md").write_text(
         "---\n"
         'description: "layers on the Federal AI Agent Behavioral Best Practices"\n'
-        "agents_contract: project\n"
+        "contract:\n"
+        "  role: project-layer\n"
+        '  requires_contract: ">=1.0"\n'
         "---\n"
         "# AGENTS.md — My Project\n\n"
         "This project layers on the **Federal AI Agent Behavioral Best Practices**.\n"

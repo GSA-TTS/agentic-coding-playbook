@@ -3,7 +3,9 @@ title: "Federal AI Agent Behavioral Best Practices"
 description: "Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements"
 status: canonical
 tier: 1
-agents_contract: universal
+contract:
+  role: universal
+  version: "1.0.0"
 last_updated: "2026-07-06"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-8", "IR-4", "IR-6", "PL-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
@@ -724,7 +726,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
-| 2026-07-06 | 0.3.0 | Split into universal contract + thin project layer; add fail-closed contract-prerequisite probe; designate canonical via `agents_contract: universal` frontmatter marker; SHA-256-verify fetched contract |
+| 2026-07-06 | 0.3.0 | Split into universal contract + thin project layer; add fail-closed contract-prerequisite probe; designate canonical via a versioned `contract:` frontmatter block (`role: universal`, `version: 1.0.0`) recognized by structure, not content |
 | 2026-06-26 | 0.2.0 | Add §8.3 periodic end-to-end validation, §9.3 discovered-defect filing gate, §14.1.1 plan proportionality + expedited mode, §15.5 track-all-work, wiring/downstream self-check items; reconcile version banner + related_files; drop hardcoded test count |
 | 2026-02-25 | 0.1.0 | Initial release — MVP scope (single-agent, FIPS Moderate, internal enterprise) |
 

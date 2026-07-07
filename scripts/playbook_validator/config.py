@@ -19,7 +19,7 @@ OPTIONAL_FRONTMATTER_FIELDS = frozenset(
         "related_files",
         "load_priority",
         "review_cycle",
-        "agents_contract",
+        "contract",
     }
 )
 
@@ -29,20 +29,57 @@ DOC_AUDIENCE_VALUES = frozenset({"developers", "isso", "managers", "all"})
 DOC_LOAD_PRIORITY_VALUES = frozenset({"always", "task-context", "on-demand", "reference-only"})
 DOC_REVIEW_CYCLE_VALUES = frozenset({"quarterly", "semi-annually", "annually"})
 
-# ── Behavioral-Contract Role (canonical designation) ─────────────────
+# ── Behavioral-Contract Designation (canonical, versioned) ───────────
 #
 # The universal behavioral contract (this repo's own AGENTS.md) declares its
-# canonical role EXPLICITLY in frontmatter — `agents_contract: universal` — so
-# tooling recognizes it by a deliberate, greppable, version-controlled signal
-# rather than by fragile content detection (a title substring or section
-# heading). The thin project layer carries `agents_contract: project` (or omits
-# the field), so a downstream project's own AGENTS.md can never be mistaken for
-# the universal contract even if it *names* the contract in its prose. See
-# issue #151 and ADR-0003.
-CONTRACT_ROLE_FIELD = "agents_contract"
+# identity EXPLICITLY in a structured, versioned frontmatter block, so tooling
+# recognizes it by a deliberate signal rather than by fragile content detection
+# (a title substring or section heading, which the thin project layer
+# legitimately reproduces):
+#
+#     contract:
+#       role: universal
+#       version: "1.0.0"
+#
+# The thin project layer carries `contract.role: project-layer` (and a
+# `requires_contract` range), so a downstream project's own AGENTS.md can never
+# be mistaken for the universal contract even if it *names* the contract in its
+# prose. `contract.version` is an INDEPENDENT semver for the behavioral rules
+# (decoupled from the repo/release version): it bumps only when the rules change
+# in a compatibility-relevant way, enabling future `requires_contract` checks.
+# See issue #151 and ADR-0003.
+CONTRACT_FIELD = "contract"
+CONTRACT_ROLE_KEY = "role"
+CONTRACT_VERSION_KEY = "version"
+CONTRACT_REQUIRES_KEY = "requires_contract"
 CONTRACT_ROLE_UNIVERSAL = "universal"
-CONTRACT_ROLE_PROJECT = "project"
+CONTRACT_ROLE_PROJECT = "project-layer"
 CONTRACT_ROLE_VALUES = frozenset({CONTRACT_ROLE_UNIVERSAL, CONTRACT_ROLE_PROJECT})
+
+# The current behavioral-contract version carried by the universal AGENTS.md.
+# Bump when the universal rules change compatibly/incompatibly (its own semver,
+# NOT the repo/release version).
+CURRENT_CONTRACT_VERSION = "1.0.0"
+
+
+def contract_block(frontmatter: dict) -> dict:
+    """Return the ``contract`` mapping from parsed frontmatter, or {} if absent
+    or malformed. Never raises on unexpected shapes."""
+    block = frontmatter.get(CONTRACT_FIELD)
+    return block if isinstance(block, dict) else {}
+
+
+def contract_role(frontmatter: dict) -> str | None:
+    """Return ``contract.role`` from parsed frontmatter, or None."""
+    role = contract_block(frontmatter).get(CONTRACT_ROLE_KEY)
+    return role if isinstance(role, str) else None
+
+
+def contract_version(frontmatter: dict) -> str | None:
+    """Return ``contract.version`` from parsed frontmatter, or None."""
+    version = contract_block(frontmatter).get(CONTRACT_VERSION_KEY)
+    return version if isinstance(version, str) else None
+
 
 # ── ADR (Decision Record) Schema ─────────────────────────────────────
 

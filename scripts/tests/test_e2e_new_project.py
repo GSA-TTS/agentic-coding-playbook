@@ -220,7 +220,7 @@ def test_bootstrapped_agents_md_does_not_self_satisfy_contract(bootstrapped_proj
     """Regression for #151: the generated project's own AGENTS.md must NOT
     self-satisfy the contract probe when no real contract is present. The thin
     layer names the universal contract in prose, but only the real contract
-    carries agents_contract: universal."""
+    declares contract.role: universal."""
     from playbook_validator import ensure_contract as ec
     from playbook_validator.ensure_contract import ContractStatus, ensure_contract
 
@@ -238,8 +238,8 @@ def test_bootstrapped_agents_md_does_not_self_satisfy_contract(bootstrapped_proj
 def test_bootstrapped_agents_md_declares_project_role(bootstrapped_project: Path):
     """The generated project AGENTS.md must declare the non-canonical role so
     its non-universal status is explicit and validated."""
-    from playbook_validator.config import CONTRACT_ROLE_UNIVERSAL
+    from playbook_validator.config import CONTRACT_ROLE_PROJECT, contract_role
     from playbook_validator.frontmatter import extract_frontmatter
 
-    role = extract_frontmatter(bootstrapped_project / "AGENTS.md").get("agents_contract")
-    assert role != CONTRACT_ROLE_UNIVERSAL, "bootstrapped project must not claim the universal contract role"
+    role = contract_role(extract_frontmatter(bootstrapped_project / "AGENTS.md"))
+    assert role == CONTRACT_ROLE_PROJECT, "bootstrapped project must declare contract.role: project-layer"

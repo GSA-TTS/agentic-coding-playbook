@@ -7,19 +7,19 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-07-06
+# Last generated: 2026-07-07
 
 schema_version: "1.0"
-generated: "2026-07-06"
+generated: "2026-07-07"
 repo: "GSA-TTS/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
 # Frontmatter schema — all .md content files MUST include at minimum:
 #   description (required), status (required), tier (required), title (required)
-# Optional: agents_contract, audience, frameworks, keywords, last_updated, load_priority, nist_controls, related_files, review_cycle
+# Optional: audience, contract, frameworks, keywords, last_updated, load_priority, nist_controls, related_files, review_cycle
 frontmatter_schema:
   required: ["description", "status", "tier", "title"]
-  optional: ["agents_contract", "audience", "frameworks", "keywords", "last_updated", "load_priority", "nist_controls", "related_files", "review_cycle"]
+  optional: ["audience", "contract", "frameworks", "keywords", "last_updated", "load_priority", "nist_controls", "related_files", "review_cycle"]
   status_values: ["canonical", "deprecated", "draft"]
   tier_values:
     1: "Core guidance — authoritative rules and control mappings"

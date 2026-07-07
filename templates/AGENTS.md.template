@@ -3,7 +3,9 @@ title: "AGENTS.md Project Template"
 description: "Copy-paste template for a thin, project-specific AGENTS.md that layers on top of the universal Federal AI Agent behavioral contract"
 status: canonical
 tier: 3
-agents_contract: project
+contract:
+  role: project-layer
+  requires_contract: ">=1.0"
 last_updated: "2026-07-06"
 audience: "developers"
 keywords: ["template", "AGENTS.md", "project-layer", "project-setup", "prerequisite"]
@@ -92,11 +94,14 @@ authoritative.
 
 <!--
   NOTE ON THE CANONICAL MARKER:
-  This file intentionally carries `agents_contract: project` in its frontmatter.
-  The universal contract is designated canonical by `agents_contract: universal`.
-  The probe recognizes the real contract by THAT marker — not by the title or a
-  heading — so this thin layer (which names the contract in the prose above)
-  never self-satisfies the check. Do NOT change this to `universal`.
+  This file intentionally declares `contract.role: project-layer` in its
+  frontmatter. The universal contract is designated canonical by
+  `contract.role: universal` (with a `contract.version`). The probe recognizes
+  the real contract by THAT structured marker — not by the title or a heading —
+  so this thin layer (which names the contract in the prose above) never
+  self-satisfies the check. Do NOT change this to `universal`. The
+  `requires_contract` range declares which universal-contract versions this
+  project is written against.
 -->
 
 The rules below are **additive** to the universal contract. Where this file is

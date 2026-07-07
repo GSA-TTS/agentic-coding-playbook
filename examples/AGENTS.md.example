@@ -3,7 +3,9 @@ title: "Example: AGENTS.md for a Federal Web Application"
 description: "Completed example showing a thin, project-specific AGENTS.md layered on the universal contract for a hypothetical federal HR benefits portal"
 status: canonical
 tier: 3
-agents_contract: project
+contract:
+  role: project-layer
+  requires_contract: ">=1.0"
 last_updated: "2026-07-06"
 audience: "developers"
 keywords: ["example", "AGENTS.md", "project-layer", "web-application", "federal"]

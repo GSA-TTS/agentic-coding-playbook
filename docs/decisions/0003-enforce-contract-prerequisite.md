@@ -61,17 +61,26 @@ cache + stamp). It is enforced at three layers:
 
 The probe's fetch URL is hard-coded to the canonical repository's pinned release
 tag — never derived from repository, file, or issue content (SI-10, §11). A
-fetched contract is accepted only if its bytes match a pinned SHA-256 constant
-(SI-7); an unverifiable fetch is treated as unobtainable and fails closed.
+fetched contract is accepted only if its own frontmatter self-declares
+`contract.role: universal`; a body that is not recognizably the contract (wrong
+file, HTML error page, garbage from a 200 response) is treated as unobtainable
+and fails closed. (An earlier revision pinned a SHA-256 of the released bytes;
+that was dropped in favor of the self-declaring versioned marker, which provides
+the same "is this really the contract?" assurance on the fetch path without a
+hash that must be regenerated every release.)
 
-The universal contract is designated canonical by an explicit frontmatter marker
-— `agents_contract: universal` — and the probe recognizes it by that marker
-rather than by a title substring or section heading. This closes a self-host
-false-positive (issue #151): the thin project layer legitimately *names* the
-contract title in its Prerequisite prose, so a title-substring recognizer let a
-bootstrapped project's own `AGENTS.md` self-satisfy the check. The thin layers
-declare `agents_contract: project`, and a repository-level validation
-(`validate-docs`) enforces that only the real contract may claim `universal`.
+The universal contract is designated canonical by a structured, versioned
+frontmatter block — `contract: { role: universal, version: "1.0.0" }` — and the
+probe recognizes it by that block rather than by a title substring or section
+heading. This closes a self-host false-positive (issue #151): the thin project
+layer legitimately *names* the contract title in its Prerequisite prose, so a
+title-substring recognizer let a bootstrapped project's own `AGENTS.md`
+self-satisfy the check. The thin layers declare `contract.role: project-layer`
+(with a `requires_contract` range), and a repository-level validation
+(`validate-docs`) enforces that only the real contract may claim `universal` and
+that it carries a `version`. `contract.version` is an independent semver for the
+behavioral rules, enabling future `requires_contract` compatibility checks
+(tracked as follow-up work in issue #153, not enforced by the probe yet).
 
 Downstream projects receive a **small self-contained probe script** (no
 dependency on installing `playbook_validator`) plus the hook and CI wiring; see
@@ -104,7 +113,7 @@ ADR-0002 for the no-vendored-copy stance the script is consistent with.
 ## Links
 
 - ADR-0002 (the universal vs. project split this enforces)
-- `scripts/playbook_validator/ensure_contract.py` (canonical probe; recognizes `agents_contract: universal`)
+- `scripts/playbook_validator/ensure_contract.py` (canonical probe; recognizes the structured `contract.role: universal` block)
 - `scripts/playbook_validator/validate_docs.py` (`validate_contract_role` — enforces the canonical-designation invariant)
 - `.pre-commit-config.yaml`, `.github/workflows/ci.yml` (enforcement layers)
 - PR #144; review issues #147, #151

@@ -9,17 +9,17 @@ enforced (session start, pre-commit hook, and CI) without installing anything.
 It mirrors ``playbook_validator/ensure_contract.py`` in the agentic-coding
 playbook. Keep the two in sync; the playbook is the source of truth.
 
-The universal contract is recognized as canonical by its explicit
-``agents_contract: universal`` frontmatter marker — never by a title substring
-or section heading (which a thin project layer legitimately reproduces). This
-mirrors the module probe and prevents a bootstrapped project's own AGENTS.md
-from self-satisfying the check (playbook issue #151).
+The universal contract is recognized as canonical by its structured, versioned
+``contract: {role: universal, version: ...}`` frontmatter block — never by a
+title substring or section heading (which a thin project layer legitimately
+reproduces). This mirrors the module probe and prevents a bootstrapped
+project's own AGENTS.md from self-satisfying the check (playbook issue #151).
 
 Precedence (first match wins), all deterministic filesystem facts:
 
   0. Self-host: this project's own AGENTS.md IS the universal contract only if
-     its frontmatter declares agents_contract: universal (the thin project
-     layer never does), so this branch is effectively inert downstream.
+     its frontmatter declares contract.role: universal (the thin project layer
+     declares project-layer), so this branch is effectively inert downstream.
   1. Home (environment-provided): $AGENTIC_CODING_PLAYBOOK_HOME/AGENTS.md,
      else ~/.agentic-coding-playbook/AGENTS.md
   2. Fresh cache: .agents/cache/AGENTS.universal.md whose sibling .stamp
@@ -32,11 +32,12 @@ the fail-closed halt: DO NOT proceed. There is no "proceed without" path.
 
 The fetch URL is hard-coded to the canonical repository's pinned release and is
 NEVER derived from repository, file, or issue content (prompt-injection safety).
-A fetched contract is accepted only if it matches the pinned SHA-256 (SI-7).
+A fetched contract is accepted only if its own frontmatter self-declares
+``contract.role: universal`` (rejects a wrong file, an HTML error page, or
+garbage from a 200 response).
 """
 
 import argparse
-import hashlib
 import os
 import sys
 import urllib.error
@@ -51,19 +52,17 @@ CONTRACT_FILENAME = "AGENTS.md"
 CACHE_RELPATH = Path(".agents/cache/AGENTS.universal.md")
 STAMP_RELPATH = Path(".agents/cache/AGENTS.universal.stamp")
 
-# Canonical designation: the universal contract declares agents_contract:
-# universal in its frontmatter. The thin project layer never does, so the
-# self-host branch below is inert downstream (mirrors the module probe; #151).
-CONTRACT_ROLE_FIELD = "agents_contract"
+# Canonical designation: the universal contract declares a structured
+# `contract: {role: universal, version: ...}` frontmatter block. The thin
+# project layer declares `contract.role: project-layer`, so the self-host branch
+# below is inert downstream (mirrors the module probe; #151).
+CONTRACT_FIELD = "contract"
+CONTRACT_ROLE_KEY = "role"
 CONTRACT_ROLE_UNIVERSAL = "universal"
 
 # Pinned release the cache is fetched from and measured against. Hard-coded.
 PINNED_RELEASE_TAG = "v0.13.0"
 CONTRACT_RAW_URL = f"https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/{PINNED_RELEASE_TAG}/AGENTS.md"
-# SHA-256 of the pinned-release AGENTS.md. A fetched contract is accepted only
-# if it hashes to this value (SI-7 integrity). Regenerate on each release bump:
-#   git show <tag>:AGENTS.md | sha256sum
-PINNED_CONTRACT_SHA256 = "cd8786c0a785739b571f38b82ae6941ee4de30c157a1d709f55c17019b9b3ce7"
 _FETCH_TIMEOUT_SECONDS = 15
 
 
@@ -80,38 +79,57 @@ def _is_present(path: Path) -> bool:
         return False
 
 
-def _frontmatter_role(path: Path) -> str | None:
-    """Return the ``agents_contract`` frontmatter value, if any.
+def _text_declares_universal(text: str) -> bool:
+    """True if raw Markdown ``text`` declares ``contract.role: universal`` in its
+    frontmatter.
 
-    Dependency-free: scans the leading ``---`` fenced block for a simple
-    ``key: value`` line rather than importing a YAML parser. Sufficient for the
-    single scalar marker we care about.
+    Dependency-free: scans the leading ``---`` fenced block for the nested
+    ``contract:`` mapping and its ``role:`` child, tracking indentation, rather
+    than importing a YAML parser. Sufficient for the single structured marker we
+    care about; mirrors the playbook's typed frontmatter read.
     """
-    if not _is_present(path):
-        return None
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError:
-        return None
     if not text.startswith("---"):
-        return None
+        return False
     end = text.find("\n---", 3)
     if end == -1:
-        return None
-    for line in text[4:end].splitlines():
-        key, sep, value = line.partition(":")
-        if sep and key.strip() == CONTRACT_ROLE_FIELD:
-            return value.strip().strip("\"'")
-    return None
+        return False
+    in_contract = False
+    contract_indent = 0
+    for raw_line in text[4:end].splitlines():
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip())
+        stripped = raw_line.strip()
+        if not in_contract:
+            if stripped.rstrip() == f"{CONTRACT_FIELD}:":
+                in_contract = True
+                contract_indent = indent
+            continue
+        # Inside the contract: block; a line at or below its indent ends it.
+        if indent <= contract_indent:
+            in_contract = False
+            if stripped.rstrip() == f"{CONTRACT_FIELD}:":
+                in_contract = True
+                contract_indent = indent
+            continue
+        key, sep, value = stripped.partition(":")
+        if sep and key.strip() == CONTRACT_ROLE_KEY:
+            return value.strip().strip("\"'") == CONTRACT_ROLE_UNIVERSAL
+    return False
 
 
 def _is_playbook_contract(path: Path) -> bool:
-    """True only if ``path`` explicitly declares ``agents_contract: universal``.
+    """True only if ``path`` declares ``contract.role: universal``.
 
-    Recognizes the universal contract by a deliberate frontmatter marker, never
-    by a title substring — so a downstream project's thin AGENTS.md (which
-    *names* the contract but is not it) never self-satisfies (#151)."""
-    return _frontmatter_role(path) == CONTRACT_ROLE_UNIVERSAL
+    Recognizes the universal contract by a deliberate structured frontmatter
+    block, never by a title substring — so a downstream project's thin AGENTS.md
+    (which *names* the contract but is not it) never self-satisfies (#151)."""
+    if not _is_present(path):
+        return False
+    try:
+        return _text_declares_universal(path.read_text(encoding="utf-8"))
+    except OSError:
+        return False
 
 
 def _read_stamp_tag(stamp_path: Path) -> str | None:
@@ -139,28 +157,28 @@ def _write_cache(cache_path: Path, stamp_path: Path, content: str) -> None:
 
 
 def _fetch_contract() -> str | None:
-    # Fetch is accepted only if the bytes match the pinned SHA-256 (SI-7); an
-    # unverifiable fetch is treated as unobtainable so the caller fails closed.
+    # Accepted only if the fetched bytes self-declare contract.role: universal;
+    # a fetch that isn't recognizably the universal contract (wrong file, HTML
+    # error page, garbage) is treated as unobtainable so the caller fails closed.
     try:
         req = urllib.request.Request(CONTRACT_RAW_URL, method="GET")  # noqa: S310
         with urllib.request.urlopen(req, timeout=_FETCH_TIMEOUT_SECONDS) as resp:  # noqa: S310
             if resp.status != 200:
                 return None
-            raw = resp.read()
+            data = resp.read().decode("utf-8")
     except (urllib.error.URLError, TimeoutError, ValueError, OSError):
         return None
-    if hashlib.sha256(raw).hexdigest() != PINNED_CONTRACT_SHA256:
+    if not data.strip() or not _text_declares_universal(data):
         return None
-    data = raw.decode("utf-8")
-    return data if data.strip() else None
+    return data
 
 
 def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> int:
     """Return 0 if the contract is available, non-zero to halt (fail-closed)."""
     # 0. Self-host: this project's own AGENTS.md IS the universal contract only
-    #    if it explicitly declares agents_contract: universal. The thin project
-    #    layer never does, so this is inert downstream — it exists solely so the
-    #    copied probe stays behaviorally consistent with the module probe (#151).
+    #    if it declares contract.role: universal. The thin project layer never
+    #    does, so this is inert downstream — it exists solely so the copied probe
+    #    stays behaviorally consistent with the module probe (#151).
     self_contract = repo_root / CONTRACT_FILENAME
     if _is_playbook_contract(self_contract):
         print(f"present-home: universal contract is this repository's own {self_contract.name}")

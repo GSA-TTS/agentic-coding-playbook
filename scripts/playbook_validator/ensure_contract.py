@@ -23,19 +23,20 @@ Precedence (first match wins):
 Design constraints (from PR #144 review, issues #147 and #151):
 
 - **Fail-closed on outcome.** There is no "proceed without the contract" path.
-- **Canonical by declaration, not content.** The playbook's own AGENTS.md is
-  recognized as the universal contract by its explicit ``agents_contract:
-  universal`` frontmatter marker — never by a title substring or heading that a
-  thin project layer legitimately reproduces (issue #151).
+- **Canonical by structured declaration, not content.** The playbook's own
+  AGENTS.md is recognized as the universal contract by a structured, versioned
+  frontmatter block (``contract.role: universal``) — never by a title substring
+  or heading that a thin project layer legitimately reproduces (issue #151).
 - **§11 safety.** The fetch URL is hard-coded to the canonical repository's
   pinned release. It is NEVER derived from repository, file, or issue content.
-- **Fetch integrity.** A fetched contract is accepted only if it matches the
-  pinned SHA-256 (SI-7); an unverifiable fetch is treated as unobtainable.
+- **Fetch self-declaration.** A fetched contract is accepted only if its own
+  frontmatter declares ``contract.role: universal`` — so a wrong file, an HTML
+  error page, or garbage cached from a 200 response is rejected. (No pinned
+  hash to bump every release; the versioned marker is the integrity signal.)
 - **Headless-safe.** No step requires interactive user input, so agents invoked
   non-interactively (``agent -p "..."``) work without a human in the loop.
 """
 
-import hashlib
 import os
 import urllib.error
 import urllib.request
@@ -44,8 +45,8 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 
-from playbook_validator.config import CONTRACT_ROLE_FIELD, CONTRACT_ROLE_UNIVERSAL
-from playbook_validator.frontmatter import extract_frontmatter
+from playbook_validator.config import CONTRACT_ROLE_UNIVERSAL, contract_role
+from playbook_validator.frontmatter import extract_frontmatter, parse_frontmatter
 
 # ── Convention constants (single source of truth) ───────────────────────────
 
@@ -63,12 +64,6 @@ STAMP_RELPATH = Path(".agents/cache/AGENTS.universal.stamp")
 # hard-coded (never taken from untrusted content) per §11.
 PINNED_RELEASE_TAG = "v0.13.0"
 CONTRACT_RAW_URL = f"https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/{PINNED_RELEASE_TAG}/AGENTS.md"
-
-# SHA-256 of the pinned-release AGENTS.md. A fetched contract is only accepted
-# if it hashes to this value, so a compromised CDN/MITM cannot substitute a
-# different "contract" (SI-7 integrity). Regenerate on each release bump:
-#   git show <tag>:AGENTS.md | sha256sum
-PINNED_CONTRACT_SHA256 = "cd8786c0a785739b571f38b82ae6941ee4de30c157a1d709f55c17019b9b3ce7"
 
 _FETCH_TIMEOUT_SECONDS = 15
 
@@ -122,24 +117,31 @@ def _is_present(path: Path) -> bool:
         return False
 
 
-# The universal contract declares its canonical role EXPLICITLY in frontmatter
-# (`agents_contract: universal`). We recognize it by that deliberate signal —
-# NOT by a title substring or section heading, both of which the thin project
-# layer legitimately reproduces (it *names* the contract in its Prerequisite
-# section). This closes the self-host false-positive in issue #151, where a
-# bootstrapped project's own thin AGENTS.md matched a title-substring check.
+# The universal contract declares its identity EXPLICITLY in a structured,
+# versioned frontmatter block (`contract.role: universal`). We recognize it by
+# that deliberate signal — NOT by a title substring or section heading, both of
+# which the thin project layer legitimately reproduces (it *names* the contract
+# in its Prerequisite section). This closes the self-host false-positive in
+# issue #151, where a bootstrapped project's own thin AGENTS.md matched a
+# title-substring check.
+
+
+def _text_declares_universal(text: str) -> bool:
+    """True if raw Markdown ``text`` declares ``contract.role: universal`` in
+    its frontmatter. Used both for on-disk files and freshly fetched bytes."""
+    return contract_role(parse_frontmatter(text)) == CONTRACT_ROLE_UNIVERSAL
 
 
 def _is_playbook_contract(path: Path) -> bool:
     """True if ``path`` is the universal contract itself (the playbook's own
-    AGENTS.md), recognized by its explicit ``agents_contract: universal``
-    frontmatter marker. This lets the playbook repo satisfy its own prerequisite
+    AGENTS.md), recognized by its structured ``contract.role: universal``
+    frontmatter block. This lets the playbook repo satisfy its own prerequisite
     check without a home-path install, while a downstream project's thin
-    AGENTS.md (role ``project`` or no marker) never self-satisfies."""
+    AGENTS.md (role ``project-layer`` or no block) never self-satisfies."""
     if not _is_present(path):
         return False
     try:
-        return extract_frontmatter(path).get(CONTRACT_ROLE_FIELD) == CONTRACT_ROLE_UNIVERSAL
+        return contract_role(extract_frontmatter(path)) == CONTRACT_ROLE_UNIVERSAL
     except OSError:
         return False
 
@@ -172,10 +174,11 @@ def _fetch_contract() -> str | None:
     """Fetch the pinned contract from the hard-coded canonical URL.
 
     Returns the contract text, or None on any network/HTTP failure OR if the
-    fetched bytes do not match the pinned SHA-256 (SI-7 integrity): a fetch that
-    cannot be verified is treated as unobtainable, so the caller fails closed.
-    The URL is a module constant — never derived from caller input or
-    repository content.
+    fetched bytes do not self-declare ``contract.role: universal`` in their
+    frontmatter: a fetch that is not recognizably the universal contract (wrong
+    file, an HTML error page, garbage) is treated as unobtainable, so the caller
+    fails closed. The URL is a module constant — never derived from caller input
+    or repository content (§11).
     """
     try:
         # URL is a hard-coded https constant, not caller-supplied (§11).
@@ -183,13 +186,12 @@ def _fetch_contract() -> str | None:
         with urllib.request.urlopen(req, timeout=_FETCH_TIMEOUT_SECONDS) as resp:  # noqa: S310
             if resp.status != 200:
                 return None
-            raw = resp.read()
+            data = resp.read().decode("utf-8")
     except (urllib.error.URLError, TimeoutError, ValueError, OSError):
         return None
-    if hashlib.sha256(raw).hexdigest() != PINNED_CONTRACT_SHA256:
+    if not data.strip() or not _text_declares_universal(data):
         return None
-    data = raw.decode("utf-8")
-    return data if data.strip() else None
+    return data
 
 
 def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractResult:

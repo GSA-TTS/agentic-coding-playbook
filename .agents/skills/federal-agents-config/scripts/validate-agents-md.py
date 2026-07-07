@@ -124,10 +124,11 @@ def validate(file_path: str) -> dict:
     # The thin project layer must NOT claim the canonical universal-contract
     # role (that marker belongs only to the real contract); otherwise a
     # bootstrapped project's own AGENTS.md could self-satisfy the probe (#151).
-    if re.search(r"^\s*agents_contract:\s*universal\s*$", content, re.MULTILINE):
+    # The role lives under a structured `contract:` frontmatter block.
+    if re.search(r"^\s*role:\s*universal\s*$", content, re.MULTILINE):
         warnings.append(
-            "Frontmatter declares 'agents_contract: universal' — a thin project layer must use "
-            "'agents_contract: project' (only the universal contract may claim 'universal'); "
+            "Frontmatter declares 'contract.role: universal' — a thin project layer must use "
+            "'role: project-layer' (only the universal contract may claim 'universal'); "
             "this would let the project self-satisfy the contract probe (#151)"
         )
 

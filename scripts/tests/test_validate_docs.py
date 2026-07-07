@@ -109,6 +109,113 @@ class TestValidateDocFrontmatter:
         errors, warnings = validate_doc_frontmatter(md)
         assert errors == []
 
+    def test_invalid_contract_role(self, tmp_path):
+        md = tmp_path / "test.md"
+        md.write_text(
+            textwrap.dedent("""\
+            ---
+            title: "Test"
+            description: "A test"
+            status: canonical
+            tier: 1
+            contract:
+              role: bogus
+            ---
+        """)
+        )
+        errors, warnings = validate_doc_frontmatter(md)
+        assert any("contract.role" in e for e in errors)
+
+    def test_universal_role_requires_version(self, tmp_path):
+        md = tmp_path / "test.md"
+        md.write_text(
+            textwrap.dedent("""\
+            ---
+            title: "Test"
+            description: "A test"
+            status: canonical
+            tier: 1
+            contract:
+              role: universal
+            ---
+        """)
+        )
+        errors, warnings = validate_doc_frontmatter(md)
+        assert any("contract.version" in e for e in errors)
+
+    def test_contract_block_must_be_mapping(self, tmp_path):
+        md = tmp_path / "test.md"
+        md.write_text(
+            textwrap.dedent("""\
+            ---
+            title: "Test"
+            description: "A test"
+            status: canonical
+            tier: 1
+            contract: "universal"
+            ---
+        """)
+        )
+        errors, warnings = validate_doc_frontmatter(md)
+        assert any("'contract' must be a mapping" in e for e in errors)
+
+    def test_valid_project_layer_contract(self, tmp_path):
+        md = tmp_path / "test.md"
+        md.write_text(
+            textwrap.dedent("""\
+            ---
+            title: "Test"
+            description: "A test"
+            status: canonical
+            tier: 3
+            contract:
+              role: project-layer
+              requires_contract: ">=1.0"
+            ---
+        """)
+        )
+        errors, warnings = validate_doc_frontmatter(md)
+        assert errors == []
+
+
+class TestValidateContractRole:
+    """Repository-level canonical-designation invariant (#151)."""
+
+    def _write(self, path, role=None, version=None):
+        lines = ["---", 'title: "x"', 'description: "d"', "status: canonical", "tier: 1"]
+        if role is not None:
+            lines.append("contract:")
+            lines.append(f"  role: {role}")
+            if version is not None:
+                lines.append(f'  version: "{version}"')
+        lines += ["---", "# body"]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("\n".join(lines) + "\n")
+
+    def test_universal_and_thin_layers_valid(self, tmp_path):
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0")
+        self._write(tmp_path / "templates/AGENTS.md.template", role="project-layer")
+        self._write(tmp_path / "examples/AGENTS.md.example", role="project-layer")
+        errors, _ = validate_contract_role(tmp_path)
+        assert errors == []
+
+    def test_universal_missing_role_errors(self, tmp_path):
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(tmp_path / "AGENTS.md", role=None)
+        errors, _ = validate_contract_role(tmp_path)
+        assert any("universal contract MUST declare contract.role" in e for e in errors)
+
+    def test_thin_layer_claiming_universal_errors(self, tmp_path):
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0")
+        self._write(tmp_path / "templates/AGENTS.md.template", role="universal", version="1.0.0")
+        errors, _ = validate_contract_role(tmp_path)
+        assert any("thin project layer MUST NOT declare" in e for e in errors)
+
 
 class TestFindContentFiles:
     """Test content file discovery."""
