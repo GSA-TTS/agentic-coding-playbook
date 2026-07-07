@@ -2,7 +2,12 @@
 
 from pathlib import Path
 
-from playbook_validator.new_project import FILES_TO_COPY, new_project
+from playbook_validator.new_project import (
+    DOWNSTREAM_SKILLS,
+    EXCLUDED_SKILLS,
+    FILES_TO_COPY,
+    new_project,
+)
 
 
 class TestNewProject:
@@ -15,30 +20,75 @@ class TestNewProject:
             f = playbook / src
             f.parent.mkdir(parents=True, exist_ok=True)
             f.write_text(f"# Content of {src}\n")
-        # Create a skill
-        skill_dir = playbook / "skills" / "test-skill"
-        skill_dir.mkdir(parents=True)
-        (skill_dir / "SKILL.md").write_text("---\nname: test-skill\n---\n# Test\n")
+        # Create the full set of skills (allowlisted + excluded) so we can
+        # verify the allowlist actually filters.
+        for skill_name in (*DOWNSTREAM_SKILLS, *EXCLUDED_SKILLS):
+            skill_dir = playbook / "skills" / skill_name
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(f"---\nname: {skill_name}\n---\n# {skill_name}\n")
         return playbook
 
-    def test_copies_all_files_and_skills(self, tmp_path: Path):
+    def test_copies_template_files(self, tmp_path: Path):
         playbook = self._setup_playbook(tmp_path)
         target = tmp_path / "new-project"
 
         copied, skipped = new_project(target, playbook)
 
-        # Template files + skills/
-        assert len(copied) == len(FILES_TO_COPY) + 1
         for _, dest in FILES_TO_COPY:
             assert (target / dest).exists()
+        # skills/ and .gitignore are also produced.
+        assert any("skills/" in c for c in copied)
+        assert ".gitignore" in copied
 
-    def test_copies_skills_directory(self, tmp_path: Path):
+    def test_copies_only_allowlisted_skills(self, tmp_path: Path):
         playbook = self._setup_playbook(tmp_path)
         target = tmp_path / "project"
 
         new_project(target, playbook)
 
-        assert (target / "skills" / "test-skill" / "SKILL.md").exists()
+        for skill_name in DOWNSTREAM_SKILLS:
+            assert (target / "skills" / skill_name / "SKILL.md").exists()
+        for skill_name in EXCLUDED_SKILLS:
+            assert not (target / "skills" / skill_name).exists()
+
+    def test_excluded_skills_reported_skipped(self, tmp_path: Path):
+        playbook = self._setup_playbook(tmp_path)
+        target = tmp_path / "project"
+
+        _copied, skipped = new_project(target, playbook)
+
+        for skill_name in EXCLUDED_SKILLS:
+            assert any(skill_name in s and "excluded" in s for s in skipped)
+
+    def test_writes_cache_gitignore(self, tmp_path: Path):
+        playbook = self._setup_playbook(tmp_path)
+        target = tmp_path / "project"
+
+        new_project(target, playbook)
+
+        gitignore = (target / ".gitignore").read_text()
+        assert ".agents/cache/" in gitignore
+
+    def test_appends_to_existing_gitignore(self, tmp_path: Path):
+        playbook = self._setup_playbook(tmp_path)
+        target = tmp_path / "project"
+        target.mkdir()
+        (target / ".gitignore").write_text("*.log\n")
+
+        _copied, _skipped = new_project(target, playbook)
+
+        gitignore = (target / ".gitignore").read_text()
+        assert "*.log" in gitignore
+        assert ".agents/cache/" in gitignore
+
+    def test_probe_marked_executable(self, tmp_path: Path):
+        playbook = self._setup_playbook(tmp_path)
+        target = tmp_path / "project"
+
+        new_project(target, playbook)
+
+        assert (target / "scripts/ensure-contract.sh").stat().st_mode & 0o111
+        assert (target / "scripts/ensure-contract.py").stat().st_mode & 0o111
 
     def test_no_agent_shims_created(self, tmp_path: Path):
         """AGENTS.md is the universal standard — no tool-specific shims needed."""
@@ -88,7 +138,8 @@ class TestNewProject:
 
         copied, skipped = new_project(target, playbook)
 
-        assert len(copied) == 0
+        # Only the .gitignore (authored, not copied from a source) is produced.
+        assert copied == [".gitignore"]
         source_skips = [s for s in skipped if "source not found" in s]
         assert len(source_skips) == len(FILES_TO_COPY) + 1  # +1 for skills/
 

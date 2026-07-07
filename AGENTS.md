@@ -3,7 +3,10 @@ title: "Federal AI Agent Behavioral Best Practices"
 description: "Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements"
 status: canonical
 tier: 1
-last_updated: "2026-06-26"
+contract:
+  role: universal
+  version: "1.0.0"
+last_updated: "2026-07-06"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-8", "IR-4", "IR-6", "PL-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
@@ -17,7 +20,7 @@ review_cycle: "quarterly"
 
 # AGENTS.md — Federal AI Agent Behavioral Best Practices
 
-> **Version:** 0.2.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
+> **Version:** 0.3.0 | **Impact Level:** FIPS Moderate | **Scope:** Single-agent, internal enterprise
 
 ## Quick Reference
 
@@ -671,8 +674,8 @@ The agent SHOULD:
 
 The agent MUST ensure that every repository it works in supports:
 
-- **One-command bootstrap:** A single command (e.g., `make setup`, `./scripts/setup.sh`, `npm run setup`) that installs all dependencies and prepares the development environment
-- **One-command verify:** A single command (e.g., `make check`, `./scripts/verify.sh`, `npm test`) that runs all linters, tests, and security checks
+- **One-command bootstrap:** A single command (e.g., `make setup`, `npm run setup`) that installs all dependencies and prepares the development environment
+- **One-command verify:** A single command (e.g., `make check`, `npm test`) that runs all linters, tests, and security checks
 
 If these commands do not exist, the agent SHOULD recommend creating them as part of the initial repository setup (see the `federal-repo-setup` skill).
 
@@ -723,6 +726,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-07-06 | 0.3.0 | Split into universal contract + thin project layer; add fail-closed contract-prerequisite probe; designate canonical via a versioned `contract:` frontmatter block (`role: universal`, `version: 1.0.0`) recognized by structure, not content |
 | 2026-06-26 | 0.2.0 | Add §8.3 periodic end-to-end validation, §9.3 discovered-defect filing gate, §14.1.1 plan proportionality + expedited mode, §15.5 track-all-work, wiring/downstream self-check items; reconcile version banner + related_files; drop hardcoded test count |
 | 2026-02-25 | 0.1.0 | Initial release — MVP scope (single-agent, FIPS Moderate, internal enterprise) |
 
@@ -741,67 +745,18 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 ---
 
-## Repository-Specific Instructions
+## Per-Repository Instructions
 
-> The sections below are specific to this repository's tooling and structure. They complement the behavioral rules above.
+> This document is the **universal** behavioral contract. It is intended to be
+> made available to the agent globally (e.g. installed into the agent's global
+> configuration) so that it applies to **every** repository the agent works in.
 
-For detailed repo-specific reference (canonical paths, validation package, context budgets), see [docs/AGENT-INSTRUCTIONS.md](docs/AGENT-INSTRUCTIONS.md).
+Repository-specific rules (project context, permitted/prohibited actions, data
+classification, tooling commands, canonical paths) live in an `AGENTS.md` at the
+root of the **working repository** — not in this file. The agent MUST load that
+project-level `AGENTS.md` when present and treat it as additive to (never
+overriding) the universal rules above.
 
-### Quick Reference
-
-```bash
-# Validation (Python package)
-PYTHONPATH=scripts python3 -m playbook_validator validate-docs
-PYTHONPATH=scripts python3 -m playbook_validator validate-skills
-PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
-PYTHONPATH=scripts python3 -m playbook_validator validate-plan --path PROJECT_PLAN.md
-PYTHONPATH=scripts python3 -m playbook_validator validate-risk-assessment --path templates/risk-assessment.md
-PYTHONPATH=scripts python3 -m playbook_validator doctor [--json]
-PYTHONPATH=scripts python3 -m playbook_validator pre-deploy
-
-# Generation
-make generate            # Generate INDEX.yaml + README skills table
-make generate-check    # Verify INDEX.yaml is up to date
-
-# Testing
-PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v
-```
-
-### Document Architecture
-
-| Tier | Load When | Documents |
-|------|-----------|-----------|
-| **1 — Always** | Every task | AGENTS.md, CODING_PRACTICES.md, PLAYBOOK.md |
-| **2 — On demand** | Task matches keywords | SECURITY-CONTROLS.md, AGENT-IDENTITY.md, FEDERAL-AI-LANDSCAPE.md |
-| **3 — Reference** | Explicitly needed | GETTING-STARTED.md, TRACEABILITY.md, templates/ |
-
-### Skills
-
-<!-- GENERATED:SKILLS_TABLE:START — do not edit, run: make generate -->
-| Skill | Purpose | Scripts? |
-|-------|---------|----------|
-| `agent-permissions` | Detect available credentials, diagnose gaps against PROJECT_PLAN.md, and guide setup... | No |
-| `ato-package` | Collect and verify all ATO submission artifacts into a review-ready package | No |
-| `cloudgov-deploy` | Deploy applications to cloud.gov — sandbox setup, manifest generation, CI/CD pipeline | No |
-| `code-review` | Review AI-assisted code changes and create compliant pull requests with proper attribution | No |
-| `federal-agents-config` | Generate a project-specific AGENTS.md through interactive decision-tree elicitation. | Yes |
-| `federal-decision-records` | Create, validate, and index architectural and security decision records using MADR... | No |
-| `federal-landscape-update` | Monitor RSS feeds for federal AI guidance updates, compare against current registry,... | No |
-| `federal-pre-deployment-check` | Run the 62-item federal pre-deployment security checklist against a codebase. | Yes |
-| `federal-repo-setup` | Initialize a code repository with federal security compliance defaults including... | No |
-| `federal-risk-assessment` | Walk through the AI agent risk assessment worksheet interactively, helping users... | No |
-| `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No |
-| `project-bootstrap` | Automatically set up a new federal coding project from a PROJECT_PLAN.md file | No |
-<!-- GENERATED:SKILLS_TABLE:END -->
-
-### Self-Check Gate
-
-Before completing any task:
-
-- [ ] Frontmatter valid on new/modified `.md` files
-- [ ] INDEX.yaml regenerated if documents changed
-- [ ] Tests pass (`PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v`)
-- [ ] No credentials in any file
-- [ ] NIST controls cited where applicable
-- [ ] Wiring complete + downstream consumers updated (§14.4)
-- [ ] Deferred / out-of-scope work captured as tracked issues (§9.3, §15.5)
+For this playbook repository's own tooling reference (validation commands,
+canonical paths, context budgets, skills inventory, and self-check gate), see
+[docs/AGENT-INSTRUCTIONS.md](docs/AGENT-INSTRUCTIONS.md).

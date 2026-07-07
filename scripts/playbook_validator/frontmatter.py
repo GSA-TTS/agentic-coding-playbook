@@ -6,13 +6,12 @@ from typing import Any
 import yaml
 
 
-def extract_frontmatter(path: Path) -> dict[str, Any]:
-    """Extract YAML frontmatter from a Markdown file.
+def parse_frontmatter(text: str) -> dict[str, Any]:
+    """Parse YAML frontmatter from raw Markdown text.
 
     Returns parsed YAML as a dict, or empty dict if no frontmatter found.
-    Frontmatter must be delimited by --- on its own line at the start of the file.
+    Frontmatter must be delimited by --- on its own line at the start.
     """
-    text = path.read_text(encoding="utf-8")
     if not text.startswith("---"):
         return {}
 
@@ -31,6 +30,15 @@ def extract_frontmatter(path: Path) -> dict[str, Any]:
         return {}
 
     return parsed
+
+
+def extract_frontmatter(path: Path) -> dict[str, Any]:
+    """Extract YAML frontmatter from a Markdown file.
+
+    Returns parsed YAML as a dict, or empty dict if no frontmatter found.
+    Frontmatter must be delimited by --- on its own line at the start of the file.
+    """
+    return parse_frontmatter(path.read_text(encoding="utf-8"))
 
 
 def get_field(path: Path, field: str) -> Any:

@@ -10,6 +10,7 @@ Usage:
     python -m playbook_validator audit-repo [--path PATH]
     python -m playbook_validator generate-index [--check] [--root PATH]
     python -m playbook_validator pre-deploy [--path PATH]
+    python -m playbook_validator ensure-contract [--root PATH] [--no-fetch]
 """
 
 import argparse
@@ -21,7 +22,11 @@ logger = logging.getLogger("playbook_validator")
 
 
 def cmd_validate_docs(args: argparse.Namespace) -> int:
-    from playbook_validator.validate_docs import find_content_files, validate_doc_frontmatter
+    from playbook_validator.validate_docs import (
+        find_content_files,
+        validate_contract_role,
+        validate_doc_frontmatter,
+    )
 
     root = Path(args.root)
     files = find_content_files(root)
@@ -37,6 +42,16 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
             print(f"WARNING: {w}")
         if not errors:
             print(f"  OK: {f.relative_to(root)}")
+
+    print("\n=== Contract-Role Designation ===")
+    role_errors, role_warnings = validate_contract_role(root)
+    for e in role_errors:
+        print(f"ERROR: {e}")
+        total_errors += 1
+    for w in role_warnings:
+        print(f"WARNING: {w}")
+    if not role_errors:
+        print("  OK: canonical universal contract designated; thin layers do not claim it")
 
     print(f"\n=== Summary ===\nErrors: {total_errors}")
     if total_errors > 0:
@@ -222,6 +237,17 @@ def cmd_pre_deploy(args: argparse.Namespace) -> int:
     return rc.exit_code
 
 
+def cmd_ensure_contract(args: argparse.Namespace) -> int:
+    from playbook_validator.ensure_contract import ensure_contract
+
+    result = ensure_contract(Path(args.root), allow_fetch=not args.no_fetch)
+    if result.warning:
+        print(f"WARNING: {result.warning}", file=sys.stderr)
+    stream = sys.stdout if result.ok else sys.stderr
+    print(f"{result.status.value}: {result.message}", file=stream)
+    return result.exit_code
+
+
 def cmd_landscape_check(args: argparse.Namespace) -> int:
     """Run the landscape monitor to check for federal AI guidance updates."""
     import landscape_monitor
@@ -268,6 +294,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("pre-deploy", help="Run pre-deployment security checks")
     p.add_argument("--path", default=".", help="Repository path")
 
+    p = sub.add_parser(
+        "ensure-contract",
+        help="Deterministically ensure the universal behavioral contract is available (fail-closed)",
+    )
+    p.add_argument("--root", default=".", help="Working project root (where the cache lives)")
+    p.add_argument("--no-fetch", action="store_true", help="Do not fetch; use only home path or existing cache")
+
     p = sub.add_parser("landscape-check", help="Check for federal AI guidance updates via RSS")
     p.add_argument("--registry", default="data/federal-ai-landscape.yaml", help="Path to landscape registry")
     p.add_argument("--output", help="Output path for diff report (default: stdout)")
@@ -295,6 +328,7 @@ _COMMANDS = {
     "doctor": cmd_doctor,
     "audit-repo": cmd_audit_repo,
     "pre-deploy": cmd_pre_deploy,
+    "ensure-contract": cmd_ensure_contract,
     "landscape-check": cmd_landscape_check,
     "validate-plan": cmd_validate_plan,
     "validate-risk-assessment": cmd_validate_risk_assessment,

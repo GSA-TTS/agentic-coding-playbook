@@ -7,19 +7,19 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-06-30
+# Last generated: 2026-07-07
 
 schema_version: "1.0"
-generated: "2026-06-30"
-repo: "gsa-tts/agentic-coding-playbook"
+generated: "2026-07-07"
+repo: "GSA-TTS/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
 # Frontmatter schema — all .md content files MUST include at minimum:
 #   description (required), status (required), tier (required), title (required)
-# Optional: audience, frameworks, keywords, last_updated, load_priority, nist_controls, related_files, review_cycle
+# Optional: audience, contract, frameworks, keywords, last_updated, load_priority, nist_controls, related_files, review_cycle
 frontmatter_schema:
   required: ["description", "status", "tier", "title"]
-  optional: ["audience", "frameworks", "keywords", "last_updated", "load_priority", "nist_controls", "related_files", "review_cycle"]
+  optional: ["audience", "contract", "frameworks", "keywords", "last_updated", "load_priority", "nist_controls", "related_files", "review_cycle"]
   status_values: ["canonical", "deprecated", "draft"]
   tier_values:
     1: "Core guidance — authoritative rules and control mappings"
@@ -38,7 +38,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: always
-    last_updated: "2026-06-26"
+    last_updated: "2026-07-06"
     audience: all
     nist_controls_count: 26
     review_cycle: quarterly
@@ -111,6 +111,15 @@ documents:
     nist_controls_count: 35
     review_cycle: quarterly
 
+  - path: "templates/CONTEXT-GUIDE.project.md"
+    title: "Agent Context Loading Guide (Project)"
+    description: "Compact routing document for AI agents working in this project — read this FIRST to determine which documents to load for your current task"
+    status: canonical
+    tier: 1
+    load_priority: always
+    audience: all
+    review_cycle: quarterly
+
   # ── Tier 2: Supporting Documentation ─────────────────────────────
   - path: "docs/AI-CONTRIBUTION-POLICY.md"
     title: "AI-Assisted Contribution Policy"
@@ -138,7 +147,7 @@ documents:
     status: canonical
     tier: 2
     load_priority: on-demand
-    last_updated: "2026-06-17"
+    last_updated: "2026-07-01"
     audience: developers
     nist_controls_count: 4
     review_cycle: semi-annually
@@ -205,21 +214,21 @@ documents:
 
   - path: "examples/AGENTS.md.example"
     title: "Example: AGENTS.md for a Federal Web Application"
-    description: "Completed example showing how to customize the AGENTS.md template for a hypothetical federal HR benefits portal"
+    description: "Completed example showing a thin, project-specific AGENTS.md layered on the universal contract for a hypothetical federal HR benefits portal"
     status: canonical
     tier: 3
     load_priority: reference-only
-    last_updated: "2026-02-25"
+    last_updated: "2026-07-06"
     audience: developers
     review_cycle: semi-annually
 
   - path: "templates/AGENTS.md.template"
     title: "AGENTS.md Project Template"
-    description: "Copy-paste template for creating a project-specific AGENTS.md with customizable agent behavior rules"
+    description: "Copy-paste template for a thin, project-specific AGENTS.md that layers on top of the universal Federal AI Agent behavioral contract"
     status: canonical
     tier: 3
     load_priority: reference-only
-    last_updated: "2026-02-25"
+    last_updated: "2026-07-06"
     audience: developers
     review_cycle: semi-annually
 
@@ -324,9 +333,9 @@ skills:
     has_scripts: false
 
 stats:
-  total_documents: 22
+  total_documents: 23
   total_skills: 12
-  tier_1_core: 8
+  tier_1_core: 9
   tier_2_supporting: 6
   tier_3_templates: 8
   total_nist_controls_referenced: 56

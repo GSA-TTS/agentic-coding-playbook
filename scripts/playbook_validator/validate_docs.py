@@ -7,10 +7,18 @@ with required fields and valid enum values.
 from pathlib import Path
 
 from playbook_validator.config import (
+    CONTRACT_REQUIRES_KEY,
+    CONTRACT_ROLE_KEY,
+    CONTRACT_ROLE_UNIVERSAL,
+    CONTRACT_ROLE_VALUES,
+    CONTRACT_VERSION_KEY,
     DOC_LOAD_PRIORITY_VALUES,
     DOC_STATUS_VALUES,
     DOC_TIER_VALUES,
     REQUIRED_FRONTMATTER_FIELDS,
+    contract_block,
+    contract_role,
+    contract_version,
 )
 from playbook_validator.frontmatter import extract_frontmatter
 
@@ -94,5 +102,79 @@ def validate_doc_frontmatter(path: Path) -> tuple[list[str], list[str]]:
         errors.append(
             f"{path} — invalid load_priority: '{load_priority}' (must be one of {sorted(DOC_LOAD_PRIORITY_VALUES)})"
         )
+
+    # Behavioral-contract block validation (optional). When present it must be a
+    # mapping with a recognized role; the universal-vs-thin invariant is checked
+    # in validate_contract_role() at the repository level.
+    raw_block = fm.get("contract")
+    if raw_block is not None:
+        if not isinstance(raw_block, dict):
+            errors.append(f"{path} — 'contract' must be a mapping (got {type(raw_block).__name__})")
+        else:
+            block = contract_block(fm)
+            role = contract_role(fm)
+            if role is not None and role not in CONTRACT_ROLE_VALUES:
+                errors.append(
+                    f"{path} — invalid contract.{CONTRACT_ROLE_KEY}: '{role}' "
+                    f"(must be one of {sorted(CONTRACT_ROLE_VALUES)})"
+                )
+            # A universal contract MUST carry a version; a project-layer SHOULD
+            # declare which contract versions it requires.
+            if role == CONTRACT_ROLE_UNIVERSAL and not contract_version(fm):
+                errors.append(f"{path} — universal contract must declare contract.{CONTRACT_VERSION_KEY}")
+            for vkey in (CONTRACT_VERSION_KEY, CONTRACT_REQUIRES_KEY):
+                vval = block.get(vkey)
+                if vval is not None and (not isinstance(vval, str) or not vval.strip()):
+                    errors.append(f"{path} — contract.{vkey} must be a non-empty string")
+
+    return errors, warnings
+
+
+# Paths (repo-root-relative) that MUST NOT claim the canonical universal role —
+# they are thin project layers that only *reference* the universal contract.
+_THIN_LAYER_PATHS = (
+    "templates/AGENTS.md.template",
+    "examples/AGENTS.md.example",
+)
+
+
+def validate_contract_role(root: Path) -> tuple[list[str], list[str]]:
+    """Enforce the canonical-designation invariant across the repository.
+
+    The universal behavioral contract (repo-root ``AGENTS.md``) MUST declare a
+    structured ``contract`` block with ``role: universal`` and a ``version`` so
+    tooling recognizes it by an explicit, versioned marker (issue #151,
+    ADR-0003). The thin project layers (template and example) MUST NOT claim the
+    universal role — otherwise a bootstrapped project's own AGENTS.md could
+    self-satisfy the contract probe.
+
+    Returns (errors, warnings).
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    universal = root / "AGENTS.md"
+    if universal.is_file():
+        fm = extract_frontmatter(universal)
+        role = contract_role(fm)
+        if role != CONTRACT_ROLE_UNIVERSAL:
+            errors.append(
+                f"{universal} — universal contract MUST declare contract.{CONTRACT_ROLE_KEY}: "
+                f"{CONTRACT_ROLE_UNIVERSAL} (found: {role!r})"
+            )
+        elif not contract_version(fm):
+            errors.append(f"{universal} — universal contract MUST declare contract.{CONTRACT_VERSION_KEY}")
+
+    for rel in _THIN_LAYER_PATHS:
+        thin = root / rel
+        if not thin.is_file():
+            continue
+        role = contract_role(extract_frontmatter(thin))
+        if role == CONTRACT_ROLE_UNIVERSAL:
+            errors.append(
+                f"{thin} — thin project layer MUST NOT declare contract.{CONTRACT_ROLE_KEY}: "
+                f"{CONTRACT_ROLE_UNIVERSAL} (only the universal contract may); this would let a "
+                "bootstrapped project self-satisfy the contract probe (#151)"
+            )
 
     return errors, warnings

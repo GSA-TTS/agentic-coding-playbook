@@ -33,6 +33,19 @@ repos:
       - id: markdownlint-cli2
         args: ["--fix"]
 
+  # Universal behavioral contract prerequisite (ADR-0003) — fail-closed.
+  # Blocks the commit if the universal contract is not available. In the
+  # playbook repo the repo's own AGENTS.md satisfies it; downstream projects
+  # get an equivalent hook wired to their self-contained ensure-contract script.
+  - repo: local
+    hooks:
+      - id: ensure-contract
+        name: Ensure universal behavioral contract is available
+        entry: python3 -m playbook_validator ensure-contract --root .
+        language: system
+        pass_filenames: false
+        always_run: true
+
   # NOTE: GitHub Actions security scanning (zizmor) runs in CI only —
   # see .github/workflows/zizmor.yml. It is intentionally NOT a local
   # pre-commit hook: the zizmor CLI hard-fails when GITHUB_TOKEN is set

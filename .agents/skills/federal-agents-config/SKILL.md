@@ -4,7 +4,7 @@ title: "Federal AGENTS.md Configuration"
 description: "Generate a project-specific AGENTS.md through interactive decision-tree elicitation."
 status: canonical
 tier: 2
-last_updated: "2026-06-01"
+last_updated: "2026-07-01"
 load_priority: on-demand
 audience: ["developers", "agents"]
 triggers: ["AGENTS.md", "agent rules", "behavioral", "compliance"]
@@ -15,6 +15,14 @@ dependencies: []
 
 This skill generates a project-specific AGENTS.md by walking the user through
 compliance-relevant questions and producing a customized behavioral contract.
+
+The generated file is a **thin, project-specific layer**: it references the
+universal Federal AI Agent Behavioral Best Practices (the universal `AGENTS.md`)
+as a prerequisite and does NOT restate the universal rules. This keeps a single
+source of truth for the universal contract and avoids copy-paste drift. The
+generated file instructs the agent to STOP if it cannot confirm the universal
+contract is available, and to require the user's affirmative permission before
+proceeding without it.
 
 ## When to Use
 
@@ -223,8 +231,8 @@ After collecting all answers:
 ## Important Notes
 
 - This skill generates a **draft** AGENTS.md. It explicitly requires human review and sign-off.
-- The generated AGENTS.md is a **compliance document**, not a development guide.
-- All content traces back to `templates/AGENTS.md.template` and `AGENTS.md` (the master rules).
+- The generated AGENTS.md is a **thin, project-specific compliance document** that layers on the universal contract — not a copy of the universal rules, and not a development guide.
+- All content traces back to `templates/AGENTS.md.template` and the universal `AGENTS.md` (the master rules).
 - The generation script (`scripts/generate-agents-md.py`) reads the config JSON and produces markdown. It does not make network calls, install packages, or modify git state.
 - The validation script (`scripts/validate-agents-md.py`) checks that required sections and fields are present.
 - See [references/PLACEHOLDER_SCHEMA.json](references/PLACEHOLDER_SCHEMA.json) for the formal JSON Schema.

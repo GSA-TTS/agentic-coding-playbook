@@ -48,6 +48,44 @@ A set of markdown files, templates, and validation tools that help AI coding age
 
 Designed for **FIPS Moderate** systems, **single-agent** architectures, and **internal enterprise** environments.
 
+## The Two-Layer Contract
+
+Agent behavioral rules are split into two layers:
+
+- **Universal contract** — this repository's [`AGENTS.md`](./AGENTS.md), the
+  *Federal AI Agent Behavioral Best Practices*. It applies to **every** project
+  and is the single source of truth for the universal rules (core principles,
+  identity, least privilege, data protection, prompt-injection defense,
+  meta-constraints, engineering discipline). It is **not** copied into
+  individual projects — that would let copies drift.
+- **Project layer** — a thin `AGENTS.md` in each project (see
+  [`templates/AGENTS.md.template`](./templates/AGENTS.md.template)) that declares
+  the universal contract as a **prerequisite** and adds only project-specific
+  rules.
+
+### Making the universal contract available
+
+Because the universal contract is not vendored per-project, each project expects
+it to be provided by the environment at a conventional location:
+
+```
+~/.agentic-coding-playbook/AGENTS.md      # (override with $AGENTIC_CODING_PLAYBOOK_HOME)
+```
+
+The supported way to provision it is the **`agentic-coding-patterns` sbx mixin
+kit**, which makes the contract available to agents in a sandboxed environment:
+
+<https://github.com/GSA-TTS/agentic-coding-patterns/tree/main/integrations/isolation/sbx-kits>
+
+If the home path is unavailable, projects bootstrapped by this playbook ship a
+self-contained probe (`scripts/ensure-contract.py`) that populates a
+**git-ignored fallback cache** at `.agents/cache/AGENTS.universal.md` from the
+pinned release, warning that the copy is a fallback. Presence is a
+**deterministic, fail-closed** check enforced at session start, in a pre-commit
+hook, and in CI — if the contract cannot be obtained, work does not proceed.
+See [ADR-0002](./docs/decisions/0002-universal-vs-project-agents-md.md) and
+[ADR-0003](./docs/decisions/0003-enforce-contract-prerequisite.md).
+
 ## Who This Is For
 
 | Role | Start Here |
@@ -67,7 +105,7 @@ Designed for **FIPS Moderate** systems, **single-agent** architectures, and **in
 | **0. Plan** | Human fills out [PROJECT_PLAN.md](./templates/PROJECT_PLAN.md) | — |
 | **0.5. Doctor** | Agent checks environment readiness | `agent-permissions` |
 | **1. Repo Setup** | Directory structure, .gitignore, CI/CD templates | `federal-repo-setup` |
-| **2. Agent Config** | Generate [AGENTS.md](./AGENTS.md) behavioral contract | `federal-agents-config` |
+| **2. Agent Config** | Generate a thin project [AGENTS.md](./AGENTS.md) that layers on the universal contract | `federal-agents-config` |
 | **3. Code** | Write code following [CODING_PRACTICES.md](./docs/CODING_PRACTICES.md) | — |
 | **4. Decisions** | Document architecture decisions as ADRs | `federal-decision-records` |
 | **5. Risk** | Assess against threat catalog | `federal-risk-assessment` |
@@ -103,7 +141,7 @@ Skills convert best practices into step-by-step workflows that any AI coding age
 
 ## Developer Tools
 
-All validation and generation tools live in the `scripts/playbook_validator/` Python package (370 tests).
+All validation and generation tools live in the `scripts/playbook_validator/` Python package (416 tests).
 
 ```bash
 make help              # Show all available commands
@@ -152,7 +190,7 @@ Full catalog of 42 federal AI guidance documents: [docs/FEDERAL-AI-LANDSCAPE.md]
 
 ```
 agentic-coding-playbook/
-├── AGENTS.md                        # Agent behavior rules (AGENTS.md standard)
+├── AGENTS.md                        # Universal agent behavior rules (AGENTS.md standard)
 ├── PLAYBOOK.md                      # Step-by-step guide: setup → deploy
 ├── CONTEXT-GUIDE.md                 # Agent entry point — routes to right docs
 ├── INDEX.yaml                       # Machine-readable document index
@@ -167,7 +205,7 @@ agentic-coding-playbook/
 ├── data/
 │   └── federal-ai-landscape.yaml    # Machine-readable guidance registry
 ├── scripts/
-│   ├── playbook_validator/          # Python validation package (370 tests)
+│   ├── playbook_validator/          # Python validation package (416 tests)
 │   └── tests/                       # TDD test suite
 ├── skills/                          # 12 executable compliance procedures
 ├── templates/                       # PROJECT_PLAN.md, AGENTS.md.template

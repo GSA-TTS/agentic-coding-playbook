@@ -16,7 +16,7 @@ Model-agnostic reference for any AI coding agent working in this repository. Rea
 ## Quick Reference
 
 ```bash
-# Validation (Python package — 370 tests)
+# Validation (Python package — 416 tests)
 PYTHONPATH=scripts python3 -m playbook_validator validate-docs
 PYTHONPATH=scripts python3 -m playbook_validator validate-skills
 PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
@@ -200,3 +200,5 @@ Before completing any task:
 - [ ] Tests pass
 - [ ] No real credentials in any file
 - [ ] NIST controls cited where applicable
+- [ ] Wiring complete + downstream consumers updated (§14.4)
+- [ ] Deferred / out-of-scope work captured as tracked issues (§9.3, §15.5)

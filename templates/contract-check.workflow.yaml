@@ -1,0 +1,41 @@
+# Universal behavioral contract prerequisite check (fail-closed).
+# Provisions the contract to the conventional home path, then verifies it is
+# available offline. Ensures agent-invoking CI checks have the contract present.
+name: Contract Prerequisite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ensure-contract:
+    name: Ensure universal behavioral contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      # Provide the universal contract to the environment. Replace this step
+      # with your organization's standard provisioning (e.g. the
+      # agentic-coding-patterns sbx mixin kit). The probe then verifies offline.
+      - name: Provision universal behavioral contract
+        run: |
+          mkdir -p "$HOME/.agentic-coding-playbook"
+          curl -fsSL \
+            https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/v0.13.0/AGENTS.md \
+            -o "$HOME/.agentic-coding-playbook/AGENTS.md"
+
+      - name: Ensure contract is available (fail-closed)
+        run: python3 scripts/ensure-contract.py --root . --no-fetch
