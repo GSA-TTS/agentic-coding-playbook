@@ -1,0 +1,404 @@
+# Security Scanner Registry — single source of truth.
+#
+# Machine-readable mapping of ecosystems -> recommended open-source security
+# scanners, with install / offline-update / output / license / origin /
+# supply-chain / NIST metadata. Validated by schemas/scanner-registry.schema.json.
+#
+# CONSOLIDATION: this file replaces the three drifting hand-maintained copies
+# (playbook TOOL_MATRIX.md, ELICITATION_GUIDE.md language table, and the
+# SAST_TOOLS/SCA_TOOLS regexes in pre_deploy_checks.py). Those become GENERATED
+# views of this registry (see the consolidation issue) so there is one source.
+#
+# v1 seed = conservative core: favor Apache/MIT + US/neutral/foundation-governed
+# + offline-capable + SARIF-native. federal_default:true marks the default set.
+
+schema_version: "1.0.0"
+updated: "2026-07-18"
+
+source_inspiration:
+  - url: "https://github.com/alibaba/open-code-review"
+    name: "Alibaba open-code-review"
+    license: "Apache-2.0"
+    relationship: "source-reviewed"
+    notes: >-
+      Architecture reviewed for inspiration (deterministic-scan + agent-triage
+      hybrid, category/severity taxonomy). No code copied; reimplemented in our
+      own idiom. We deliberately inverted their LLM-first design to scanner-first.
+
+scanners:
+  # ---------------------------------------------------------------- Python
+  - id: bandit
+    name: Bandit
+    category: sast
+    ecosystems: [python]
+    install: { method: pip, ref: "pip install bandit", version_pin: "1.8.6" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Rules bundled with the pip package; update via pip."
+      refresh_cadence: per-release
+    output: { native_sarif: true, sarif_flag: "-f sarif", other_formats: [json, csv] }
+    license: Apache-2.0
+    origin: { vendor: PyCQA, country: US, governance: community }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SA-11", "SI-10"]
+    federal_default: true
+
+  - id: pip-audit
+    name: pip-audit
+    category: sca
+    ecosystems: [python]
+    install: { method: pip, ref: "pip install pip-audit", version_pin: "2.9.0" }
+    definitions:
+      offline_mode: db-split
+      update_method: "Queries PyPI advisory DB / OSV; supports local OSV dump."
+      update_endpoint: "https://pypi.org/ , https://api.osv.dev/"
+      refresh_cadence: daily
+      offline_flags: ["--vulnerability-service=osv"]
+    output: { native_sarif: false, converter: "json-to-sarif", other_formats: [json, columnar] }
+    license: Apache-2.0
+    origin: { vendor: "Trail of Bits / PyPA", country: US, governance: community }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SR-3", "SA-15"]
+    federal_default: true
+    notes: "Preferred over 'safety' (whose vulnerability DB is commercial-tiered)."
+
+  # ------------------------------------------------------------ JS / TS
+  - id: eslint-plugin-security
+    name: eslint-plugin-security
+    category: sast
+    ecosystems: [javascript, typescript]
+    install: { method: npm, ref: "npm i -D eslint-plugin-security" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Rules bundled in the npm package."
+      refresh_cadence: per-release
+    output: { native_sarif: false, converter: "eslint-formatter-sarif", other_formats: [json, stylish] }
+    license: Apache-2.0
+    origin: { vendor: "ESLint / OpenJS", country: US, governance: foundation }
+    supply_chain_flags: []
+    maintenance: moderate
+    nist_controls: ["RA-5", "SA-11", "SI-10"]
+    federal_default: false
+    notes: "For JS/TS SAST, semgrep with local rules is the preferred default; this is a lighter alternative."
+
+  # ---------------------------------------------------------------- Go
+  - id: gosec
+    name: gosec
+    category: sast
+    ecosystems: [go]
+    install: { method: go-install, ref: "go install github.com/securego/gosec/v2/cmd/gosec@latest" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Rules bundled in the binary."
+      refresh_cadence: per-release
+    output: { native_sarif: true, sarif_flag: "-fmt sarif", other_formats: [json, text] }
+    license: Apache-2.0
+    origin: { vendor: securego, country: "neutral", governance: community }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SA-11", "SI-10"]
+    federal_default: true
+
+  - id: govulncheck
+    name: govulncheck
+    category: sca
+    ecosystems: [go]
+    install: { method: go-install, ref: "go install golang.org/x/vuln/cmd/govulncheck@latest" }
+    definitions:
+      offline_mode: db-split
+      update_method: "Queries Go vuln DB (vuln.go.dev); supports local mirror via -db file://."
+      update_endpoint: "https://vuln.go.dev/"
+      refresh_cadence: daily
+      offline_flags: ["-db=file:///path/to/mirror"]
+    output: { native_sarif: false, converter: "json-to-sarif", other_formats: [json, text] }
+    license: BSD-3-Clause
+    origin: { vendor: "Google / Go team", country: US, governance: commercial }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SR-3"]
+    federal_default: true
+    notes: "Reachability-aware: only reports vulns actually called. Low false positives."
+
+  # -------------------------------------------------------- Java / Kotlin
+  - id: spotbugs-find-sec-bugs
+    name: "SpotBugs + Find Security Bugs"
+    category: sast
+    ecosystems: [java, kotlin]
+    install: { method: binary, ref: "SpotBugs CLI + find-sec-bugs plugin jar (or Maven/Gradle plugin)" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Detectors bundled in the plugin jar."
+      refresh_cadence: per-release
+    output: { native_sarif: true, sarif_flag: "-sarif", other_formats: [xml] }
+    license: LGPL-2.1
+    origin: { vendor: "SpotBugs community / Philippe Arteau", country: "neutral", governance: community }
+    supply_chain_flags: []
+    maintenance: moderate
+    nist_controls: ["RA-5", "SA-11", "SI-10"]
+    federal_default: true
+    notes: "LGPL — dynamic-link/tool use is fine; note license in SBOM."
+
+  - id: owasp-dependency-check
+    name: "OWASP Dependency-Check"
+    category: sca
+    ecosystems: [java, dotnet, javascript, python, ruby, multi]
+    install: { method: binary, ref: "dependency-check CLI zip (or Maven/Gradle plugin)" }
+    definitions:
+      offline_mode: db-split
+      update_method: "Downloads NVD data feeds into a local H2 DB (NVD API key required since 2023)."
+      update_endpoint: "https://services.nvd.nist.gov/"
+      refresh_cadence: daily
+      offline_flags: ["--noupdate", "--data=/path/to/populated-db"]
+    output: { native_sarif: true, sarif_flag: "--format SARIF", other_formats: [json, xml, html] }
+    license: Apache-2.0
+    origin: { vendor: OWASP, country: US, governance: foundation }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SR-3", "SA-15"]
+    federal_default: true
+    notes: "Classic air-gap tool. NVD is a US-government feed (services.nvd.nist.gov)."
+
+  # ---------------------------------------------------------------- .NET
+  - id: security-code-scan
+    name: Security Code Scan
+    category: sast
+    ecosystems: [dotnet]
+    install: { method: nuget, ref: "dotnet add package SecurityCodeScan.VS2019 (or dotnet tool)" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Roslyn analyzer rules bundled."
+      refresh_cadence: per-release
+    output: { native_sarif: true, sarif_flag: "(Roslyn SARIF output)", other_formats: [text] }
+    license: LGPL-3.0
+    origin: { vendor: community, country: "neutral", governance: community }
+    supply_chain_flags: ["near-stale"]
+    maintenance: low
+    nist_controls: ["RA-5", "SA-11", "SI-10"]
+    federal_default: false
+    notes: "Near-stale upstream; consider semgrep C# rules as the primary .NET SAST until this revives."
+
+  # ---------------------------------------------------------------- Rust
+  - id: cargo-audit
+    name: cargo-audit
+    category: sca
+    ecosystems: [rust]
+    install: { method: cargo, ref: "cargo install cargo-audit" }
+    definitions:
+      offline_mode: db-split
+      update_method: "Clones RustSec advisory-db (git)."
+      update_endpoint: "https://github.com/RustSec/advisory-db"
+      refresh_cadence: daily
+      offline_flags: ["--no-fetch", "--db=/path/to/advisory-db"]
+    output: { native_sarif: false, converter: "json-to-sarif", other_formats: [json] }
+    license: "Apache-2.0 OR MIT"
+    origin: { vendor: "RustSec / Rust Foundation", country: US, governance: foundation }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SR-3"]
+    federal_default: true
+
+  # ---------------------------------------------------------------- Ruby
+  - id: brakeman
+    name: Brakeman
+    category: sast
+    ecosystems: [ruby]
+    install: { method: gem, ref: "gem install brakeman" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Checks bundled in the gem."
+      refresh_cadence: per-release
+    output: { native_sarif: true, sarif_flag: "-f sarif", other_formats: [json, html] }
+    license: MIT
+    origin: { vendor: "community / Justin Collins", country: "neutral", governance: community }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SA-11", "SI-10"]
+    federal_default: true
+    notes: "Rails-focused SAST."
+
+  - id: bundler-audit
+    name: bundler-audit
+    category: sca
+    ecosystems: [ruby]
+    install: { method: gem, ref: "gem install bundler-audit" }
+    definitions:
+      offline_mode: db-split
+      update_method: "Pulls ruby-advisory-db (git)."
+      update_endpoint: "https://github.com/rubysec/ruby-advisory-db"
+      refresh_cadence: daily
+      offline_flags: ["--no-update"]
+    output: { native_sarif: false, converter: "json-to-sarif", other_formats: [text] }
+    license: GPL-3.0
+    origin: { vendor: rubysec, country: "neutral", governance: community }
+    supply_chain_flags: []
+    maintenance: moderate
+    nist_controls: ["RA-5", "SR-3"]
+    federal_default: true
+
+  # ------------------------------------------------------- IaC / Terraform
+  - id: checkov
+    name: Checkov
+    category: iac
+    ecosystems: [terraform, kubernetes, docker]
+    install: { method: pip, ref: "pip install checkov" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Policies bundled; optional platform enrichment is opt-in."
+      refresh_cadence: per-release
+    output: { native_sarif: true, sarif_flag: "-o sarif", other_formats: [json] }
+    license: Apache-2.0
+    origin: { vendor: "Prisma Cloud / Palo Alto Networks", country: US, governance: commercial }
+    supply_chain_flags: ["commercial-tier"]
+    maintenance: active
+    nist_controls: ["CM-6", "CM-2", "RA-5"]
+    federal_default: true
+    notes: "Apache-2.0 core; commercial platform enrichment is opt-in (leave off)."
+
+  # ----------------------------------------------------- Containers / Docker
+  - id: hadolint
+    name: hadolint
+    category: iac
+    ecosystems: [docker]
+    install: { method: binary, ref: "hadolint binary (brew/docker/release)" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Rules bundled in the binary."
+      refresh_cadence: per-release
+    output: { native_sarif: true, sarif_flag: "-f sarif", other_formats: [json, checkstyle] }
+    license: GPL-3.0
+    origin: { vendor: community, country: "neutral", governance: community }
+    supply_chain_flags: []
+    maintenance: moderate
+    nist_controls: ["CM-6", "CM-2"]
+    federal_default: true
+    notes: "Dockerfile linter."
+
+  - id: grype
+    name: Grype
+    category: container
+    extra_categories: [sca]
+    ecosystems: [docker, multi]
+    install: { method: binary, ref: "grype binary (brew/release); pairs with syft SBOM" }
+    definitions:
+      offline_mode: db-split
+      update_method: "Downloads Grype DB (Anchore-hosted; aggregates NVD+GHSA+distro+OSV)."
+      update_endpoint: "https://toolbox-data.anchore.io/grype/databases/"
+      refresh_cadence: daily
+      offline_flags: ["GRYPE_DB_AUTO_UPDATE=false"]
+    output: { native_sarif: true, sarif_flag: "-o sarif", other_formats: [json, table, cyclonedx] }
+    license: Apache-2.0
+    origin: { vendor: Anchore, country: US, governance: commercial }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SR-3"]
+    federal_default: true
+    notes: "US-origin container/SCA scanner; preferred over trivy for origin-conservative posture."
+
+  - id: syft
+    name: Syft
+    category: sbom
+    ecosystems: [multi, docker]
+    install: { method: binary, ref: "syft binary (brew/release)" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Catalogers bundled; no vuln DB (SBOM generation only)."
+      refresh_cadence: per-release
+    output: { native_sarif: false, other_formats: [spdx, cyclonedx, syft-json] }
+    license: Apache-2.0
+    origin: { vendor: Anchore, country: US, governance: commercial }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["SR-3", "SR-4", "CM-8"]
+    federal_default: true
+    notes: "SBOM tool (SPDX/CycloneDX). Feed its SBOM into grype for offline scanning. Not a findings/SARIF source."
+
+  # ------------------------------------------------- Cross-language / multi
+  - id: semgrep
+    name: Semgrep
+    category: sast
+    ecosystems: [multi]
+    install: { method: pip, ref: "pip install semgrep" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Use a LOCAL rules directory (--config ./rules) — no network, no metrics. Avoid registry (p/...) pulls."
+      refresh_cadence: "vendor rules repo at pinned commit; re-vendor monthly"
+      offline_flags: ["--metrics=off", "--config=./rules"]
+    output: { native_sarif: true, sarif_flag: "--sarif", other_formats: [json] }
+    license: LGPL-2.1
+    origin: { vendor: "Semgrep Inc.", country: US, governance: commercial }
+    supply_chain_flags: ["telemetry-default-on", "commercial-tier"]
+    maintenance: active
+    disable_telemetry: ["--metrics=off", "SEMGREP_SEND_METRICS=off"]
+    nist_controls: ["RA-5", "SA-11", "SI-10"]
+    federal_default: true
+    notes: >-
+      Multi-language SAST. MUST run with --metrics=off and a local/pinned rules
+      dir; NEVER run 'semgrep login' or 'semgrep ci' (that is the cloud tier).
+      Source code and private rules are never sent, but registry pulls send
+      aggregate metrics — disable them.
+
+  - id: osv-scanner
+    name: OSV-Scanner
+    category: sca
+    ecosystems: [multi]
+    install: { method: go-install, ref: "go install github.com/google/osv-scanner/cmd/osv-scanner@latest" }
+    definitions:
+      offline_mode: db-split
+      update_method: "Queries OSV.dev API; or download offline DBs for air-gapped runs."
+      update_endpoint: "https://api.osv.dev/"
+      refresh_cadence: daily
+      offline_flags: ["--offline-vulnerabilities", "--download-offline-databases"]
+    output: { native_sarif: true, sarif_flag: "--format sarif", other_formats: [json, table] }
+    license: Apache-2.0
+    origin: { vendor: "Google / OpenSSF", country: US, governance: foundation }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["RA-5", "SR-3", "SA-15"]
+    federal_default: true
+    notes: >-
+      Multi-ecosystem SCA backbone. Do NOT use 'fix'/guided-remediation on
+      untrusted repos (can execute package-manager scripts).
+
+  - id: gitleaks
+    name: gitleaks
+    category: secrets
+    ecosystems: [any]
+    install: { method: binary, ref: "gitleaks binary (brew/release/go install)" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Rules bundled in the binary (TOML)."
+      refresh_cadence: per-release
+    output: { native_sarif: true, sarif_flag: "-f sarif", other_formats: [json, csv] }
+    license: MIT
+    origin: { vendor: "community / Zachary Rice", country: US, governance: community }
+    supply_chain_flags: []
+    maintenance: active
+    nist_controls: ["IA-5", "SC-28", "SC-12"]
+    federal_default: true
+    notes: >-
+      Best federal secrets default: MIT, US-neutral, fully offline, SARIF-native.
+      Findings MUST be redacted to fingerprints before any agent/LLM sees them.
+
+  - id: trufflehog
+    name: TruffleHog
+    category: secrets
+    ecosystems: [any]
+    install: { method: binary, ref: "trufflehog binary (brew/release/go install)" }
+    definitions:
+      offline_mode: bundled
+      update_method: "Detectors bundled; verification mode calls provider APIs."
+      refresh_cadence: per-release
+    output: { native_sarif: false, converter: "json-to-sarif", other_formats: [json] }
+    license: AGPL-3.0
+    origin: { vendor: "Truffle Security", country: US, governance: commercial }
+    supply_chain_flags: ["commercial-tier", "phones-home-on-verify"]
+    maintenance: active
+    disable_telemetry: ["(run detection-only; do NOT pass --only-verified)"]
+    nist_controls: ["IA-5", "SC-28"]
+    federal_default: false
+    notes: >-
+      Optional deeper secrets coverage. Run DETECTION-ONLY: --only-verified calls
+      third-party APIs (network + potential data exposure). AGPL — keep as a
+      separate invoked binary, do not link.
