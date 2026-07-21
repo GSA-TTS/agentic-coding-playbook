@@ -4,6 +4,14 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.14.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.14.0...v0.14.1) (2026-07-21)
+
+
+### Maintenance
+
+* **deps:** bump actions/setup-node from 6.4.0 to 7.0.0 ([#158](https://github.com/GSA-TTS/agentic-coding-playbook/issues/158)) ([5597ac9](https://github.com/GSA-TTS/agentic-coding-playbook/commit/5597ac9fea17914826e1c8eb04103cbcda55fe0b))
+* **deps:** bump ruff from 0.15.20 to 0.15.21 ([#159](https://github.com/GSA-TTS/agentic-coding-playbook/issues/159)) ([6eb55c4](https://github.com/GSA-TTS/agentic-coding-playbook/commit/6eb55c44e5a5eaef25408c9eebce447f9a13cd2e))
+
 ## [0.14.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.13.0...v0.14.0) (2026-07-07)
 
 
