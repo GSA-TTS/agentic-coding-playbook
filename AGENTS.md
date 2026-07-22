@@ -257,7 +257,7 @@ The agent SHOULD:
 - Generate or update the Software Bill of Materials (SBOM) when dependencies change
 - Verify package integrity (checksums, signatures) when available
 - Prefer dependencies from trusted registries
-- Prefer license-unencumbered equivalents where they exist and are otherwise suitable (e.g. CINC Auditor in place of Chef InSpec), to avoid commercial license-acceptance steps
+- Prefer license-unencumbered equivalents where they exist and are otherwise suitable (e.g. reads and write the same input/output formats, implements the same specification, fulfills a well-established role), to avoid commercial license-acceptance steps
 
 ### 5.3 Error Handling
 
