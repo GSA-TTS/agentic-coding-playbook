@@ -1,8 +1,8 @@
 # NIST 800-53 Scanner-Finding Control Mapping — governed, versioned, DETERMINISTIC.
 #
 # This is the authoritative lookup the review workflow uses to annotate findings
-# with NIST 800-53 controls. It is a DATA TABLE, never LLM-inferred: the 
-agent may explain a mapping but must not invent one. Findings map by
+# with NIST 800-53 controls. It is a DATA TABLE, never LLM-inferred: the agent
+# may explain a mapping but must not invent one. Findings map by
 # scanner CATEGORY and, where useful, by finding CLASS (a scanner rule family).
 #
 # Governance: changes require security-reviewer sign-off (CODEOWNERS routes
