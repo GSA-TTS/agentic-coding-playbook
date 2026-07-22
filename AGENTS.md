@@ -6,8 +6,8 @@ tier: 1
 contract:
   role: universal
   version: "1.0.0"
-last_updated: "2026-07-06"
-nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-8", "IR-4", "IR-6", "PL-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
+last_updated: "2026-07-22"
+nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "CM-10", "IA-8", "IR-4", "IR-6", "PL-4", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
 keywords: ["agent-rules", "behavioral-contract", "least-privilege", "audit-logging", "prompt-injection", "prohibited-actions", "meta-constraints", "plan-before-execute", "verification-transcript", "engineering-discipline"]
@@ -184,6 +184,7 @@ The agent MUST obtain explicit user approval before:
 - Executing destructive operations (deleting files, dropping databases, force-pushing)
 - Making network requests to external services
 - Installing or upgrading dependencies
+- Accepting a software license or EULA on the organization's behalf (e.g. click-through terms, `--accept-license` / `accept-silent`-style flags) — accepting terms is a commitment the human must make
 - Modifying CI/CD pipeline configurations
 - Committing or pushing code to remote repositories
 - Accessing or processing data classified above the current authorization level
@@ -250,11 +251,13 @@ The agent MUST:
 - Check for known vulnerabilities before adding new dependencies
 - Prefer dependencies with active maintenance and security track records
 - Minimize the number of dependencies — use standard library equivalents when available
+- Not auto-accept a dependency's or tool's license terms on the organization's behalf; surface the license and its federal-use compatibility for human approval before proceeding
 
 The agent SHOULD:
 - Generate or update the Software Bill of Materials (SBOM) when dependencies change
 - Verify package integrity (checksums, signatures) when available
 - Prefer dependencies from trusted registries
+- Prefer license-unencumbered equivalents where they exist and are otherwise suitable (e.g. CINC Auditor in place of Chef InSpec), to avoid commercial license-acceptance steps
 
 ### 5.3 Error Handling
 
@@ -279,7 +282,7 @@ The agent SHOULD:
 - When using memory-unsafe languages (C, C++), use compiler hardening flags and static analysis
 - Follow CISA memory safety guidance for language selection
 
-> **Control Mapping:** SI-10 (Input Validation), SA-11 (Developer Testing), SC-13 (Cryptographic Protection), SA-15 (Development Process)
+> **Control Mapping:** SI-10 (Input Validation), SA-11 (Developer Testing), SC-13 (Cryptographic Protection), SA-15 (Development Process), SA-4 (Acquisition Process), CM-10 (Software Usage Restrictions)
 
 ---
 
@@ -726,6 +729,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-07-22 | 0.4.0 | Add license-acceptance rules: §3.2 requires human approval before accepting a license/EULA on the org's behalf; §5.2 forbids auto-accepting license terms and prefers license-unencumbered equivalents (e.g. CINC over Chef InSpec); add SA-4, CM-10 mappings |
 | 2026-07-06 | 0.3.0 | Split into universal contract + thin project layer; add fail-closed contract-prerequisite probe; designate canonical via a versioned `contract:` frontmatter block (`role: universal`, `version: 1.0.0`) recognized by structure, not content |
 | 2026-06-26 | 0.2.0 | Add §8.3 periodic end-to-end validation, §9.3 discovered-defect filing gate, §14.1.1 plan proportionality + expedited mode, §15.5 track-all-work, wiring/downstream self-check items; reconcile version banner + related_files; drop hardcoded test count |
 | 2026-02-25 | 0.1.0 | Initial release — MVP scope (single-agent, FIPS Moderate, internal enterprise) |
