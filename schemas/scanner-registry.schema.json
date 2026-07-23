@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gsa-tts.github.io/agentic-coding-patterns/schemas/scanner-registry.schema.json",
+  "title": "Security Scanner Registry",
+  "description": "Machine-readable registry mapping languages/ecosystems to recommended open-source security scanners, with install, definition-update/offline, output, license, origin, supply-chain, and NIST-control metadata. Single source of truth; downstream copies (playbook TOOL_MATRIX, elicitation guide, pre-deploy regexes) are generated from this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "updated", "scanners"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "description": "Semver of the registry schema."
+    },
+    "updated": {
+      "type": "string",
+      "format": "date",
+      "description": "Last-reviewed date (YYYY-MM-DD)."
+    },
+    "source_inspiration": {
+      "type": "array",
+      "description": "Provenance for externally-inspired design (governance requirement).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "license", "relationship"],
+        "properties": {
+          "url": { "type": "string" },
+          "name": { "type": "string" },
+          "license": { "type": "string" },
+          "relationship": {
+            "type": "string",
+            "enum": ["clean-room", "source-reviewed", "concept-only"],
+            "description": "How this registry relates to the source. No code copied in any case."
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "scanners": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/scanner" }
+    }
+  },
+  "$defs": {
+    "scanner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "name", "category", "ecosystems", "install",
+        "definitions", "output", "license", "origin", "maintenance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "kebab-case unique id."
+        },
+        "name": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["sast", "sca", "secrets", "iac", "container", "sbom", "license"],
+          "description": "Primary scanner category."
+        },
+        "extra_categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["sast", "sca", "secrets", "iac", "container", "sbom", "license"]
+          },
+          "description": "Additional categories a multi-tool covers (e.g. trivy: sca+iac+container+secrets)."
+        },
+        "ecosystems": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "python", "javascript", "typescript", "go", "java", "kotlin",
+              "dotnet", "rust", "ruby", "php", "terraform", "docker",
+              "kubernetes", "shell", "multi", "any"
+            ]
+          },
+          "description": "Ecosystems this scanner applies to. 'multi'=language-agnostic SAST/SCA; 'any'=works on any repo (e.g. secrets)."
+        },
+        "install": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "ref"],
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["pip", "npm", "gem", "cargo", "go-install", "brew", "binary", "builtin", "nuget", "docker"],
+              "description": "Primary install mechanism."
+            },
+            "ref": {
+              "type": "string",
+              "description": "Install command or package reference (documentation, not executed verbatim by the registry)."
+            },
+            "version_pin": {
+              "type": "string",
+              "description": "Recommended pinned version/tag for reproducibility."
+            }
+          }
+        },
+        "definitions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["offline_mode", "update_method"],
+          "properties": {
+            "offline_mode": {
+              "type": "string",
+              "enum": ["bundled", "db-split", "hard-net"],
+              "description": "bundled=rules ship in binary, fully offline; db-split=update DB once online then run offline; hard-net=requires network at scan time."
+            },
+            "update_method": {
+              "type": "string",
+              "description": "How rules/DB are refreshed (e.g. 'OCI DB pull', 'git clone advisory-db', 'bundled with release', 'OSV API/offline dump')."
+            },
+            "update_endpoint": {
+              "type": "string",
+              "description": "The specific endpoint(s) refresh reaches (for the allow-listed provisioning step). Omit for bundled tools."
+            },
+            "refresh_cadence": {
+              "type": "string",
+              "description": "How often upstream updates definitions (e.g. 'daily', '~6h', 'per-release'). Drives staleness-finding thresholds."
+            },
+            "offline_flags": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Flags that force offline operation after provisioning (e.g. ['--skip-db-update','--offline-scan'])."
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["native_sarif"],
+          "properties": {
+            "native_sarif": { "type": "boolean" },
+            "sarif_flag": { "type": "string", "description": "Flag to emit SARIF natively (e.g. '-f sarif')." },
+            "converter": { "type": "string", "description": "If not SARIF-native, the JSON->SARIF converter to use." },
+            "other_formats": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "license": {
+          "type": "string",
+          "description": "SPDX-ish license id. Note any commercial-tier caveat in supply_chain_flags."
+        },
+        "origin": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["vendor", "country"],
+          "properties": {
+            "vendor": { "type": "string" },
+            "country": { "type": "string", "description": "Country of the primary maintaining org, for supply-chain awareness." },
+            "governance": {
+              "type": "string",
+              "enum": ["community", "foundation", "commercial", "government"],
+              "description": "Who governs the project."
+            }
+          }
+        },
+        "supply_chain_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "telemetry-default-on", "commercial-tier", "commercial-database",
+              "foreign-origin", "proprietary-license", "oss-only-license",
+              "phones-home-on-verify", "near-stale", "deprecated"
+            ]
+          },
+          "description": "Federal supply-chain awareness flags. Empty = no notable concern."
+        },
+        "disable_telemetry": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Flags/env to disable telemetry/phone-home (enforced by the invocation wrapper, not the user)."
+        },
+        "maintenance": {
+          "type": "string",
+          "enum": ["active", "moderate", "low", "deprecated"],
+          "description": "Upstream maintenance signal."
+        },
+        "nist_controls": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z]{2}-\\d+.*$" },
+          "description": "NIST 800-53 controls this scanner's category supports (advisory; authoritative mapping lives in nist-scanner-mapping.yaml)."
+        },
+        "federal_default": {
+          "type": "boolean",
+          "description": "true = part of the v1 conservative default set (Apache/MIT + US/neutral/foundation-governed + offline-capable + SARIF-preferred)."
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

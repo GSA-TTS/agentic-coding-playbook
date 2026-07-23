@@ -1,0 +1,116 @@
+# NIST 800-53 Scanner-Finding Control Mapping — governed, versioned, DETERMINISTIC.
+#
+# This is the authoritative lookup the review workflow uses to annotate findings
+# with NIST 800-53 controls. It is a DATA TABLE, never LLM-inferred: the agent
+# may explain a mapping but must not invent one. Findings map by
+# scanner CATEGORY and, where useful, by finding CLASS (a scanner rule family).
+#
+# Governance: changes require security-reviewer sign-off (CODEOWNERS routes
+# .agents/skills/ + data security content to @GSA-TTS/agentic-coding-team).
+# Each entry carries mapping_confidence so ambiguity is surfaced, not hidden.
+# A finding may implicate MULTIPLE controls — list all; do not pick one silently.
+#
+# Authority for the controls themselves is the playbook SECURITY-CONTROLS.md +
+# the federal-ai-landscape registry; this file maps scanner output TO them.
+
+schema_version: "1.0.0"
+updated: "2026-07-18"
+
+# Category-level mappings: the baseline control set for every finding a scanner
+# of this category emits. Confidence high = the category reliably implicates the
+# control.
+by_category:
+  sast:
+    controls: ["SA-11", "SI-10", "RA-5"]
+    mapping_confidence: high
+    rationale: "SAST finds coding weaknesses (input validation, injection); SA-11 developer testing, SI-10 input validation, RA-5 vulnerability scanning."
+  sca:
+    controls: ["RA-5", "SR-3", "SA-15"]
+    mapping_confidence: high
+    rationale: "SCA finds vulnerable/deps; RA-5 vuln scanning, SR-3 supply-chain controls, SA-15 development process."
+  secrets:
+    controls: ["IA-5", "SC-28", "SC-12"]
+    mapping_confidence: high
+    rationale: "Secret exposure implicates authenticator management (IA-5), protection at rest (SC-28), key establishment (SC-12)."
+  iac:
+    controls: ["CM-6", "CM-2", "RA-5"]
+    mapping_confidence: high
+    rationale: "IaC misconfig implicates configuration settings (CM-6), baseline config (CM-2), vuln scanning (RA-5)."
+  container:
+    controls: ["RA-5", "SR-3", "CM-6"]
+    mapping_confidence: high
+    rationale: "Container image vulns/config: vuln scanning (RA-5), supply chain (SR-3), config settings (CM-6)."
+  sbom:
+    controls: ["SR-3", "SR-4", "CM-8"]
+    mapping_confidence: high
+    rationale: "SBOM supports supply-chain provenance (SR-3/SR-4) and component inventory (CM-8)."
+  license:
+    controls: ["SA-4"]
+    mapping_confidence: medium
+    rationale: "License findings relate to acquisition terms (SA-4); mapping is advisory."
+
+# Finding-class refinements: when a scanner rule family is identifiable, ADD
+# these more-specific controls on top of the category baseline. Keyed by a
+# normalized finding class the SARIF-normalizer assigns.
+by_finding_class:
+  sql-injection:
+    add_controls: ["SI-10"]
+    mapping_confidence: high
+    owasp: ["A03:2021-Injection", "LLM01"]
+  command-injection:
+    add_controls: ["SI-10", "AC-6"]
+    mapping_confidence: high
+    owasp: ["A03:2021-Injection"]
+  xss:
+    add_controls: ["SI-10"]
+    mapping_confidence: high
+    owasp: ["A03:2021-Injection"]
+  path-traversal:
+    add_controls: ["AC-3", "AC-6"]
+    mapping_confidence: high
+    owasp: ["A01:2021-Broken-Access-Control"]
+  hardcoded-credential:
+    add_controls: ["IA-5", "SC-28"]
+    mapping_confidence: high
+    owasp: ["A07:2021-Identification-and-Authentication-Failures"]
+  weak-crypto:
+    add_controls: ["SC-13", "SC-12", "SC-8"]
+    mapping_confidence: high
+    owasp: ["A02:2021-Cryptographic-Failures"]
+  insecure-deserialization:
+    add_controls: ["SI-10"]
+    mapping_confidence: medium
+    owasp: ["A08:2021-Software-and-Data-Integrity-Failures"]
+  ssrf:
+    add_controls: ["SC-7", "AC-4"]
+    mapping_confidence: high
+    owasp: ["A10:2021-Server-Side-Request-Forgery"]
+  vulnerable-dependency:
+    add_controls: ["RA-5", "SR-3", "SI-2"]
+    mapping_confidence: high
+    owasp: ["A06:2021-Vulnerable-and-Outdated-Components"]
+  missing-authz:
+    add_controls: ["AC-3", "AC-6"]
+    mapping_confidence: high
+    owasp: ["A01:2021-Broken-Access-Control"]
+  overbroad-permission:
+    add_controls: ["AC-6"]
+    mapping_confidence: high
+    owasp: ["A01:2021-Broken-Access-Control"]
+  insecure-logging:
+    add_controls: ["AU-2", "SI-11"]
+    mapping_confidence: medium
+  container-misconfig:
+    add_controls: ["CM-6", "AC-6"]
+    mapping_confidence: high
+  iac-misconfig:
+    add_controls: ["CM-6", "CM-2"]
+    mapping_confidence: high
+
+# Fallback when a finding cannot be classified beyond its scanner category:
+# use the category baseline with confidence downgraded to 'low' and FAIL CLOSED
+# (route to human review) rather than emit a confident-looking mapping.
+unmapped_policy:
+  action: escalate-to-human
+  mapping_confidence: low
+  note: "If neither category nor finding-class yields a mapping, surface the finding to human review with no control asserted. Never fabricate a control."
