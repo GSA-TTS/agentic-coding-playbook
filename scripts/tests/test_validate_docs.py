@@ -266,3 +266,68 @@ class TestFindContentFiles:
         )
         files = find_content_files(tmp_path)
         assert "0001-some-decision.md" not in [f.name for f in files]
+
+
+class TestSecurityControlsCount:
+    """Guard that SECURITY-CONTROLS.md frontmatter count == documented rows (#121)."""
+
+    def _write(self, tmp_path, controls, rows, prose_n=None):
+        docs = tmp_path / "docs"
+        docs.mkdir(exist_ok=True)
+        arr = ", ".join(f'"{c}"' for c in controls)
+        body_rows = "\n".join(f"| **{c}** | Name | P1 | desc | impl | verify | xref |" for c in rows)
+        prose = f"\n{prose_n} controls across 10 families.\n" if prose_n is not None else ""
+        (docs / "SECURITY-CONTROLS.md").write_text(
+            f"---\ntitle: SC\nstatus: canonical\ntier: 1\nnist_controls: [{arr}]\n---\n"
+            f"# Security Controls\n{prose}\n"
+            "| Control | Name | Priority | Description | Impl | Verify | Xref |\n"
+            "|---|---|---|---|---|---|---|\n"
+            f"{body_rows}\n"
+        )
+
+    def test_matching_counts_pass(self, tmp_path):
+        from playbook_validator.validate_docs import validate_security_controls_count
+
+        self._write(tmp_path, ["AC-2", "AC-3", "CM-6"], ["AC-2", "AC-3", "CM-6"], prose_n=3)
+        errors, warnings = validate_security_controls_count(tmp_path)
+        assert errors == []
+        assert warnings == []
+
+    def test_frontmatter_undercount_fails(self, tmp_path):
+        from playbook_validator.validate_docs import validate_security_controls_count
+
+        # 2 in frontmatter, 3 documented — the exact #121 drift.
+        self._write(tmp_path, ["AC-2", "AC-3"], ["AC-2", "AC-3", "CM-6"])
+        errors, _ = validate_security_controls_count(tmp_path)
+        assert errors and "CM-6" in errors[0]
+
+    def test_frontmatter_overcount_fails(self, tmp_path):
+        from playbook_validator.validate_docs import validate_security_controls_count
+
+        self._write(tmp_path, ["AC-2", "AC-3", "SI-99"], ["AC-2", "AC-3"])
+        errors, _ = validate_security_controls_count(tmp_path)
+        assert errors and "SI-99" in errors[0]
+
+    def test_prose_count_mismatch_warns(self, tmp_path):
+        from playbook_validator.validate_docs import validate_security_controls_count
+
+        self._write(tmp_path, ["AC-2", "AC-3"], ["AC-2", "AC-3"], prose_n=99)
+        errors, warnings = validate_security_controls_count(tmp_path)
+        assert errors == []
+        assert warnings and "99 controls" in warnings[0]
+
+    def test_absent_doc_is_noop(self, tmp_path):
+        from playbook_validator.validate_docs import validate_security_controls_count
+
+        errors, warnings = validate_security_controls_count(tmp_path)
+        assert errors == [] and warnings == []
+
+    def test_real_repo_is_consistent(self):
+        """The live docs/SECURITY-CONTROLS.md must pass the guard."""
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import validate_security_controls_count
+
+        root = Path(__file__).resolve().parents[2]
+        errors, _ = validate_security_controls_count(root)
+        assert errors == [], f"live SECURITY-CONTROLS.md drift: {errors}"

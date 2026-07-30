@@ -4,6 +4,7 @@ Validates that all content Markdown files have correct frontmatter
 with required fields and valid enum values.
 """
 
+import re
 from pathlib import Path
 
 from playbook_validator.config import (
@@ -126,6 +127,70 @@ def validate_doc_frontmatter(path: Path) -> tuple[list[str], list[str]]:
                 vval = block.get(vkey)
                 if vval is not None and (not isinstance(vval, str) or not vval.strip()):
                     errors.append(f"{path} — contract.{vkey} must be a non-empty string")
+
+    return errors, warnings
+
+
+# Control-overlay body rows look like: | **AC-2** | Account Management | ...
+# One row per NIST control documented in docs/SECURITY-CONTROLS.md.
+_CONTROL_ROW_RE = re.compile(r"^\|\s*\*\*([A-Z]{2}-\d{1,2})\*\*\s*\|", re.MULTILINE)
+_SECURITY_CONTROLS_REL = "docs/SECURITY-CONTROLS.md"
+
+
+def validate_security_controls_count(root: Path) -> tuple[list[str], list[str]]:
+    """Assert SECURITY-CONTROLS.md frontmatter matches its documented controls.
+
+    The frontmatter ``nist_controls`` array is what machine consumers (INDEX.yaml,
+    traceability) read; the body has one ``| **XX-N** |`` table row per control.
+    If they diverge, consumers get a wrong count and the prose "N controls" claim
+    drifts (issue #121). This guard fails closed so the two can never silently
+    disagree again. It also flags an inline "N controls" prose count that no
+    longer matches.
+
+    Returns (errors, warnings).
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    doc = root / _SECURITY_CONTROLS_REL
+    if not doc.is_file():
+        # Not every consumer repo ships this doc; absence is not an error here.
+        return errors, warnings
+
+    text = doc.read_text(encoding="utf-8")
+    fm = extract_frontmatter(doc) or {}
+    fm_controls = fm.get("nist_controls") or []
+    fm_count = len(fm_controls)
+
+    # Body: distinct controls that actually have a documented row.
+    body = text.split("---\n", 2)[2] if text.startswith("---\n") else text
+    body_controls = sorted(set(_CONTROL_ROW_RE.findall(body)))
+    body_count = len(body_controls)
+
+    if fm_count != body_count:
+        fm_set, body_set = set(fm_controls), set(body_controls)
+        only_fm = sorted(fm_set - body_set)
+        only_body = sorted(body_set - fm_set)
+        detail = []
+        if only_fm:
+            detail.append(f"in frontmatter but not documented: {only_fm}")
+        if only_body:
+            detail.append(f"documented but not in frontmatter: {only_body}")
+        errors.append(
+            f"{doc} — nist_controls count ({fm_count}) != documented control rows "
+            f"({body_count}). {'; '.join(detail) if detail else 'counts differ'}. "
+            "Reconcile the frontmatter array with the body table (issue #121)."
+        )
+
+    # Advisory: an inline "N controls" prose claim that disagrees with the truth.
+    for m in re.finditer(r"(\d+)\s+controls\b", text):
+        claimed = int(m.group(1))
+        if claimed != body_count:
+            warnings.append(
+                f"{doc} — prose says '{claimed} controls' but {body_count} are "
+                f"documented; update the prose to match (issue #121)."
+            )
+            break
 
     return errors, warnings
 

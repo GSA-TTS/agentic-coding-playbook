@@ -26,6 +26,7 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
         find_content_files,
         validate_contract_role,
         validate_doc_frontmatter,
+        validate_security_controls_count,
     )
 
     root = Path(args.root)
@@ -52,6 +53,16 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
         print(f"WARNING: {w}")
     if not role_errors:
         print("  OK: canonical universal contract designated; thin layers do not claim it")
+
+    print("\n=== Security-Controls Count Integrity ===")
+    sc_errors, sc_warnings = validate_security_controls_count(root)
+    for e in sc_errors:
+        print(f"ERROR: {e}")
+        total_errors += 1
+    for w in sc_warnings:
+        print(f"WARNING: {w}")
+    if not sc_errors:
+        print("  OK: SECURITY-CONTROLS.md frontmatter count matches documented control rows")
 
     print(f"\n=== Summary ===\nErrors: {total_errors}")
     if total_errors > 0:
