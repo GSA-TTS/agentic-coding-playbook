@@ -240,6 +240,19 @@ class TestFindContentFiles:
         assert "README.md" not in filenames
         assert "CONTRIBUTING.md" not in filenames
 
+    def test_excludes_community_health_files(self, tmp_path):
+        # GitHub-recognized community-health files are kept in their standard
+        # form (GitHub renders them specially) and MUST NOT require content-doc
+        # frontmatter.
+        (tmp_path / "CODE_OF_CONDUCT.md").write_text("# Code of Conduct")
+        (tmp_path / "SUPPORT.md").write_text("# Support")
+        (tmp_path / "GOVERNANCE.md").write_text("# Governance")
+        files = find_content_files(tmp_path)
+        filenames = [f.name for f in files]
+        assert "CODE_OF_CONDUCT.md" not in filenames
+        assert "SUPPORT.md" not in filenames
+        assert "GOVERNANCE.md" not in filenames
+
     def test_excludes_skills_dir(self, tmp_path):
         skills = tmp_path / "skills" / "test-skill"
         skills.mkdir(parents=True)
