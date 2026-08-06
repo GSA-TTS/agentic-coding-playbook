@@ -30,6 +30,9 @@ EXCLUDED_FILENAMES = frozenset(
         "CONTRIBUTING.md",
         "CHANGELOG.md",
         "SECURITY.md",
+        "CODE_OF_CONDUCT.md",
+        "SUPPORT.md",
+        "GOVERNANCE.md",
         "LICENSE",
         "TRANSFER.md",
     }

@@ -46,7 +46,12 @@ The agent reads your plan and sets up everything: `AGENTS.md`, coding standards,
 
 A set of markdown files, templates, and validation tools that help AI coding agents follow **secure-by-default practices** when assisting federal employees with software development. Drop these files into any repository to establish consistent behavioral standards across the full development lifecycle.
 
-Designed for **FIPS Moderate** systems, **single-agent** architectures, and **internal enterprise** environments.
+A practical, living approach to secure AI-assisted development for federal
+teams — usable across single-agent and multi-agent ("swarm") workflows, and
+spanning backend, frontend, accessibility/Section 508, and the full development
+lifecycle. It is grounded in current federal requirements and security and
+software-development best practices; it is **not** authoritative federal policy,
+and it does not replace your agency's own authorization decisions.
 
 ## The Two-Layer Contract
 
@@ -215,11 +220,29 @@ agentic-coding-playbook/
 
 ---
 
-## Scope
+## Where this applies
 
-**In scope:** Single-agent systems, internal enterprise apps, FIPS Moderate, full SDLC.
+- **Agentic workflows:** single-agent and multi-agent / swarm approaches. (Note:
+  multi-agent patterns add threat surface — inter-agent prompt injection, wider
+  tool/credential blast radius — and our guidance there is still maturing.)
+- **Across the stack:** backend, public-facing and frontend work, and
+  accessibility / Section 508.
+- **Security baseline:** written against a **FIPS Moderate** baseline; adapt the
+  controls to your own system's impact level and ATO.
+- **Lifecycle:** the full software development lifecycle.
 
-**Out of scope:** Multi-agent orchestration, FIPS High/classified, public-facing AI services, ML training pipelines, procurement guidance (see [OMB M-25-22](https://www.whitehouse.gov/)).
+## What this is not
+
+- **Not authoritative federal policy** and not a substitute for your agency's
+  security authorization (ATO) process. Confirm any requirement against its
+  current authoritative source (NIST, OMB, your agency) — this repo is a
+  practical snapshot, not the system of record.
+- **Not a foundation for FIPS High or classified systems.** Consult your
+  agency's security team for those contexts.
+- **Not procurement guidance** — see
+  [OMB M-25-22](https://www.whitehouse.gov/).
+- **Community-maintained and evolving.** Methods here are community-tested, not
+  guaranteed; provided as-is under [CC0 1.0](./LICENSE) with no warranty.
 
 ---
 
@@ -227,8 +250,8 @@ agentic-coding-playbook/
 
 We welcome contributions from the agentic coding community.
 
-- **Fix it directly** — Submit a PR (preferred for internal repos)
-- **Questions** — Ask in the agentic-coding Slack channel
+- **Fix it directly** — Submit a PR
+- **Questions** — Open a GitHub issue or start a discussion
 - **Not sure how?** — Open an issue to discuss
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for details. This project uses [conventional commits](https://www.conventionalcommits.org/) and automated releases via [release-please](https://github.com/googleapis/release-please).
