@@ -12,11 +12,11 @@ This repo is one of three in the agentic coding ecosystem:
 | **[Playbook](https://github.com/GSA-TTS/agentic-coding-playbook)** (you are here) | Standards & practices | Coding standards, skills, templates |
 | **[Patterns](https://github.com/GSA-TTS/agentic-coding-patterns)** | Community sharing | Workflows, lessons learned, examples |
 
-**Not sure where your contribution belongs?** Ask in the agentic-coding Slack channel.
+**Not sure where your contribution belongs?** Open a GitHub issue to discuss.
 
 ## Getting Help
 
-- **Questions:** Ask in the agentic-coding Slack channel
+- **Questions:** Open a GitHub issue or start a discussion
 - **Bugs/improvements:** Open a GitHub issue or submit a PR
 - **Security issues:** See [SECURITY.md](SECURITY.md) — direct fixes preferred
 
@@ -26,7 +26,7 @@ The simplest approach:
 
 1. **Fix it directly** — Submit a PR
 2. **Not sure how?** — Open an issue to discuss first
-3. **Questions?** — Ask in the agentic-coding Slack channel
+3. **Questions?** — Open a GitHub issue to discuss
 
 ## Contribution Guidelines
 

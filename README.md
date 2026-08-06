@@ -251,7 +251,7 @@ agentic-coding-playbook/
 We welcome contributions from the federal agentic-coding community.
 
 - **Fix it directly** — Submit a PR
-- **Questions** — Ask in the agentic-coding Slack channel
+- **Questions** — Open a GitHub issue or start a discussion
 - **Not sure how?** — Open an issue to discuss
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for details. This project uses [conventional commits](https://www.conventionalcommits.org/) and automated releases via [release-please](https://github.com/googleapis/release-please).
