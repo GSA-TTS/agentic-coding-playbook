@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in improving the Agentic Coding Playbook! This is an internal repository that benefits from input by practitioners across GSA.
+Thank you for your interest in improving the Agentic Coding Playbook! This repository welcomes input from practitioners across GSA and the broader federal community.
 
 ## Ecosystem Overview
 
@@ -24,7 +24,7 @@ This repo is one of three in the agentic coding ecosystem:
 
 The simplest approach:
 
-1. **Fix it directly** — Submit a PR (preferred for internal repos)
+1. **Fix it directly** — Submit a PR
 2. **Not sure how?** — Open an issue to discuss first
 3. **Questions?** — Ask in the agentic-coding Slack channel
 
@@ -405,7 +405,19 @@ All pull requests require review. Changes to security standards require addition
 
 ## Code of Conduct
 
-Be professional, constructive, and respectful. Quality and accuracy matter.
+This project follows its [Code of Conduct](CODE_OF_CONDUCT.md). Be professional,
+constructive, and respectful; quality and accuracy matter.
+
+## Public domain
+
+This project is in the public domain within the United States, and copyright and
+related rights in the work worldwide are waived through the
+[CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
+See [`LICENSE`](LICENSE) for details.
+
+All contributions to this project will be released under the CC0 dedication. By
+submitting a pull request or issue, you are agreeing to comply with this waiver
+of copyright interest.
 
 ## Share What You Learn
 
