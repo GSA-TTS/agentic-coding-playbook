@@ -248,7 +248,7 @@ agentic-coding-playbook/
 
 ## Contributing
 
-We welcome contributions from the agentic coding community.
+We welcome contributions from the federal agentic-coding community.
 
 - **Fix it directly** — Submit a PR
 - **Questions** — Open a GitHub issue or start a discussion
