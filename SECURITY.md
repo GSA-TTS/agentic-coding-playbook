@@ -2,7 +2,8 @@
 
 ## About this repository
 
-The `agentic-coding-playbook` is a living, community-maintained repository that
+The `agentic-coding-playbook` is a living repository — maintained by and for the
+federal agentic-coding community — that
 captures a practical approach to implementing current federal requirements
 alongside security and software-development best practices for AI-assisted work.
 It is **not** an authoritative source of federal policy or standards. It contains
