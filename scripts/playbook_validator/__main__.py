@@ -110,7 +110,10 @@ def cmd_validate_skills(args: argparse.Namespace) -> int:
 
 
 def cmd_validate_landscape(args: argparse.Namespace) -> int:
-    from playbook_validator.validate_landscape import validate_landscape
+    from playbook_validator.validate_landscape import (
+        validate_landscape,
+        validate_landscape_doc_summary,
+    )
 
     path = Path(args.path)
     if not path.exists():
@@ -118,6 +121,10 @@ def cmd_validate_landscape(args: argparse.Namespace) -> int:
         return 2
 
     errors, warnings, count = validate_landscape(path)
+    # Guard the generated Status Summary + Phase Mapping in the companion doc
+    # against the registry (#142). Root is the registry's grandparent (repo root).
+    doc_errors = validate_landscape_doc_summary(path.parent.parent)
+    errors = errors + doc_errors
     for w in warnings:
         print(f"WARN: {w}", file=sys.stderr)
     for e in errors:
