@@ -116,3 +116,52 @@ def validate_landscape(path: Path) -> tuple[list[str], list[str], int]:
         errors.append(f"total_entries declares {declared} but found {actual} entries")
 
     return errors, warnings, actual
+
+
+def validate_landscape_doc_summary(root: Path) -> list[str]:
+    """Guard the generated blocks in docs/FEDERAL-AI-LANDSCAPE.md (#142).
+
+    Fails closed if the Status Summary table or the Playbook Phase Mapping table
+    (between their ``GENERATED:LANDSCAPE_SUMMARY`` / ``GENERATED:LANDSCAPE_PHASES``
+    markers) disagrees with what the YAML registry would generate — so the doc
+    can't drift even if hand-edited or `make generate` is skipped. No-op for a
+    block whose markers are absent. Returns a list of error strings.
+    """
+    doc = root / "docs" / "FEDERAL-AI-LANDSCAPE.md"
+    if not doc.is_file():
+        return []
+    text = doc.read_text(encoding="utf-8")
+
+    from playbook_validator.index_updaters import (
+        compute_landscape_summary,
+        compute_phase_mapping,
+        render_landscape_summary_table,
+        render_phase_mapping_table,
+    )
+
+    errors: list[str] = []
+
+    summary = compute_landscape_summary(root)
+    if summary is not None:
+        expected = render_landscape_summary_table(summary[0])
+        errors += _check_generated_block(doc, text, "LANDSCAPE_SUMMARY", expected, "Status Summary table")
+
+    mapping = compute_phase_mapping(root)
+    if mapping is not None:
+        expected = render_phase_mapping_table(mapping)
+        errors += _check_generated_block(doc, text, "LANDSCAPE_PHASES", expected, "Playbook Phase Mapping table")
+
+    return errors
+
+
+def _check_generated_block(doc: Path, text: str, marker_id: str, expected: str, label: str) -> list[str]:
+    """Compare the body between GENERATED:<marker_id> markers to ``expected``."""
+    start = f"<!-- GENERATED:{marker_id}:START"
+    end = f"<!-- GENERATED:{marker_id}:END -->"
+    if start not in text or end not in text:
+        return []  # markers not adopted — not this guard's job to require them
+    block = text.split(start, 1)[1].split(end, 1)[0]
+    body = block.split("\n", 1)[1].strip() if "\n" in block else ""
+    if body != expected.strip():
+        return [f"{doc} — {label} is out of sync with data/federal-ai-landscape.yaml. Run `make generate` (#142)."]
+    return []

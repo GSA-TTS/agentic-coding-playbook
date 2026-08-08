@@ -338,6 +338,7 @@ _COUNT_PROSE_FILES = (
     "docs/SECURITY-CONTROLS.md",
     "docs/ROADMAP.md",
     "CONTEXT-GUIDE.md",
+    "CONTRIBUTING.md",
 )
 # Contexts where "N entries" is NOT the landscape catalog (avoid false positives).
 _LANDSCAPE_CONTEXT_RE = re.compile(r"(?i)(landscape|federal ai guidance catalog|entries total)")
@@ -393,6 +394,7 @@ def validate_count_drift(root: Path) -> tuple[list[str], list[str]]:
                             "count (#184)."
                         )
 
+    errors += _validate_roadmap_metrics(root)
     return errors, warnings
 
 
@@ -465,3 +467,29 @@ def validate_frontmatter_crosswalk(root: Path) -> tuple[list[str], list[str]]:
         )
 
     return errors, warnings
+
+
+def _validate_roadmap_metrics(root: Path) -> list[str]:
+    """Guard the generated ROADMAP metrics table against live sources (#142)."""
+    doc = root / "docs" / "ROADMAP.md"
+    if not doc.is_file():
+        return []
+    text = doc.read_text(encoding="utf-8")
+    start = "<!-- GENERATED:ROADMAP_METRICS:START"
+    end = "<!-- GENERATED:ROADMAP_METRICS:END -->"
+    if start not in text or end not in text:
+        return []
+
+    from playbook_validator.generate_index import collect_documents, collect_skills, compute_stats
+    from playbook_validator.index_updaters import render_roadmap_metrics_table
+
+    stats = compute_stats(collect_documents(root), collect_skills(root))
+    expected = render_roadmap_metrics_table(root, stats).strip()
+    block = text.split(start, 1)[1].split(end, 1)[0]
+    body = block.split("\n", 1)[1].strip() if "\n" in block else ""
+    if body != expected:
+        return [
+            "docs/ROADMAP.md — Current State metrics table is out of sync with "
+            "repository sources. Run `make generate` (#142)."
+        ]
+    return []

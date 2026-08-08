@@ -20,6 +20,7 @@ Canonical reference for all federal AI guidance relevant to AI-assisted software
 
 ## Status Summary
 
+<!-- GENERATED:LANDSCAPE_SUMMARY:START — do not edit, run: make generate -->
 | Category | Active | Revoked/Rescinded | Draft |
 |---|---|---|---|
 | Executive Orders | 5 | 1 | 0 |
@@ -31,6 +32,7 @@ Canonical reference for all federal AI guidance relevant to AI-assisted software
 | Industry Standards | 6 | 0 | 0 |
 | White House Plans | 2 | 0 | 0 |
 | **Total** | **36** | **3** | **3** |
+<!-- GENERATED:LANDSCAPE_SUMMARY:END -->
 
 > Counts reflect `data/federal-ai-landscape.yaml` (42 entries total; "final" standards counted as Active). `status: final` and `status: active` both denote in-effect references.
 
@@ -312,17 +314,23 @@ These complement federal guidance and are referenced throughout this playbook.
 
 ## Playbook Phase Mapping
 
-| Phase | Primary References |
+<!-- GENERATED:LANDSCAPE_PHASES:START — do not edit, run: make generate -->
+| Phase | References (from registry `playbook_phases`) |
 |---|---|
-| **Phase 0: Project Plan** | M-25-21 (high-impact AI classification), EO 13960 (AI principles) |
-| **Phase 0.5: Environment Doctor** | M-25-22 (procurement), M-26-04 (LLM procurement principles) |
-| **Phase 1: Repo Setup** | SP 800-218 (SSDF), SLSA (supply chain) |
-| **Phase 2: Agent Config** | OWASP Agentic 2026, AI RMF 1.0, AI 600-1 (GenAI profile) |
-| **Phase 3: Write Code** | SP 800-218A (AI SDLC), OWASP LLM 2025, AI 100-2 (adversarial ML) |
-| **Phase 4: Document Decisions** | GAO AI Accountability Framework (governance pillar) |
-| **Phase 5: Assess Risk** | AI RMF 1.0 (Measure/Manage), AI 600-1, IR 8596 (Cyber AI Profile) |
-| **Phase 6: Pre-Deploy Check** | CISA Secure by Design, NIST SP 800-53 |
-| **Phase 7: Deploy** | FedRAMP, M-25-22 (acquisition requirements) |
+| **Phase 0: Project Plan** | EO 14179, EO 13960, National AI Legislative Framework, M-25-21, M-16-21, Advancing American AI Act, Copyright and Artificial Intelligence, Part 2, Winning the Race |
+| **Phase 0.5: Environment Doctor** | EO 14319, M-25-22, M-26-04, M-26-10 |
+| **Phase 1: Repo Setup** | NIST SP 800-218A, NIST SSDF, SLSA |
+| **Phase 2: Agent Config** | M-25-21, NIST AI 100-1, NIST AI 600-1, NIST COSAIS, Advancing American AI Act, DoD Responsible AI Strategy and…, OWASP Top 10 for Agentic Applications |
+| **Phase 3: Write Code** | NIST AI 100-2, NIST SP 800-218A, OWASP Top 10 for LLM Applications, OWASP Top 10 for Agentic Applications, NIST SSDF |
+| **Phase 4: Document Decisions** | GAO AI Accountability Framework |
+| **Phase 5: Assess Risk** | M-25-21, NIST AI 100-1, NIST AI 600-1, NIST AI 100-2, NIST AI 800-1, NIST IR 8596, NIST COSAIS, GAO AI Accountability Framework, MITRE ATLAS |
+| **Phase 6: Pre-Deploy Check** | NIST SP 800-218A, NIST AI 800-4, NIST IR 8596, CISA Roadmap for Artificial Intelligence, OWASP Top 10 for LLM Applications |
+| **Phase 7: Deploy** | M-25-22 |
+<!-- GENERATED:LANDSCAPE_PHASES:END -->
+
+> This table is generated from the `playbook_phases` field on each entry in
+> [`data/federal-ai-landscape.yaml`](../data/federal-ai-landscape.yaml). To
+> change a mapping, edit the entry's `playbook_phases` and run `make generate`.
 
 ---
 
