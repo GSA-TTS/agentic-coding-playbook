@@ -341,3 +341,82 @@ def test_copied_probe_accepts_universal_contract(repo, tmp_path):
     empty_home = tmp_path / "copied-empty-home2"
     empty_home.mkdir()
     assert _run_copied_probe(repo, empty_home) == 0
+
+
+# ── 9. Copied probe recognizes inline flow-mapping frontmatter (#154) ─────────
+
+import importlib.util  # noqa: E402
+
+
+def _load_copied_probe():
+    """Import templates/ensure-contract.py as a module to unit-test its parser
+    directly (the subprocess tests above cover end-to-end exit codes)."""
+    spec = importlib.util.spec_from_file_location(
+        "copied_ensure_contract", PLAYBOOK_ROOT / "templates" / "ensure-contract.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _module_declares_universal(text: str) -> bool:
+    """Module probe's recognition (real YAML) for the same input."""
+    from playbook_validator.config import CONTRACT_ROLE_UNIVERSAL, contract_role
+    from playbook_validator.frontmatter import parse_frontmatter
+
+    return contract_role(parse_frontmatter(text)) == CONTRACT_ROLE_UNIVERSAL
+
+
+# Inputs exercising both YAML forms + the guard cases. The bug this fixes: the
+# copied probe used to return False on inline flow-mapping universal (#154).
+_PARITY_CASES = {
+    "block_universal": '---\ncontract:\n  role: universal\n  version: "1.0.0"\n---\n# x\n',
+    "flow_universal": "---\ncontract: {role: universal}\n---\n# x\n",
+    "flow_universal_with_version": '---\ncontract: {role: universal, version: "1.0.0"}\n---\n# x\n',
+    "flow_universal_double_quoted": '---\ncontract: {role: "universal"}\n---\n# x\n',
+    "flow_universal_single_quoted": "---\ncontract: {role: 'universal'}\n---\n# x\n",
+    "flow_universal_reversed": "---\ncontract: {version: 1.0.0, role: universal}\n---\n# x\n",
+    "flow_project_layer": "---\ncontract: {role: project-layer}\n---\n# x\n",
+    "block_project_layer": "---\ncontract:\n  role: project-layer\n---\n# x\n",
+    "no_contract_block": "---\ntitle: x\n---\n# x\n",
+    # Malformed / decoy forms that must fail closed in BOTH probes.
+    "empty_flow": "---\ncontract: {}\n---\n# x\n",
+    "flow_missing_space": "---\ncontract:{role: universal}\n---\n# x\n",
+    "flow_empty_role": "---\ncontract: {role: }\n---\n# x\n",
+    "decoy_field": "---\ncontractor: {role: universal}\n---\n# x\n",
+}
+
+
+@pytest.mark.parametrize("name", list(_PARITY_CASES))
+def test_copied_and_module_probes_agree(name):
+    """#154: the dependency-free copied probe and the YAML module probe MUST
+    return the same verdict for every frontmatter form — especially inline flow
+    mappings, where they used to diverge."""
+    copied = _load_copied_probe()
+    text = _PARITY_CASES[name]
+    assert copied._text_declares_universal(text) == _module_declares_universal(text), f"probe divergence on {name!r}"
+
+
+def test_copied_probe_accepts_flow_mapping_universal():
+    """Direct regression for #154: flow-mapping universal is now recognized."""
+    copied = _load_copied_probe()
+    assert copied._text_declares_universal("---\ncontract: {role: universal}\n---\n# x\n") is True
+
+
+def test_copied_probe_rejects_flow_mapping_project_layer():
+    """A flow-mapping project layer must NOT self-satisfy (fail-closed, #151)."""
+    copied = _load_copied_probe()
+    assert copied._text_declares_universal("---\ncontract: {role: project-layer}\n---\n# x\n") is False
+
+
+def test_copied_probe_flow_mapping_end_to_end(repo, tmp_path):
+    """End-to-end: a repo whose AGENTS.md uses inline flow-mapping universal is
+    accepted by the subprocess-invoked copied probe (exit 0)."""
+    repo.mkdir(parents=True)
+    (repo / "AGENTS.md").write_text(
+        '---\ntitle: x\ncontract: {role: universal, version: "1.0.0"}\n---\n'
+        "# AGENTS.md — Federal AI Agent Behavioral Best Practices\n"
+    )
+    empty_home = tmp_path / "flow-empty-home"
+    empty_home.mkdir()
+    assert _run_copied_probe(repo, empty_home) == 0
