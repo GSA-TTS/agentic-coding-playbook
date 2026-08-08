@@ -181,7 +181,7 @@ class TestValidateDocFrontmatter:
 class TestValidateContractRole:
     """Repository-level canonical-designation invariant (#151)."""
 
-    def _write(self, path, role=None, version=None):
+    def _write(self, path, role=None, version=None, banner=None):
         lines = ["---", 'title: "x"', 'description: "d"', "status: canonical", "tier: 1"]
         if role is not None:
             lines.append("contract:")
@@ -189,13 +189,15 @@ class TestValidateContractRole:
             if version is not None:
                 lines.append(f'  version: "{version}"')
         lines += ["---", "# body"]
+        if banner is not None:
+            lines.append(f"> **Version:** {banner} | **Impact Level:** FIPS Moderate")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("\n".join(lines) + "\n")
 
     def test_universal_and_thin_layers_valid(self, tmp_path):
         from playbook_validator.validate_docs import validate_contract_role
 
-        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0")
+        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0", banner="1.0.0")
         self._write(tmp_path / "templates/AGENTS.md.template", role="project-layer")
         self._write(tmp_path / "examples/AGENTS.md.example", role="project-layer")
         errors, _ = validate_contract_role(tmp_path)
@@ -211,10 +213,56 @@ class TestValidateContractRole:
     def test_thin_layer_claiming_universal_errors(self, tmp_path):
         from playbook_validator.validate_docs import validate_contract_role
 
-        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0")
+        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0", banner="1.0.0")
         self._write(tmp_path / "templates/AGENTS.md.template", role="universal", version="1.0.0")
         errors, _ = validate_contract_role(tmp_path)
         assert any("thin project layer MUST NOT declare" in e for e in errors)
+
+    def test_frontmatter_version_mismatch_config_errors(self, tmp_path):
+        """#191: contract.version must equal config.CURRENT_CONTRACT_VERSION."""
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(tmp_path / "AGENTS.md", role="universal", version="0.4.0", banner="0.4.0")
+        errors, _ = validate_contract_role(tmp_path)
+        assert any("CURRENT_CONTRACT_VERSION" in e and "#191" in e for e in errors)
+
+    def test_banner_version_mismatch_frontmatter_errors(self, tmp_path):
+        """#191: the body banner Version must equal contract.version."""
+        from playbook_validator.config import CURRENT_CONTRACT_VERSION
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(
+            tmp_path / "AGENTS.md",
+            role="universal",
+            version=CURRENT_CONTRACT_VERSION,
+            banner="0.3.0",
+        )
+        errors, _ = validate_contract_role(tmp_path)
+        assert any("body banner Version" in e and "#191" in e for e in errors)
+
+    def test_version_consistent_passes(self, tmp_path):
+        """All three version copies agree → no error."""
+        from playbook_validator.config import CURRENT_CONTRACT_VERSION
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(
+            tmp_path / "AGENTS.md",
+            role="universal",
+            version=CURRENT_CONTRACT_VERSION,
+            banner=CURRENT_CONTRACT_VERSION,
+        )
+        errors, _ = validate_contract_role(tmp_path)
+        assert errors == []
+
+    def test_real_repo_contract_version_consistent(self):
+        """The live AGENTS.md must have frontmatter == banner == config version."""
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import validate_contract_role
+
+        root = Path(__file__).resolve().parents[2]
+        errors, _ = validate_contract_role(root)
+        assert errors == [], f"live contract-version drift: {errors}"
 
 
 class TestFindContentFiles:

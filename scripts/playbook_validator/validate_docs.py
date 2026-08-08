@@ -232,6 +232,8 @@ def validate_contract_role(root: Path) -> tuple[list[str], list[str]]:
             )
         elif not contract_version(fm):
             errors.append(f"{universal} — universal contract MUST declare contract.{CONTRACT_VERSION_KEY}")
+        else:
+            errors.extend(_check_contract_version_consistency(universal, fm))
 
     for rel in _THIN_LAYER_PATHS:
         thin = root / rel
@@ -246,3 +248,34 @@ def validate_contract_role(root: Path) -> tuple[list[str], list[str]]:
             )
 
     return errors, warnings
+
+
+# Body banner "> **Version:** X.Y.Z" in the universal contract — must agree with
+# the frontmatter contract.version and config.CURRENT_CONTRACT_VERSION so the
+# three copies can never drift apart again (#191).
+_BANNER_VERSION_RE = re.compile(r">\s*\*\*Version:\*\*\s*([0-9]+\.[0-9]+\.[0-9]+)")
+
+
+def _check_contract_version_consistency(universal: Path, fm: dict) -> list[str]:
+    """The universal contract's version appears in three places: the
+    ``contract.version`` frontmatter marker, the ``> **Version:**`` body banner,
+    and ``config.CURRENT_CONTRACT_VERSION``. They MUST all agree (#191) — a prior
+    drift (frontmatter 0.4.0 / banner 0.3.0 / config 1.0.0) meant the shipped
+    thin template's ``requires_contract: ">=1.0"`` was unsatisfiable."""
+    from playbook_validator.config import CURRENT_CONTRACT_VERSION
+
+    errors: list[str] = []
+    fm_version = contract_version(fm)
+    if fm_version != CURRENT_CONTRACT_VERSION:
+        errors.append(
+            f"{universal} — contract.version ({fm_version!r}) != "
+            f"config.CURRENT_CONTRACT_VERSION ({CURRENT_CONTRACT_VERSION!r}); "
+            "reconcile the two (#191)."
+        )
+    banner = _BANNER_VERSION_RE.search(universal.read_text(encoding="utf-8"))
+    if banner and banner.group(1) != fm_version:
+        errors.append(
+            f"{universal} — body banner Version ({banner.group(1)!r}) != "
+            f"contract.version ({fm_version!r}); reconcile the two (#191)."
+        )
+    return errors
