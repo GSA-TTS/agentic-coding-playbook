@@ -134,19 +134,59 @@ def update_context_guide_word_counts(root: Path) -> None:
 # ── Hardcoded count updates ───────────────────────────────────────────
 
 
+def count_landscape_entries(root: Path) -> int | None:
+    """Return the number of ``entries:`` in the landscape registry, or None.
+
+    Single source of truth for the landscape count, shared by the generator
+    (this module) and the drift guard (validate_docs) so they cannot disagree.
+    """
+    landscape_path = root / "data" / "federal-ai-landscape.yaml"
+    if not landscape_path.is_file():
+        return None
+    content = landscape_path.read_text(encoding="utf-8")
+    return len(re.findall(r"^\s+- id:", content, re.MULTILINE))
+
+
+def count_security_controls(root: Path) -> int | None:
+    """Return the count of distinct documented NIST controls, or None.
+
+    Counts the unique ``| **XX-N** |`` control rows in docs/SECURITY-CONTROLS.md
+    — the same body-row source the #121 integrity guard uses (raw rows may
+    duplicate a control across families, so distinct is authoritative). Shared
+    with the drift guard so prose rewrites and the CI check agree.
+    """
+    doc = root / "docs" / "SECURITY-CONTROLS.md"
+    if not doc.is_file():
+        return None
+    text = doc.read_text(encoding="utf-8")
+    body = text.split("---\n", 2)[2] if text.startswith("---\n") else text
+    rows = re.findall(r"^\|\s*\*\*([A-Z]{2}-\d{1,2})\*\*\s*\|", body, re.MULTILINE)
+    return len(set(rows))
+
+
+# Landscape-catalog "N entries" span. The count must not be part of a larger
+# token (no preceding word char / dot / hyphen). Matches "39 entries".
+_LANDSCAPE_ENTRIES_RE = re.compile(r"(?<![\w.\-])(\d+)(\s+entries\b)")
+# "N controls" count span (issues #121, #184). The COUNT is a standalone integer
+# (negative lookbehind rejects the "53" in "800-53" and "2" in "Rev 5.2"),
+# optionally followed by a "security" or "NIST [SP] 800-53 [Rev 5.x]" qualifier,
+# then "controls". Because the framework number itself ("800-53") is excluded
+# from the count group by the lookbehind, "NIST 800-53 controls" (no leading
+# tally) cannot match, while "36 NIST 800-53 controls" captures 36 as the count.
+_CONTROLS_QUALIFIER = r"(?:security\s+|NIST\s+(?:SP\s+)?800-53\s+(?:Rev\s+5(?:\.\d+)?\s+)?)?"
+_CONTROLS_RE = re.compile(rf"(?<![\w.\-])(\d+)(\s+{_CONTROLS_QUALIFIER}controls\b)")
+
+
 def update_hardcoded_counts(root: Path, stats: IndexStats, skills: list[SkillInfo]) -> None:
     """Update hardcoded counts in markdown files to match actual data.
 
-    Replaces patterns like "N tests", "N skills", "N federal AI guidance"
-    with computed values from source data. Prevents count drift.
+    Replaces patterns like "N tests", "N skills", "N federal AI guidance",
+    "N entries" (landscape catalog), and "N controls" with computed values from
+    source data. Prevents count drift (issues #121, #184).
     """
     test_count = _collect_test_count(root)
-
-    landscape_path = root / "data" / "federal-ai-landscape.yaml"
-    landscape_count = None
-    if landscape_path.is_file():
-        content = landscape_path.read_text(encoding="utf-8")
-        landscape_count = len(re.findall(r"^\s+- id:", content, re.MULTILINE))
+    landscape_count = count_landscape_entries(root)
+    controls_count = count_security_controls(root)
 
     md_files = list(root.glob("*.md")) + list(root.glob("docs/*.md"))
 
@@ -165,6 +205,10 @@ def update_hardcoded_counts(root: Path, stats: IndexStats, skills: list[SkillInf
                 f"{landscape_count} federal AI guidance",
                 text,
             )
+            text = _LANDSCAPE_ENTRIES_RE.sub(rf"{landscape_count}\2", text)
+
+        if controls_count is not None:
+            text = _CONTROLS_RE.sub(rf"{controls_count}\2", text)
 
         if text != original:
             md_file.write_text(text, encoding="utf-8")

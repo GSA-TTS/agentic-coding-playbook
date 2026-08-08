@@ -246,3 +246,82 @@ def validate_contract_role(root: Path) -> tuple[list[str], list[str]]:
             )
 
     return errors, warnings
+
+
+# Prose count-drift guard (#184). Prose files copy the landscape-entry count and
+# the control count; these are NOT the source of truth and drift silently (docs
+# said "39 entries" while the registry held 42). Each numeric span is anchored to
+# its noun so an unrelated number is never flagged.
+_LANDSCAPE_ENTRIES_PROSE_RE = re.compile(r"(?<![\w.\-])(\d+)\s+entries\b")
+# Count group then optional "security"/framework qualifier then "controls". The
+# negative lookbehind keeps a number inside "800-53"/"Rev 5.2" out of the count
+# group (mirrors index_updaters exactly so generate + guard agree).
+_CONTROLS_QUALIFIER = r"(?:security\s+|NIST\s+(?:SP\s+)?800-53\s+(?:Rev\s+5(?:\.\d+)?\s+)?)?"
+_CONTROLS_PROSE_RE = re.compile(rf"(?<![\w.\-])(\d+)\s+{_CONTROLS_QUALIFIER}controls\b")
+# Only scan files that actually carry a catalog/control count claim. Kept as a
+# small explicit list so the guard is deterministic and cheap; `make generate`
+# rewrites these same spans, so a synced repo passes with zero edits.
+_COUNT_PROSE_FILES = (
+    "README.md",
+    "docs/README.md",
+    "docs/AGENT-INSTRUCTIONS.md",
+    "docs/FEDERAL-AI-LANDSCAPE.md",
+    "docs/SECURITY-CONTROLS.md",
+    "docs/ROADMAP.md",
+    "CONTEXT-GUIDE.md",
+)
+# Contexts where "N entries" is NOT the landscape catalog (avoid false positives).
+_LANDSCAPE_CONTEXT_RE = re.compile(r"(?i)(landscape|federal ai guidance catalog|entries total)")
+
+
+def validate_count_drift(root: Path) -> tuple[list[str], list[str]]:
+    """Fail closed when a prose count copy disagrees with its source list (#184).
+
+    Two source-of-truth counts are copied into prose across the repo:
+    - landscape entries → ``data/federal-ai-landscape.yaml`` (``entries:`` list)
+    - NIST controls → distinct rows in ``docs/SECURITY-CONTROLS.md``
+
+    A stale copy (e.g. "39 entries" when the registry holds 42) passes the
+    existing per-file integrity guards, which only check a source's internal
+    consistency. This guard scans the known prose files and errors when a count
+    token adjacent to its noun differs from the source length, so drift cannot
+    ship even if someone forgets ``make generate``. Import kept local to avoid a
+    circular dependency with generate_index.
+
+    Returns (errors, warnings).
+    """
+    from playbook_validator.index_updaters import (
+        count_landscape_entries,
+        count_security_controls,
+    )
+
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    landscape_count = count_landscape_entries(root)
+    controls_count = count_security_controls(root)
+
+    for rel in _COUNT_PROSE_FILES:
+        doc = root / rel
+        if not doc.is_file():
+            continue
+        for line in doc.read_text(encoding="utf-8").splitlines():
+            if landscape_count is not None and _LANDSCAPE_CONTEXT_RE.search(line):
+                for m in _LANDSCAPE_ENTRIES_PROSE_RE.finditer(line):
+                    if int(m.group(1)) != landscape_count:
+                        errors.append(
+                            f"{rel} — prose says '{m.group(1)} entries' but the landscape "
+                            f"registry has {landscape_count} (data/federal-ai-landscape.yaml). "
+                            "Run `make generate` or fix the count (#184)."
+                        )
+            if controls_count is not None:
+                for m in _CONTROLS_PROSE_RE.finditer(line):
+                    if int(m.group(1)) != controls_count:
+                        errors.append(
+                            f"{rel} — prose says '{m.group(0).strip()}' but "
+                            f"{controls_count} controls are documented in "
+                            "docs/SECURITY-CONTROLS.md. Run `make generate` or fix the "
+                            "count (#184)."
+                        )
+
+    return errors, warnings
