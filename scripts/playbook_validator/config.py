@@ -81,6 +81,73 @@ def contract_version(frontmatter: dict) -> str | None:
     return version if isinstance(version, str) else None
 
 
+def contract_requires(frontmatter: dict) -> str | None:
+    """Return ``contract.requires_contract`` from parsed frontmatter, or None.
+
+    The range a project layer declares for which universal-contract versions it
+    is compatible with (#153). See ``version_satisfies`` for the grammar."""
+    req = contract_block(frontmatter).get(CONTRACT_REQUIRES_KEY)
+    return req if isinstance(req, str) else None
+
+
+# ── Contract version-range compatibility (#153) ──────────────────────
+#
+# A deliberately tiny, dependency-free semver comparator so the SAME logic can be
+# copied verbatim into the self-contained downstream probe (templates/
+# ensure-contract.py) — no `packaging`/`semver` import allowed there. Grammar
+# supported for `requires_contract`:
+#   ">=X.Y[.Z]"  ">X.Y[.Z]"  "<=..."  "<..."  "==X.Y[.Z]" / "=X.Y[.Z]"
+#   "^X.Y[.Z]"   (caret: same major, >= the given minor.patch; major 0 pins minor)
+#   "X.Y[.Z]"    (bare == exact)
+# Missing patch defaults to 0. Anything unparseable returns False (fail-closed).
+
+_VERSION_RE = re.compile(r"^\s*(\d+)\.(\d+)(?:\.(\d+))?\s*$")
+_RANGE_RE = re.compile(r"^\s*(>=|<=|>|<|==|=|\^)?\s*(\d+)\.(\d+)(?:\.(\d+))?\s*$")
+
+
+def _parse_version(text: str) -> tuple[int, int, int] | None:
+    m = _VERSION_RE.match(text or "")
+    if not m:
+        return None
+    return int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)
+
+
+def version_satisfies(version: str | None, requirement: str | None) -> bool:
+    """True if concrete ``version`` satisfies the ``requirement`` range (#153).
+
+    Fail-closed: a missing/malformed version or requirement returns False, so a
+    project can never be silently judged compatible with an unparseable pin.
+    """
+    ver = _parse_version(version or "")
+    if ver is None:
+        return False
+    m = _RANGE_RE.match(requirement or "")
+    if m is None:
+        return False
+    op = m.group(1) or "=="
+    req = (int(m.group(2)), int(m.group(3)), int(m.group(4) or 0))
+    if op in ("==", "="):
+        return ver == req
+    if op == ">=":
+        return ver >= req
+    if op == ">":
+        return ver > req
+    if op == "<=":
+        return ver <= req
+    if op == "<":
+        return ver < req
+    if op == "^":
+        # caret: same leading non-zero component; >= the given tuple.
+        if ver < req:
+            return False
+        if req[0] != 0:
+            return ver[0] == req[0]
+        if req[1] != 0:
+            return ver[0] == 0 and ver[1] == req[1]
+        return ver[0] == 0 and ver[1] == 0
+    return False
+
+
 # ── ADR (Decision Record) Schema ─────────────────────────────────────
 
 REQUIRED_ADR_FIELDS = frozenset({"title", "status", "date", "nist_controls"})

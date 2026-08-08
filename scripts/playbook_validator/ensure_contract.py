@@ -45,7 +45,13 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 
-from playbook_validator.config import CONTRACT_ROLE_UNIVERSAL, contract_role
+from playbook_validator.config import (
+    CONTRACT_ROLE_UNIVERSAL,
+    contract_requires,
+    contract_role,
+    contract_version,
+    version_satisfies,
+)
 from playbook_validator.frontmatter import extract_frontmatter, parse_frontmatter
 
 # ── Convention constants (single source of truth) ───────────────────────────
@@ -146,6 +152,59 @@ def _is_playbook_contract(path: Path) -> bool:
         return False
 
 
+def _text_version(text: str) -> str | None:
+    """The ``contract.version`` declared in raw Markdown ``text``, if any."""
+    return contract_version(parse_frontmatter(text))
+
+
+def _project_requires(repo_root: Path) -> str | None:
+    """The ``contract.requires_contract`` range the working project's own thin
+    AGENTS.md declares, if any. None when there is no project layer or no range.
+
+    This is the downstream project's compatibility demand against the universal
+    contract; ``ensure_contract`` checks the resolved contract's version against
+    it (#153)."""
+    project_agents = repo_root / CONTRACT_FILENAME
+    if not _is_present(project_agents):
+        return None
+    try:
+        fm = extract_frontmatter(project_agents)
+    except OSError:
+        return None
+    # Only a project-layer declares a requirement; the universal contract's own
+    # AGENTS.md (self-host case) has no requires_contract.
+    if contract_role(fm) == CONTRACT_ROLE_UNIVERSAL:
+        return None
+    return contract_requires(fm)
+
+
+def _compat_warning(repo_root: Path, contract_text: str | None) -> str | None:
+    """If the project declares ``requires_contract`` and the resolved contract's
+    version does NOT satisfy it, return an advisory string; else None (#153).
+
+    Advisory (warning, not a hard halt): the contract IS available — this only
+    flags a version-range mismatch the human should reconcile. Fail-closed
+    within its own scope: an unparseable version/range counts as unsatisfied."""
+    requirement = _project_requires(repo_root)
+    if requirement is None:
+        return None
+    available = _text_version(contract_text) if contract_text else None
+    if version_satisfies(available, requirement):
+        return None
+    return (
+        f"Contract version mismatch: this project requires "
+        f"'{requirement}' but the available universal contract is version "
+        f"{available or 'unknown'}. Update the contract or the project's "
+        "contract.requires_contract range (#153)."
+    )
+
+
+def _merge_warnings(*warnings: str | None) -> str | None:
+    """Join the non-empty warnings with a space, or None if all are empty."""
+    present = [w for w in warnings if w]
+    return " ".join(present) if present else None
+
+
 def _read_stamp_tag(stamp_path: Path) -> str | None:
     """Return the ``release_tag`` recorded in the cache stamp, if any."""
     if not stamp_path.is_file():
@@ -220,11 +279,16 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractRes
     # 1. Environment-provided home contract short-circuits everything.
     home_path = _home_contract_path()
     if _is_present(home_path):
+        try:
+            home_text = home_path.read_text(encoding="utf-8")
+        except OSError:
+            home_text = None
         return ContractResult(
             status=ContractStatus.HOME,
             ok=True,
             path=home_path,
             message=f"Universal contract present at {home_path}.",
+            warning=_compat_warning(repo_root, home_text),
         )
 
     cache_path = repo_root / CACHE_RELPATH
@@ -240,12 +304,16 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractRes
     # 2. Fresh cache (present and matching the pinned release tag).
     if _is_present(cache_path):
         if _read_stamp_tag(stamp_path) == PINNED_RELEASE_TAG:
+            try:
+                cache_text = cache_path.read_text(encoding="utf-8")
+            except OSError:
+                cache_text = None
             return ContractResult(
                 status=ContractStatus.CACHE_FRESH,
                 ok=True,
                 path=cache_path,
                 message=f"Universal contract present in cache ({cache_path}).",
-                warning=stale_warning,
+                warning=_merge_warnings(stale_warning, _compat_warning(repo_root, cache_text)),
             )
         # Cache exists but is behind the pinned release → try to refresh.
         if not allow_fetch:

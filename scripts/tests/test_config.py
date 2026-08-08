@@ -82,3 +82,61 @@ class TestValidators:
         assert is_valid_skill_name("-leading-hyphen") is False
         assert is_valid_skill_name("trailing-hyphen-") is False
         assert is_valid_skill_name("a" * 65) is False  # too long
+
+
+class TestVersionSatisfies:
+    """Dependency-free contract version-range comparator (#153)."""
+
+    def _vs(self):
+        from playbook_validator.config import version_satisfies
+
+        return version_satisfies
+
+    def test_gte_range(self):
+        vs = self._vs()
+        assert vs("1.0.0", ">=1.0") is True
+        assert vs("0.4.0", ">=1.0") is False  # the #191 case
+        assert vs("1.0.0", ">=1.0.0") is True
+
+    def test_gt_lt_lte(self):
+        vs = self._vs()
+        assert vs("1.2.0", ">1.0") is True
+        assert vs("1.0.0", ">1.0") is False
+        assert vs("1.0.0", "<=1.0") is True
+        assert vs("0.9.0", "<1.0") is True
+        assert vs("1.0.0", "<1.0") is False
+
+    def test_exact(self):
+        vs = self._vs()
+        assert vs("1.0.0", "==1.0.0") is True
+        assert vs("1.0.1", "==1.0.0") is False
+        assert vs("1.0.0", "=1.0") is True
+        assert vs("1.0.0", "1.0") is True  # bare == exact
+        assert vs("1.0.1", "1.0.0") is False
+
+    def test_caret(self):
+        vs = self._vs()
+        assert vs("1.5.0", "^1.0") is True
+        assert vs("2.0.0", "^1.0") is False
+        assert vs("1.0.0", "^1.2") is False  # below the floor
+        # major 0 pins the minor
+        assert vs("0.4.9", "^0.4") is True
+        assert vs("0.5.0", "^0.4") is False
+
+    def test_missing_patch_defaults_zero(self):
+        vs = self._vs()
+        assert vs("1.0", "1.0.0") is True
+        assert vs("1.0.0", "1.0") is True
+
+    def test_fail_closed_on_bad_input(self):
+        vs = self._vs()
+        assert vs(None, ">=1.0") is False
+        assert vs("1.0.0", None) is False
+        assert vs("1.0.0", "garbage") is False
+        assert vs("not-a-version", ">=1.0") is False
+        assert vs("", "") is False
+
+    def test_whitespace_tolerant(self):
+        vs = self._vs()
+        assert vs("1.0.0", ">= 1.0") is True
+        assert vs(" 1.0.0 ", ">=1.0") is True

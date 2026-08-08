@@ -42,7 +42,7 @@ import os
 import sys
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DEFAULT_HOME = Path.home() / ".agentic-coding-playbook"
@@ -59,6 +59,8 @@ STAMP_RELPATH = Path(".agents/cache/AGENTS.universal.stamp")
 CONTRACT_FIELD = "contract"
 CONTRACT_ROLE_KEY = "role"
 CONTRACT_ROLE_UNIVERSAL = "universal"
+CONTRACT_VERSION_KEY = "version"
+CONTRACT_REQUIRES_KEY = "requires_contract"
 
 # Pinned release the cache is fetched from and measured against. Hard-coded.
 PINNED_RELEASE_TAG = "v0.13.0"
@@ -132,6 +134,117 @@ def _is_playbook_contract(path: Path) -> bool:
         return False
 
 
+def _contract_child_value(text: str, child_key: str) -> str | None:
+    """Return the value of ``contract.<child_key>`` from raw frontmatter, or None.
+
+    Dependency-free block scan (same indentation approach as
+    ``_text_declares_universal``). Reads simple scalar children like ``version``
+    and ``requires_contract``. Sufficient for the single-level contract marker;
+    values are simple scalars, never nested."""
+    if not text.startswith("---"):
+        return None
+    end = text.find("\n---", 3)
+    if end == -1:
+        return None
+    in_contract = False
+    contract_indent = 0
+    for raw_line in text[4:end].splitlines():
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip())
+        stripped = raw_line.strip()
+        if not in_contract:
+            if stripped.rstrip() == f"{CONTRACT_FIELD}:":
+                in_contract = True
+                contract_indent = indent
+            continue
+        if indent <= contract_indent:
+            in_contract = False
+            if stripped.rstrip() == f"{CONTRACT_FIELD}:":
+                in_contract = True
+                contract_indent = indent
+            continue
+        key, sep, value = stripped.partition(":")
+        if sep and key.strip() == child_key:
+            return value.strip().strip("\"'") or None
+    return None
+
+
+# ── Version-range compatibility (#153) — MUST mirror config.version_satisfies ──
+# Dependency-free copy of the playbook's config.version_satisfies. Keep the two
+# in sync (the playbook is source of truth); a cross-probe parity test guards it.
+import re as _re  # noqa: E402  (local import to keep the stdlib header block intact)
+
+_VERSION_RE = _re.compile(r"^\s*(\d+)\.(\d+)(?:\.(\d+))?\s*$")
+_RANGE_RE = _re.compile(r"^\s*(>=|<=|>|<|==|=|\^)?\s*(\d+)\.(\d+)(?:\.(\d+))?\s*$")
+
+
+def _parse_version(text: str):
+    m = _VERSION_RE.match(text or "")
+    if not m:
+        return None
+    return int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)
+
+
+def _version_satisfies(version, requirement) -> bool:
+    """True if ``version`` satisfies the ``requirement`` range. Fail-closed on a
+    missing/malformed version or range. Mirrors config.version_satisfies (#153)."""
+    ver = _parse_version(version or "")
+    if ver is None:
+        return False
+    m = _RANGE_RE.match(requirement or "")
+    if m is None:
+        return False
+    op = m.group(1) or "=="
+    req = (int(m.group(2)), int(m.group(3)), int(m.group(4) or 0))
+    if op in ("==", "="):
+        return ver == req
+    if op == ">=":
+        return ver >= req
+    if op == ">":
+        return ver > req
+    if op == "<=":
+        return ver <= req
+    if op == "<":
+        return ver < req
+    if op == "^":
+        if ver < req:
+            return False
+        if req[0] != 0:
+            return ver[0] == req[0]
+        if req[1] != 0:
+            return ver[0] == 0 and ver[1] == req[1]
+        return ver[0] == 0 and ver[1] == 0
+    return False
+
+
+def _compat_warning(repo_root: Path, contract_text: str | None) -> str | None:
+    """If the project's own AGENTS.md declares ``contract.requires_contract`` and
+    the available contract's ``contract.version`` does NOT satisfy it, return an
+    advisory string; else None. Advisory, not a hard halt (#153)."""
+    project = repo_root / CONTRACT_FILENAME
+    if not _is_present(project):
+        return None
+    try:
+        project_text = project.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    if _text_declares_universal(project_text):  # the universal contract itself
+        return None
+    requirement = _contract_child_value(project_text, CONTRACT_REQUIRES_KEY)
+    if requirement is None:
+        return None
+    available = _contract_child_value(contract_text, CONTRACT_VERSION_KEY) if contract_text else None
+    if _version_satisfies(available, requirement):
+        return None
+    return (
+        f"WARNING: contract version mismatch — this project requires "
+        f"'{requirement}' but the available universal contract is version "
+        f"{available or 'unknown'}. Update the contract or the project's "
+        "contract.requires_contract range (#153)."
+    )
+
+
 def _read_stamp_tag(stamp_path: Path) -> str | None:
     if not stamp_path.is_file():
         return None
@@ -149,9 +262,7 @@ def _write_cache(cache_path: Path, stamp_path: Path, content: str) -> None:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(content, encoding="utf-8")
     stamp = (
-        f"source_url={CONTRACT_RAW_URL}\n"
-        f"release_tag={PINNED_RELEASE_TAG}\n"
-        f"fetched_at={datetime.now(timezone.utc).isoformat()}\n"
+        f"source_url={CONTRACT_RAW_URL}\nrelease_tag={PINNED_RELEASE_TAG}\nfetched_at={datetime.now(UTC).isoformat()}\n"
     )
     stamp_path.write_text(stamp, encoding="utf-8")
 
@@ -186,6 +297,13 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> int:
 
     home_path = _home_contract_path()
     if _is_present(home_path):
+        try:
+            home_text = home_path.read_text(encoding="utf-8")
+        except OSError:
+            home_text = None
+        compat = _compat_warning(repo_root, home_text)
+        if compat:
+            print(compat, file=sys.stderr)
         print(f"present-home: universal contract at {home_path}")
         return 0
 
@@ -201,6 +319,13 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> int:
     if _is_present(cache_path):
         if _read_stamp_tag(stamp_path) == PINNED_RELEASE_TAG:
             print(warn, file=sys.stderr)
+            try:
+                cache_text = cache_path.read_text(encoding="utf-8")
+            except OSError:
+                cache_text = None
+            compat = _compat_warning(repo_root, cache_text)
+            if compat:
+                print(compat, file=sys.stderr)
             print(f"present-cache-fresh: universal contract in cache ({cache_path})")
             return 0
         if not allow_fetch:
