@@ -344,3 +344,161 @@ class TestSecurityControlsCount:
         root = Path(__file__).resolve().parents[2]
         errors, _ = validate_security_controls_count(root)
         assert errors == [], f"live SECURITY-CONTROLS.md drift: {errors}"
+
+
+class TestCountDriftGuard:
+    """Guard that prose landscape/control counts match their source lists (#184)."""
+
+    def _setup(self, tmp_path, *, entries, controls, prose_files):
+        """Write a landscape YAML (entries), SECURITY-CONTROLS.md (controls),
+        and the given {relpath: text} prose files. Returns tmp_path (root)."""
+        data = tmp_path / "data"
+        data.mkdir(exist_ok=True)
+        entry_block = "\n".join(
+            f"  - id: e-{i}\n    title: T{i}\n    category: omb_memo\n"
+            f"    source: OMB\n    date: 2025-01-0{i % 9 + 1}\n    status: active\n"
+            f"    relevance: r\n    url: https://x/{i}"
+            for i in range(entries)
+        )
+        (data / "federal-ai-landscape.yaml").write_text(
+            f"version: '1'\ntotal_entries: {entries}\nentries:\n{entry_block}\n"
+        )
+        docs = tmp_path / "docs"
+        docs.mkdir(exist_ok=True)
+        rows = "\n".join(f"| **{c}** | Name | P1 | d | i | v | x |" for c in controls)
+        (docs / "SECURITY-CONTROLS.md").write_text(
+            f"---\ntitle: SC\nstatus: canonical\ntier: 1\n"
+            f"nist_controls: [{', '.join(repr(c) for c in controls)}]\n---\n"
+            f"# Controls\n\n{rows}\n"
+        )
+        for rel, text in prose_files.items():
+            p = tmp_path / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(text)
+        return tmp_path
+
+    def test_matching_counts_pass(self, tmp_path):
+        from playbook_validator.validate_docs import validate_count_drift
+
+        self._setup(
+            tmp_path,
+            entries=2,
+            controls=["AC-2", "AC-3"],
+            prose_files={
+                "README.md": "Full catalog of 2 federal AI guidance documents.\n"
+                "The landscape catalog has 2 entries.\n"
+                "We map 2 NIST 800-53 controls here.\n",
+            },
+        )
+        errors, _ = validate_count_drift(tmp_path)
+        assert errors == []
+
+    def test_stale_landscape_entries_fails(self, tmp_path):
+        from playbook_validator.validate_docs import validate_count_drift
+
+        # source has 2 entries; prose says 39 (the real drift this fixes)
+        self._setup(
+            tmp_path,
+            entries=2,
+            controls=["AC-2"],
+            prose_files={
+                "docs/README.md": "Federal AI guidance catalog (39 entries)\n",
+            },
+        )
+        errors, _ = validate_count_drift(tmp_path)
+        assert errors and "39 entries" in errors[0] and "2" in errors[0]
+
+    def test_stale_control_count_fails(self, tmp_path):
+        from playbook_validator.validate_docs import validate_count_drift
+
+        self._setup(
+            tmp_path,
+            entries=1,
+            controls=["AC-2", "AC-3"],
+            prose_files={
+                "README.md": "36 NIST 800-53 controls mapped\n",
+            },
+        )
+        errors, _ = validate_count_drift(tmp_path)
+        assert errors and "36" in errors[0] and "2 controls" in errors[0]
+
+    def test_framework_name_not_flagged(self, tmp_path):
+        """A bare 'NIST 800-53 controls' phrase (no tally) must NOT be flagged."""
+        from playbook_validator.validate_docs import validate_count_drift
+
+        self._setup(
+            tmp_path,
+            entries=1,
+            controls=["AC-2", "AC-3"],
+            prose_files={
+                "README.md": "Maps risks to NIST 800-53 controls.\n"
+                "cloud.gov inherits ~80% of NIST 800-53 controls.\n"
+                "NIST SP 800-53 Rev 5.2 controls (the compliance framework).\n",
+            },
+        )
+        errors, _ = validate_count_drift(tmp_path)
+        assert errors == []
+
+    def test_entries_outside_landscape_context_not_flagged(self, tmp_path):
+        """'N entries' without a landscape context word is ignored."""
+        from playbook_validator.validate_docs import validate_count_drift
+
+        self._setup(
+            tmp_path,
+            entries=2,
+            controls=["AC-2"],
+            prose_files={
+                "README.md": "The changelog has 99 entries.\n",
+            },
+        )
+        errors, _ = validate_count_drift(tmp_path)
+        assert errors == []
+
+    def test_real_repo_is_consistent(self):
+        """The live repo prose counts must pass after `make generate`."""
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import validate_count_drift
+
+        root = Path(__file__).resolve().parents[2]
+        errors, _ = validate_count_drift(root)
+        assert errors == [], f"live count drift: {errors}"
+
+
+class TestUpdateHardcodedCounts:
+    """Guard the generator rewrites the right count spans and nothing else (#184)."""
+
+    def _setup(self, tmp_path, *, entries, controls):
+        data = tmp_path / "data"
+        data.mkdir(exist_ok=True)
+        entry_block = "\n".join(f"  - id: e-{i}\n    title: T{i}" for i in range(entries))
+        (data / "federal-ai-landscape.yaml").write_text(
+            f"version: '1'\ntotal_entries: {entries}\nentries:\n{entry_block}\n"
+        )
+        docs = tmp_path / "docs"
+        docs.mkdir(exist_ok=True)
+        rows = "\n".join(f"| **{c}** | N | P1 | d | i | v | x |" for c in controls)
+        (docs / "SECURITY-CONTROLS.md").write_text(f"---\ntitle: SC\nstatus: canonical\ntier: 1\n---\n# C\n\n{rows}\n")
+
+    def test_rewrites_stale_counts(self, tmp_path, monkeypatch):
+        from playbook_validator import index_updaters
+
+        self._setup(tmp_path, entries=42, controls=["AC-2", "AC-3", "CM-6"])
+        readme = tmp_path / "README.md"
+        readme.write_text(
+            "Catalog of 39 federal AI guidance documents.\n"
+            "The landscape has 39 entries.\n"
+            "We document 36 NIST 800-53 controls.\n"
+            "Framework: NIST 800-53 controls apply.\n"  # must NOT change
+        )
+        # No test-count subprocess in the unit test.
+        monkeypatch.setattr(index_updaters, "_collect_test_count", lambda root: None)
+        index_updaters.update_hardcoded_counts(tmp_path, None, [])
+        out = readme.read_text()
+        assert "42 federal AI guidance" in out
+        assert "42 entries" in out
+        assert "3 NIST 800-53 controls" in out
+        # the bare framework phrase is untouched
+        assert "Framework: NIST 800-53 controls apply." in out
+        # the standard's own number is never mangled
+        assert "800-53" in out and "800-3" not in out
