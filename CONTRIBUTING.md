@@ -118,7 +118,7 @@ dependencies: []
 NIST controls are referenced in three places:
 
 1. **AGENTS.md** — frontmatter `nist_controls` array + inline `<!-- NIST: XX-N -->` comments
-1. **docs/SECURITY-CONTROLS.md** — the master control overlay (36 controls mapped)
+1. **docs/SECURITY-CONTROLS.md** — the master control overlay (35 controls mapped)
 1. **docs/TRACEABILITY.md** — bidirectional control-to-document matrix
 
 To update a mapping:
