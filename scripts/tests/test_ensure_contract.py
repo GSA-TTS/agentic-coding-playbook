@@ -341,3 +341,108 @@ def test_copied_probe_accepts_universal_contract(repo, tmp_path):
     empty_home = tmp_path / "copied-empty-home2"
     empty_home.mkdir()
     assert _run_copied_probe(repo, empty_home) == 0
+
+
+# ── 10. requires_contract version-range compatibility (#153) ──────────────────
+
+import importlib.util  # noqa: E402
+
+
+def _load_copied_probe():
+    """Import templates/ensure-contract.py as a module to unit-test its
+    dependency-free helpers directly."""
+    spec = importlib.util.spec_from_file_location(
+        "copied_ensure_contract_153", PLAYBOOK_ROOT / "templates" / "ensure-contract.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _write_project_layer(repo: Path, requires: str | None) -> None:
+    repo.mkdir(parents=True, exist_ok=True)
+    fm = "---\ntitle: p\ndescription: d\nstatus: canonical\ntier: 3\ncontract:\n  role: project-layer\n"
+    if requires is not None:
+        fm += f'  requires_contract: "{requires}"\n'
+    fm += "---\n# Project layer\n"
+    (repo / "AGENTS.md").write_text(fm)
+
+
+def _write_home_contract(home_dir: Path, version: str) -> Path:
+    home = home_dir / ".agentic-coding-playbook"
+    home.mkdir(parents=True, exist_ok=True)
+    (home / "AGENTS.md").write_text(
+        f'---\ntitle: u\ncontract:\n  role: universal\n  version: "{version}"\n---\n'
+        "# AGENTS.md — Federal AI Agent Behavioral Best Practices\n"
+    )
+    return home
+
+
+def test_requires_satisfied_no_warning(repo, tmp_path, monkeypatch):
+    """Project requires >=1.0, home contract is 1.0.0 → ok, no compat warning."""
+    _write_project_layer(repo, ">=1.0")
+    home = _write_home_contract(tmp_path / "h1", "1.0.0")
+    monkeypatch.setenv(ec.HOME_OVERRIDE_ENV, str(home))
+    result = ensure_contract(repo, allow_fetch=False)
+    assert result.ok is True
+    assert result.status == ContractStatus.HOME
+    assert result.warning is None
+
+
+def test_requires_unsatisfied_warns_but_ok(repo, tmp_path, monkeypatch):
+    """Project requires >=1.0, home contract is 0.4.0 → ok (present) BUT a
+    compat warning fires (the #153 signal; #191 was exactly this drift)."""
+    _write_project_layer(repo, ">=1.0")
+    home = _write_home_contract(tmp_path / "h2", "0.4.0")
+    monkeypatch.setenv(ec.HOME_OVERRIDE_ENV, str(home))
+    result = ensure_contract(repo, allow_fetch=False)
+    assert result.ok is True
+    assert result.warning and "requires" in result.warning and "0.4.0" in result.warning
+
+
+def test_no_requires_no_warning(repo, tmp_path, monkeypatch):
+    """A project with no requires_contract never gets a compat warning."""
+    _write_project_layer(repo, None)
+    home = _write_home_contract(tmp_path / "h3", "0.4.0")
+    monkeypatch.setenv(ec.HOME_OVERRIDE_ENV, str(home))
+    result = ensure_contract(repo, allow_fetch=False)
+    assert result.ok is True
+    assert result.warning is None
+
+
+def test_caret_range_unsatisfied_warns(repo, tmp_path, monkeypatch):
+    """Caret range enforced: requires ^1.0, contract 2.0.0 → warning."""
+    _write_project_layer(repo, "^1.0")
+    home = _write_home_contract(tmp_path / "h4", "2.0.0")
+    monkeypatch.setenv(ec.HOME_OVERRIDE_ENV, str(home))
+    result = ensure_contract(repo, allow_fetch=False)
+    assert result.warning and "^1.0" in result.warning
+
+
+def test_comparator_parity_module_vs_copied():
+    """#153/#154: the copied probe's _version_satisfies MUST return the same
+    verdict as the module config.version_satisfies for every combination —
+    they are duplicated (copied probe is dependency-free) and must not drift."""
+    import itertools
+
+    from playbook_validator.config import version_satisfies as module_vs
+
+    copied = _load_copied_probe()
+    versions = [None, "", "1.0.0", "0.4.0", "1.0", "1.2.3", "2.0.0", "0.5.0", "bad"]
+    ranges = [
+        None,
+        "",
+        ">=1.0",
+        ">1.0",
+        "<=1.0",
+        "<1.0",
+        "==1.0.0",
+        "=1.0",
+        "^1.0",
+        "^0.4",
+        "1.0.0",
+        "garbage",
+        ">= 1.0",
+    ]
+    for v, r in itertools.product(versions, ranges):
+        assert copied._version_satisfies(v, r) == module_vs(v, r), f"comparator divergence on ({v!r}, {r!r})"
