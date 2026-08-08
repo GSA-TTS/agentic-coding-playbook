@@ -741,3 +741,135 @@ class TestLandscapeDocGuard:
         )
         errors = validate_landscape_doc_summary(tmp_path)
         assert errors and "out of sync" in errors[0]
+
+
+# ── TRACEABILITY §1 matrix generation + guard (#197) ──────────────────────────
+
+
+class TestTraceabilityMatrix:
+    _HDR = (
+        "| Control | Name | AGENTS.md | docs/CODING_PRACTICES.md | "
+        "SECURITY-CONTROLS.md | AGENT-IDENTITY.md | Checklist |\n"
+        "|---|---|---|---|---|---|---|\n"
+    )
+
+    def _setup(self, root, *, names, agents_controls, coding_controls):
+        (root / "data").mkdir(exist_ok=True)
+        import json as _json
+
+        (root / "data" / "nist-800-53-control-names.json").write_text(
+            _json.dumps({"_provenance": {}, "controls": names})
+        )
+        (root / "docs").mkdir(exist_ok=True)
+
+        def _doc(path, controls):
+            arr = ", ".join(f'"{c}"' for c in controls)
+            path.write_text(f"---\ntitle: t\nstatus: canonical\ntier: 1\nnist_controls: [{arr}]\n---\n# x\n")
+
+        _doc(root / "AGENTS.md", agents_controls)
+        _doc(root / "docs" / "CODING_PRACTICES.md", coding_controls)
+        _doc(root / "docs" / "SECURITY-CONTROLS.md", [])
+        _doc(root / "docs" / "AGENT-IDENTITY.md", [])
+
+    def test_rowset_is_union_sorted(self, tmp_path):
+        from playbook_validator.index_updaters import compute_traceability_rows
+
+        self._setup(
+            tmp_path,
+            names={
+                "AC-2": "Account Management",
+                "AC-12": "Session Termination",
+                "SI-10": "Information Input Validation",
+            },
+            agents_controls=["AC-2", "SI-10"],
+            coding_controls=["AC-12", "AC-2"],
+        )
+        ids, names = compute_traceability_rows(tmp_path)
+        # union, family-alpha then numeric (AC-2 before AC-12)
+        assert ids == ["AC-2", "AC-12", "SI-10"]
+        assert names["SI-10"] == "Information Input Validation"
+
+    def test_names_from_oscal_map(self, tmp_path):
+        from playbook_validator.index_updaters import (
+            compute_traceability_rows,
+            render_traceability_matrix,
+        )
+
+        self._setup(
+            tmp_path,
+            names={"SI-10": "Information Input Validation"},
+            agents_controls=["SI-10"],
+            coding_controls=[],
+        )
+        ids, names = compute_traceability_rows(tmp_path)
+        table = render_traceability_matrix(ids, names, {"SI-10": ["§5.1", "§2", "§3.9", "—", "3.1"]})
+        assert "| SI-10 | Information Input Validation | §5.1 | §2 | §3.9 | — | 3.1 |" in table
+
+    def test_editorial_cells_preserved(self, tmp_path):
+        from playbook_validator.index_updaters import (
+            render_traceability_matrix,
+        )
+
+        # a control with no editorial entry gets all em dashes
+        table = render_traceability_matrix(["AC-2"], {"AC-2": "Account Management"}, {})
+        assert "| AC-2 | Account Management | — | — | — | — | — |" in table
+
+    def test_missing_oscal_map_returns_none(self, tmp_path):
+        from playbook_validator.index_updaters import compute_traceability_rows
+
+        (tmp_path / "AGENTS.md").write_text(
+            '---\ntitle: t\nstatus: canonical\ntier: 1\nnist_controls: ["AC-2"]\n---\n# x\n'
+        )
+        assert compute_traceability_rows(tmp_path) is None
+
+    def test_guard_flags_wrong_name(self, tmp_path):
+        from playbook_validator.validate_docs import _validate_traceability_matrix
+
+        self._setup(
+            tmp_path,
+            names={"AC-2": "Account Management"},
+            agents_controls=["AC-2"],
+            coding_controls=[],
+        )
+        (tmp_path / "docs" / "TRACEABILITY.md").write_text(
+            "# T\n\n<!-- GENERATED:TRACEABILITY_MATRIX:START -->\n"
+            + self._HDR
+            + "| AC-2 | WRONG NAME | — | — | — | — | — |\n"
+            "<!-- GENERATED:TRACEABILITY_MATRIX:END -->\n"
+        )
+        errors = _validate_traceability_matrix(tmp_path)
+        assert errors and "AC-2" in errors[0] and "Account Management" in errors[0]
+
+    def test_guard_flags_missing_control(self, tmp_path):
+        from playbook_validator.validate_docs import _validate_traceability_matrix
+
+        self._setup(
+            tmp_path,
+            names={"AC-2": "Account Management", "AC-3": "Access Enforcement"},
+            agents_controls=["AC-2", "AC-3"],
+            coding_controls=[],
+        )
+        (tmp_path / "docs" / "TRACEABILITY.md").write_text(
+            "# T\n\n<!-- GENERATED:TRACEABILITY_MATRIX:START -->\n"
+            + self._HDR
+            + "| AC-2 | Account Management | — | — | — | — | — |\n"  # AC-3 missing
+            "<!-- GENERATED:TRACEABILITY_MATRIX:END -->\n"
+        )
+        errors = _validate_traceability_matrix(tmp_path)
+        assert errors and "control set is out of sync" in errors[0]
+
+
+class TestOscalControlNames:
+    def test_derive_map_skips_enhancements(self):
+        from pathlib import Path
+
+        from playbook_validator.index_updaters import load_oscal_control_names
+
+        # sanity on the real committed map: base controls only, known values
+        root = Path(__file__).resolve().parents[2]
+        names = load_oscal_control_names(root)
+        assert names is not None
+        assert names["SI-10"] == "Information Input Validation"
+        assert names["SR-3"] == "Supply Chain Controls and Processes"
+        # no enhancement ids like AC-2.1 leaked in
+        assert not any("." in cid for cid in names)
