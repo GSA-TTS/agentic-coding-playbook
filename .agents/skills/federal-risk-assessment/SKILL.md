@@ -14,7 +14,7 @@ dependencies: []
 # Federal Risk Assessment
 
 This skill walks users through the risk assessment template from
-`templates/risk-assessment.md` interactively, helping them complete each
+`docs/risk-assessment.md` interactively, helping them complete each
 section with context-appropriate guidance.
 
 ## When to Use
@@ -26,7 +26,7 @@ section with context-appropriate guidance.
 
 ## How It Works
 
-Read `templates/risk-assessment.md` first to discover the current worksheet structure
+Read `docs/risk-assessment.md` first to discover the current worksheet structure
 (sections, capabilities, data types, threats, control areas). Then guide the user
 through each section, explain what's needed, ask questions, and fill in the template.
 
@@ -65,7 +65,7 @@ Then walk through the capabilities checklist:
 
 > "Which of these capabilities will the agent use in this project? (Yes/No for each)"
 
-Present the capabilities from `templates/risk-assessment.md` Section 2
+Present the capabilities from `docs/risk-assessment.md` Section 2
 (Agent Capabilities Inventory). Read the template to discover the current list.
 For each capability, ask Yes/No.
 
@@ -78,12 +78,12 @@ Present the data types table and ask for each:
 > "For each data type, tell me if it's present in the system, its classification,
 > and whether the agent needs access to it."
 
-Walk through the data types listed in `templates/risk-assessment.md` Section 3
+Walk through the data types listed in `docs/risk-assessment.md` Section 3
 (Data Classification). Read the template to discover the current list.
 
 #### 3.2 Data Flow
 
-For each data destination in `templates/risk-assessment.md` Section 3.2
+For each data destination in `docs/risk-assessment.md` Section 3.2
 (Data Flow), ask if it's authorized and encrypted.
 
 ### Section 4: Threat Analysis
@@ -112,7 +112,7 @@ After completing all threats, summarize with the risk tolerance table:
 
 ### Section 5: Control Assessment
 
-Walk through the control areas listed in `templates/risk-assessment.md` Section 5
+Walk through the control areas listed in `docs/risk-assessment.md` Section 5
 (Control Implementation Status). Read the template to discover the current list.
 
 > "For each control area, what's the current implementation status?"
@@ -162,5 +162,5 @@ signed by the System Owner and ISSO before it becomes part of the ATO documentat
 - The completed assessment is a **draft** requiring human review and sign-off.
 - Risk scores are based on the user's input — the agent does not override or second-guess ratings.
 - Threat descriptions are pre-filled from OWASP and NIST sources. See `references/THREAT_CATALOG.md`.
-- The full template is at `templates/risk-assessment.md`. This skill makes it interactive, it does not change the template structure.
-- **Policy reference:** `templates/risk-assessment.md` (template), `docs/SECURITY-CONTROLS.md` (control guidance).
+- The full template is at `docs/risk-assessment.md`. This skill makes it interactive, it does not change the template structure.
+- **Policy reference:** `docs/risk-assessment.md` (template), `docs/SECURITY-CONTROLS.md` (control guidance).

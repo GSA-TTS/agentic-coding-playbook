@@ -168,5 +168,5 @@ with references to the relevant policy documents (use the
 - The reviewer MUST NOT be the same person who directed the agent (per checklist instructions).
 - Automated checks are best-effort — tool availability varies by environment.
 - The automated checks (`make pre-deploy`) are read-only. They do not modify files, install packages, or make network calls.
-- All 60 items trace back to NIST SP 800-53 controls via `docs/TRACEABILITY.md` Table 3.
-- **Policy reference:** `checklists/pre-deployment.md` for the full checklist, `docs/TRACEABILITY.md` for control mappings.
+- All 60 items trace back to NIST SP 800-53 controls via the playbook's traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) Table 3.
+- **Policy reference:** `checklists/pre-deployment.md` for the full checklist; the playbook traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) for control mappings.
