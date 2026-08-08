@@ -402,6 +402,7 @@ def generate_index(root: Path) -> None:
         update_landscape_summary,
         update_phase_mapping,
         update_roadmap_metrics,
+        update_traceability_matrix,
     )
 
     documents = collect_documents(root)
@@ -422,6 +423,7 @@ def generate_index(root: Path) -> None:
     update_landscape_summary(root)
     update_phase_mapping(root)
     update_roadmap_metrics(root, stats)
+    update_traceability_matrix(root)
 
     print(
         f"Generated INDEX.yaml "
