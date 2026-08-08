@@ -15,14 +15,20 @@ Long-term plan for making the Agentic Coding Playbook a living, learnable resour
 
 ## Current State (v0.6.0)
 
+<!-- GENERATED:ROADMAP_METRICS:START — do not edit, run: make generate -->
 | Metric | Count |
 |--------|-------|
-| Documents | 20 |
+| Documents | 23 |
 | Skills | 12 |
-| Tests | 285 |
+| Tests | 445 |
 | Checklist items | 62 |
-| Landscape entries | 39 |
-| NIST controls mapped | 55 |
+| Landscape entries | 42 |
+| NIST controls mapped | 35 |
+<!-- GENERATED:ROADMAP_METRICS:END -->
+
+> These counts are generated from the repository's own sources (`INDEX.yaml`
+> stats, `data/federal-ai-landscape.yaml`, `docs/SECURITY-CONTROLS.md`, the
+> checklist, and pytest collection) by `make generate` — do not hand-edit.
 
 The playbook covers the full SDLC from project planning through deployment and continuous monitoring. All content is model-agnostic (AGENTS.md standard, 25+ tools).
 
