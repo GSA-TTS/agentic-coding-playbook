@@ -399,6 +399,7 @@ def generate_index(root: Path) -> None:
         render_skills_table,
         update_context_guide_word_counts,
         update_doc_inventory,
+        update_framework_refs,
         update_hardcoded_counts,
         update_landscape_summary,
         update_phase_mapping,
@@ -426,6 +427,7 @@ def generate_index(root: Path) -> None:
     update_roadmap_metrics(root, stats)
     update_traceability_matrix(root)
     update_doc_inventory(root)
+    update_framework_refs(root)
 
     print(
         f"Generated INDEX.yaml "

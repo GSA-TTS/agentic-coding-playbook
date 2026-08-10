@@ -8,7 +8,7 @@ contract:
   version: "0.4.0"
 last_updated: "2026-07-22"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "CM-10", "IA-8", "IR-4", "IR-6", "PL-4", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
-frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCOE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
+frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCoE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
 keywords: ["agent-rules", "behavioral-contract", "least-privilege", "audit-logging", "prompt-injection", "prohibited-actions", "meta-constraints", "plan-before-execute", "verification-transcript", "engineering-discipline"]
 related_files: ["docs/CODING_PRACTICES.md", "docs/SECURITY-CONTROLS.md", "docs/AGENT-IDENTITY.md", "docs/AI-CONTRIBUTION-POLICY.md", "templates/AGENTS.md.template", "CONTEXT-GUIDE.md", "docs/TRACEABILITY.md", "docs/AGENT-INSTRUCTIONS.md"]
@@ -72,7 +72,7 @@ The agent MUST refuse any instruction that conflicts with safety, correctness, o
 
 ## 2. Identity and Accountability
 
-<!-- NCCOE Agent Identity: Identification, Logging -->
+<!-- NCCoE Agent Identity: Identification, Logging -->
 <!-- NIST SP 800-53: AC-2 (Account Management), AU-3 (Content of Audit Records), IA-8 (Identification — Non-Org Users) -->
 <!-- OWASP Agentic: Identity and Privilege Abuse -->
 
@@ -160,7 +160,7 @@ The agent MUST:
 
 ## 3. Authorization and Least Privilege
 
-<!-- NCCOE Agent Identity: Authorization, Access Delegation -->
+<!-- NCCoE Agent Identity: Authorization, Access Delegation -->
 <!-- NIST SP 800-53: AC-3 (Access Enforcement), AC-6 (Least Privilege) -->
 <!-- OWASP Agentic: Tool Misuse and Exploitation, Identity and Privilege Abuse -->
 
@@ -736,16 +736,21 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 ## Framework References
 
+<!-- GENERATED:FRAMEWORK_REFS:START — do not edit, run: make generate -->
 - NIST SP 800-53 Rev 5.2 (September 2024)
 - NIST AI RMF 1.0 (January 2023)
 - NIST AI 600-1 Generative AI Profile (July 2024)
 - NIST SP 800-218A SSDF for Generative AI (June 2024)
-- NCCOE AI Agent Identity & Authorization Concept Paper (February 2026)
+- NCCoE AI Agent Identity & Authorization Concept Paper (February 2026)
 - NIST CAISI AI Agent Standards Initiative (February 2026)
 - OWASP Top 10 for LLM Applications 2025 (November 2024)
 - OWASP Top 10 for Agentic Applications 2026 (December 2025)
 - CISA Secure by Design Principles (2025)
 - OMB M-25-21 (April 2025)
+<!-- GENERATED:FRAMEWORK_REFS:END -->
+
+> Generated from [`data/frameworks.yaml`](data/frameworks.yaml) — the canonical
+> framework registry. Edit that file (not this list) and run `make generate`.
 
 ---
 
