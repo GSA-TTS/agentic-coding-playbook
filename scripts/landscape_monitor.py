@@ -42,19 +42,53 @@ RSS_FEEDS = [
     },
     {
         "name": "Federal Register - AI",
-        "url": "https://www.federalregister.gov/api/v1/documents.rss?conditions%5Bterm%5D=artificial+intelligence",
+        # Scoped query (#182): restrict to the document types that carry AI
+        # governance (presidential documents, rules, proposed rules, notices)
+        # rather than an unscoped free-text term match that also returns grant
+        # notices, meeting announcements, and export bulletins. `per_page`
+        # bounds the response; `order=newest` keeps the most recent first.
+        "url": (
+            "https://www.federalregister.gov/api/v1/documents.rss"
+            "?conditions%5Bterm%5D=artificial+intelligence"
+            "&conditions%5Btype%5D%5B%5D=PRESDOCU"
+            "&conditions%5Btype%5D%5B%5D=RULE"
+            "&conditions%5Btype%5D%5B%5D=PRORULE"
+            "&conditions%5Btype%5D%5B%5D=NOTICE"
+            "&order=newest&per_page=50"
+        ),
         "category_hint": "legislation",
     },
 ]
 
-# Keywords that indicate AI-related content
+# Strong AI-governance signal (#182). A single loose token like a bare "AI",
+# "ML", or "algorithm" is NOT enough on its own — those matched grant notices,
+# committee announcements, and unrelated rules. An item is surfaced only if its
+# title+summary matches one of these specific phrases. (A bare-token secondary
+# pass is applied ONLY to feeds already scoped to an AI/NIST source; see
+# `_is_ai_relevant`.)
 AI_KEYWORDS = re.compile(
-    r"\b(artificial intelligence|AI|machine learning|ML|"
-    r"large language model|LLM|generative AI|foundation model|"
-    r"neural network|deep learning|algorithm|automated decision|"
-    r"NIST AI|AI RMF|agentic)\b",
+    r"\b("
+    r"artificial intelligence|"
+    r"machine learning|"
+    r"large language model|LLM|"
+    r"generative AI|gen(?:erative)?\s?AI|"
+    r"foundation model|frontier model|"
+    r"neural network|deep learning|"
+    r"automated decision|automated decision-?making|"
+    r"NIST AI|AI RMF|AI risk management|"
+    r"agentic|AI safety|AI governance|"
+    r"algorithmic (?:accountability|impact|bias)"
+    r")\b",
     re.IGNORECASE,
 )
+
+# Weak tokens that only count when the feed is ALREADY AI/NIST-scoped by source
+# (e.g. the NIST CSRC feed). On the broad Federal Register feed a bare "AI"/"ML"
+# is too noisy to surface on its own.
+_WEAK_AI_TOKENS = re.compile(r"\b(AI|ML|algorithm)\b")
+# Feeds whose SOURCE already narrows the topic — the weak token pass is allowed
+# for these because the surrounding corpus is on-topic.
+_SOURCE_SCOPED_FEEDS = frozenset({"NIST CSRC"})
 
 # How far back to look in RSS feeds (days)
 LOOKBACK_DAYS = 90
@@ -152,6 +186,19 @@ def load_registry(path: Path) -> tuple[list[RegistryEntry], dict[str, RegistryEn
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+def _is_ai_relevant(text: str, source: str) -> bool:
+    """True if ``text`` (title+summary) is AI-governance relevant for ``source``.
+
+    Precision gate for #182: a strong-phrase match always qualifies. A weak bare
+    token ("AI"/"ML"/"algorithm") qualifies ONLY when the feed source is already
+    topic-scoped (e.g. NIST CSRC), so the broad Federal Register feed no longer
+    surfaces grant notices / meeting announcements that merely contain "AI".
+    """
+    if AI_KEYWORDS.search(text):
+        return True
+    return source in _SOURCE_SCOPED_FEEDS and bool(_WEAK_AI_TOKENS.search(text))
+
+
 def fetch_rss_feeds(feeds: list[dict[str, str]]) -> list[RSSEntry]:
     """Fetch and parse RSS feeds, filtering for AI-related content."""
     if not FEEDPARSER_AVAILABLE:
@@ -184,9 +231,9 @@ def fetch_rss_feeds(feeds: list[dict[str, str]]) -> list[RSSEntry]:
                 summary = getattr(item, "summary", "")
                 link = getattr(item, "link", "")
 
-                # Filter for AI-related content
+                # Filter for AI-related content (source-aware precision, #182)
                 text_to_check = f"{title} {summary}"
-                if not AI_KEYWORDS.search(text_to_check):
+                if not _is_ai_relevant(text_to_check, feed_config["name"]):
                     continue
 
                 entries.append(

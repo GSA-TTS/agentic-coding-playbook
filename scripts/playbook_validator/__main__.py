@@ -25,6 +25,7 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
     from playbook_validator.validate_docs import (
         find_content_files,
         validate_contract_role,
+        validate_count_drift,
         validate_doc_frontmatter,
         validate_security_controls_count,
     )
@@ -63,6 +64,16 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
         print(f"WARNING: {w}")
     if not sc_errors:
         print("  OK: SECURITY-CONTROLS.md frontmatter count matches documented control rows")
+
+    print("\n=== Prose Count-Drift Guard ===")
+    cd_errors, cd_warnings = validate_count_drift(root)
+    for e in cd_errors:
+        print(f"ERROR: {e}")
+        total_errors += 1
+    for w in cd_warnings:
+        print(f"WARNING: {w}")
+    if not cd_errors:
+        print("  OK: prose landscape/control counts match their source lists")
 
     print(f"\n=== Summary ===\nErrors: {total_errors}")
     if total_errors > 0:
