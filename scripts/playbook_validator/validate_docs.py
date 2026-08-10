@@ -396,7 +396,32 @@ def validate_count_drift(root: Path) -> tuple[list[str], list[str]]:
 
     errors += _validate_roadmap_metrics(root)
     errors += _validate_doc_inventory(root)
+    errors += _validate_llms_txt(root)
     return errors, warnings
+
+
+def _validate_llms_txt(root: Path) -> list[str]:
+    """Guard the generated repo-root llms.txt against INDEX.yaml (#212).
+
+    Fully-generated file — fail closed if it is missing or out of sync. No-op
+    only when INDEX.yaml itself is absent (nothing to generate from).
+    """
+    index_path = root / "INDEX.yaml"
+    if not index_path.is_file():
+        return []
+    llms = root / "llms.txt"
+    if not llms.is_file():
+        return ["llms.txt is missing. Run `make generate` (#212)."]
+
+    import yaml
+
+    from playbook_validator.index_updaters import render_llms_txt
+
+    index = yaml.safe_load(index_path.read_text(encoding="utf-8")) or {}
+    expected = render_llms_txt(index)
+    if llms.read_text(encoding="utf-8") != expected:
+        return ["llms.txt is out of sync with INDEX.yaml. Run `make generate` (#212)."]
+    return []
 
 
 def _validate_doc_inventory(root: Path) -> list[str]:

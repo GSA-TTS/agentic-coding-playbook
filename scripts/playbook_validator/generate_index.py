@@ -401,6 +401,7 @@ def generate_index(root: Path) -> None:
         update_doc_inventory,
         update_hardcoded_counts,
         update_landscape_summary,
+        update_llms_txt,
         update_phase_mapping,
         update_roadmap_metrics,
     )
@@ -424,6 +425,7 @@ def generate_index(root: Path) -> None:
     update_phase_mapping(root)
     update_roadmap_metrics(root, stats)
     update_doc_inventory(root)
+    update_llms_txt(root)
 
     print(
         f"Generated INDEX.yaml "

@@ -811,3 +811,89 @@ class TestDocInventory:
 
         root = Path(__file__).resolve().parents[2]
         assert _validate_doc_inventory(root) == []
+
+
+# ── Repo-root llms.txt generation + guard (#212) ──────────────────────────────
+
+
+class TestLlmsTxt:
+    def _index(self):
+        return {
+            "repo": "GSA-TTS/agentic-coding-playbook",
+            "scope": "FIPS Moderate | Single-agent",
+            "documents": [
+                {"path": "AGENTS.md", "title": "Agent Rules", "description": "Behavioral contract.", "tier": 1},
+                {"path": "docs/SETUP.md", "title": "Setup", "description": "How to set up.", "tier": 2},
+                {"path": "AGENTS.md.older", "title": "Older", "description": "", "tier": 1},
+            ],
+        }
+
+    def test_render_structure_and_sort(self):
+        from playbook_validator.index_updaters import render_llms_txt
+
+        out = render_llms_txt(self._index())
+        assert out.startswith("<!-- GENERATED")
+        assert "# agentic-coding-playbook" in out
+        assert "> Federal AI agent behavioral playbook" in out
+        assert "[llms.txt](https://llmstxt.org/)" in out
+        # tier headings
+        assert "## Core (always load)" in out
+        assert "## Supporting" in out
+        # tier-1 entries sorted by path (AGENTS.md before AGENTS.md.older)
+        core = out.split("## Core (always load)", 1)[1].split("## Supporting", 1)[0]
+        assert core.index("(AGENTS.md)") < core.index("(AGENTS.md.older)")
+        # link format with + without description
+        assert "- [Agent Rules](AGENTS.md): Behavioral contract." in out
+        assert "- [Older](AGENTS.md.older)\n" in out
+        # data section
+        assert "[INDEX.yaml](INDEX.yaml)" in out
+        assert out.endswith("\n")
+
+    def test_update_writes_file(self, tmp_path):
+        import yaml as _yaml
+        from playbook_validator.index_updaters import update_llms_txt
+
+        (tmp_path / "INDEX.yaml").write_text(_yaml.safe_dump(self._index()))
+        update_llms_txt(tmp_path)
+        assert (tmp_path / "llms.txt").is_file()
+        assert "# agentic-coding-playbook" in (tmp_path / "llms.txt").read_text()
+
+    def test_update_noop_without_index(self, tmp_path):
+        from playbook_validator.index_updaters import update_llms_txt
+
+        update_llms_txt(tmp_path)  # no INDEX.yaml
+        assert not (tmp_path / "llms.txt").exists()
+
+    def test_guard_flags_missing(self, tmp_path):
+        import yaml as _yaml
+        from playbook_validator.validate_docs import _validate_llms_txt
+
+        (tmp_path / "INDEX.yaml").write_text(_yaml.safe_dump(self._index()))
+        errors = _validate_llms_txt(tmp_path)
+        assert errors and "missing" in errors[0]
+
+    def test_guard_flags_drift(self, tmp_path):
+        import yaml as _yaml
+        from playbook_validator.validate_docs import _validate_llms_txt
+
+        (tmp_path / "INDEX.yaml").write_text(_yaml.safe_dump(self._index()))
+        (tmp_path / "llms.txt").write_text("stale content\n")
+        errors = _validate_llms_txt(tmp_path)
+        assert errors and "out of sync" in errors[0]
+
+    def test_guard_passes_when_synced(self, tmp_path):
+        import yaml as _yaml
+        from playbook_validator.index_updaters import update_llms_txt
+        from playbook_validator.validate_docs import _validate_llms_txt
+
+        (tmp_path / "INDEX.yaml").write_text(_yaml.safe_dump(self._index()))
+        update_llms_txt(tmp_path)
+        assert _validate_llms_txt(tmp_path) == []
+
+    def test_real_repo_llms_txt_consistent(self):
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import _validate_llms_txt
+
+        root = Path(__file__).resolve().parents[2]
+        assert _validate_llms_txt(root) == []
