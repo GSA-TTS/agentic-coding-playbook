@@ -62,9 +62,7 @@ DOWNSTREAM_SKILLS = (
     "code-review",
     "federal-decision-records",
     "federal-pre-deployment-check",
-    "federal-repo-setup",
     "federal-risk-assessment",
-    "federal-security-controls-lookup",
 )
 
 # Excluded (playbook-operational) skills, kept explicit for the e2e test and
@@ -73,6 +71,14 @@ EXCLUDED_SKILLS = (
     "federal-agents-config",
     "federal-landscape-update",
     "project-bootstrap",
+    # Playbook-doc NAVIGATORS (#189): these skills exist to navigate the
+    # playbook's own reference docs (federal-security-controls-lookup reads
+    # docs/TRACEABILITY.md + INDEX.yaml; federal-repo-setup converts
+    # docs/GETTING-STARTED.md). Those docs are playbook-only and not copied
+    # downstream, so the skills are inert / dangling in a bootstrapped project.
+    # A downstream project consults the playbook directly instead.
+    "federal-security-controls-lookup",
+    "federal-repo-setup",
 )
 
 # Git-ignore entries written into the bootstrapped project so the fallback
