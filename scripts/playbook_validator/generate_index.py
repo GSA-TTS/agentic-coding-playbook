@@ -398,6 +398,7 @@ def generate_index(root: Path) -> None:
         inject_readme_table,
         render_skills_table,
         update_context_guide_word_counts,
+        update_doc_inventory,
         update_hardcoded_counts,
         update_landscape_summary,
         update_phase_mapping,
@@ -422,6 +423,7 @@ def generate_index(root: Path) -> None:
     update_landscape_summary(root)
     update_phase_mapping(root)
     update_roadmap_metrics(root, stats)
+    update_doc_inventory(root)
 
     print(
         f"Generated INDEX.yaml "
