@@ -207,4 +207,5 @@ Present the generated index to the user.
   not break compatibility with MADR tooling.
 - **Policy references:** `AGENTS.md` (agent decisions), `docs/CODING_PRACTICES.md`
   (coding decisions), `docs/SECURITY-CONTROLS.md` (control guidance),
-  `docs/TRACEABILITY.md` (control mappings).
+  the playbook's control-mapping matrix (docs/TRACEABILITY.md in the
+  agentic-coding-playbook repo).
