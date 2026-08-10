@@ -27,6 +27,7 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
         validate_contract_role,
         validate_count_drift,
         validate_doc_frontmatter,
+        validate_frontmatter_crosswalk,
         validate_security_controls_count,
     )
 
@@ -74,6 +75,16 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
         print(f"WARNING: {w}")
     if not cd_errors:
         print("  OK: prose landscape/control counts match their source lists")
+
+    print("\n=== Frontmatter Standards Crosswalk ===")
+    cw_errors, cw_warnings = validate_frontmatter_crosswalk(root)
+    for e in cw_errors:
+        print(f"ERROR: {e}")
+        total_errors += 1
+    for w in cw_warnings:
+        print(f"WARNING: {w}")
+    if not cw_errors:
+        print("  OK: every frontmatter_schema key is crosswalked to Dublin Core / schema.org")
 
     print(f"\n=== Summary ===\nErrors: {total_errors}")
     if total_errors > 0:
