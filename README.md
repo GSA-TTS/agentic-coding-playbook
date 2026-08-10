@@ -96,7 +96,7 @@ See [ADR-0002](./docs/decisions/0002-universal-vs-project-agents-md.md) and
 | Role | Start Here |
 |------|-----------|
 | **Developer** using an AI agent | [PLAYBOOK.md](./PLAYBOOK.md) — step-by-step from setup to deploy |
-| **ISSO / Security Officer** | [docs/SECURITY-CONTROLS.md](./docs/SECURITY-CONTROLS.md) — 36 NIST 800-53 controls mapped |
+| **ISSO / Security Officer** | [docs/SECURITY-CONTROLS.md](./docs/SECURITY-CONTROLS.md) — 35 NIST 800-53 controls mapped |
 | **Manager** approving AI agent use | [AGENTS.md](./AGENTS.md) sections 1-3 — principles, identity, authorization |
 | **AI Agent** reading this repo | [CONTEXT-GUIDE.md](./CONTEXT-GUIDE.md) — tells you what to load for your task |
 | **Contributor** | [CONTRIBUTING.md](./CONTRIBUTING.md) — commit conventions, skill format, review process |
@@ -146,7 +146,7 @@ Skills convert best practices into step-by-step workflows that any AI coding age
 
 ## Developer Tools
 
-All validation and generation tools live in the `scripts/playbook_validator/` Python package (416 tests).
+All validation and generation tools live in the `scripts/playbook_validator/` Python package (439 tests).
 
 ```bash
 make help              # Show all available commands
@@ -204,13 +204,13 @@ agentic-coding-playbook/
 ├── docs/
 │   ├── AGENT-INSTRUCTIONS.md        # Detailed tooling reference
 │   ├── CODING_PRACTICES.md          # Secure coding standards
-│   ├── SECURITY-CONTROLS.md         # 36 NIST 800-53 controls mapped
+│   ├── SECURITY-CONTROLS.md         # 35 NIST 800-53 controls mapped
 │   ├── FEDERAL-AI-LANDSCAPE.md      # Federal AI guidance catalog
 │   └── ...                          # See docs/README.md for full index
 ├── data/
 │   └── federal-ai-landscape.yaml    # Machine-readable guidance registry
 ├── scripts/
-│   ├── playbook_validator/          # Python validation package (416 tests)
+│   ├── playbook_validator/          # Python validation package (439 tests)
 │   └── tests/                       # TDD test suite
 ├── skills/                          # 12 executable compliance procedures
 ├── templates/                       # PROJECT_PLAN.md, AGENTS.md.template
