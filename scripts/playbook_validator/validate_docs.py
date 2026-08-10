@@ -425,3 +425,43 @@ def _check_contract_version_consistency(universal: Path, fm: dict) -> list[str]:
             f"contract.version ({fm_version!r}); reconcile the two (#191)."
         )
     return errors
+
+
+def validate_frontmatter_crosswalk(root: Path) -> tuple[list[str], list[str]]:
+    """Every INDEX.yaml frontmatter_schema key must be crosswalked (#209, ADR 0004).
+
+    Keeps `data/frontmatter-crosswalk.yaml` in sync with the declared schema so a
+    newly-added frontmatter key must be mapped to its Dublin Core / schema.org
+    equivalent deliberately, rather than drifting outside any standard. No-op if
+    either file is absent. Fails closed on a schema key with no crosswalk entry.
+    """
+    import yaml
+
+    index_path = root / "INDEX.yaml"
+    crosswalk_path = root / "data" / "frontmatter-crosswalk.yaml"
+    if not index_path.is_file() or not crosswalk_path.is_file():
+        return [], []
+
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    index = yaml.safe_load(index_path.read_text(encoding="utf-8")) or {}
+    schema = index.get("frontmatter_schema", {}) or {}
+    schema_keys = set(schema.get("required", []) or []) | set(schema.get("optional", []) or [])
+
+    crosswalk = yaml.safe_load(crosswalk_path.read_text(encoding="utf-8")) or {}
+    mapped_keys = {entry.get("key") for entry in (crosswalk.get("crosswalk", []) or []) if isinstance(entry, dict)}
+
+    for key in sorted(schema_keys - mapped_keys):
+        errors.append(
+            f"data/frontmatter-crosswalk.yaml — frontmatter key '{key}' is declared in "
+            "INDEX.yaml frontmatter_schema but has no crosswalk entry. Add its Dublin "
+            "Core / schema.org mapping (#209, ADR 0004)."
+        )
+    for key in sorted(mapped_keys - schema_keys):
+        warnings.append(
+            f"data/frontmatter-crosswalk.yaml — crosswalk entry '{key}' is not in "
+            "INDEX.yaml frontmatter_schema (stale mapping?)."
+        )
+
+    return errors, warnings

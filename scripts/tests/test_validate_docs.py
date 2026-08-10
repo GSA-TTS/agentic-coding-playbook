@@ -623,3 +623,74 @@ class TestDocFreshness:
             errors, _ = validate_doc_frontmatter(f)
             date_errors = [e for e in errors if "must be ISO" in e]
             assert date_errors == [], f"malformed date in {f}: {date_errors}"
+
+
+class TestFrontmatterCrosswalk:
+    """Guard that every frontmatter_schema key is crosswalked (#209, ADR 0004)."""
+
+    def _setup(self, tmp_path, *, schema_keys, crosswalk_keys):
+        import yaml as _yaml
+
+        (tmp_path / "INDEX.yaml").write_text(
+            _yaml.safe_dump(
+                {
+                    "frontmatter_schema": {
+                        "required": list(schema_keys[:2]),
+                        "optional": list(schema_keys[2:]),
+                    }
+                }
+            )
+        )
+        (tmp_path / "data").mkdir(exist_ok=True)
+        (tmp_path / "data" / "frontmatter-crosswalk.yaml").write_text(
+            _yaml.safe_dump({"version": "1.0", "crosswalk": [{"key": k} for k in crosswalk_keys]})
+        )
+
+    def test_all_keys_mapped_passes(self, tmp_path):
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        self._setup(
+            tmp_path,
+            schema_keys=["title", "description", "status", "tier"],
+            crosswalk_keys=["title", "description", "status", "tier"],
+        )
+        errors, _ = validate_frontmatter_crosswalk(tmp_path)
+        assert errors == []
+
+    def test_unmapped_schema_key_fails(self, tmp_path):
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        self._setup(
+            tmp_path,
+            schema_keys=["title", "description", "status", "newkey"],
+            crosswalk_keys=["title", "description", "status"],  # newkey missing
+        )
+        errors, _ = validate_frontmatter_crosswalk(tmp_path)
+        assert errors and "newkey" in errors[0] and "no crosswalk entry" in errors[0]
+
+    def test_stale_crosswalk_entry_warns(self, tmp_path):
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        self._setup(
+            tmp_path,
+            schema_keys=["title", "description"],
+            crosswalk_keys=["title", "description", "gone"],  # gone not in schema
+        )
+        errors, warnings = validate_frontmatter_crosswalk(tmp_path)
+        assert errors == []
+        assert any("gone" in w for w in warnings)
+
+    def test_noop_without_files(self, tmp_path):
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        errors, warnings = validate_frontmatter_crosswalk(tmp_path)
+        assert errors == [] and warnings == []
+
+    def test_real_repo_crosswalk_complete(self):
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        root = Path(__file__).resolve().parents[2]
+        errors, _ = validate_frontmatter_crosswalk(root)
+        assert errors == [], f"live crosswalk gap: {errors}"
