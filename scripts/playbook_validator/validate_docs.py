@@ -4,6 +4,7 @@ Validates that all content Markdown files have correct frontmatter
 with required fields and valid enum values.
 """
 
+import datetime
 import re
 from pathlib import Path
 
@@ -131,7 +132,73 @@ def validate_doc_frontmatter(path: Path) -> tuple[list[str], list[str]]:
                 if vval is not None and (not isinstance(vval, str) or not vval.strip()):
                     errors.append(f"{path} — contract.{vkey} must be a non-empty string")
 
+    _validate_freshness(path, fm, errors, warnings)
+
     return errors, warnings
+
+
+# Freshness fields (#210). Dates are ISO YYYY-MM-DD. `review_cycle` → max age in
+# days used to DERIVE staleness from `last_updated` when no explicit `stale_after`
+# is set. Staleness is a WARNING (content present, just due for review); a
+# malformed date is an ERROR (fail closed — a bad date must never read as fresh).
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_REVIEW_CYCLE_DAYS = {"quarterly": 90, "semi-annually": 182, "annually": 365}
+
+
+def _parse_iso_date(value: str) -> datetime.date | None:
+    if not isinstance(value, str) or not _ISO_DATE_RE.match(value.strip()):
+        return None
+    try:
+        return datetime.date.fromisoformat(value.strip())
+    except ValueError:
+        return None
+
+
+def _validate_freshness(path: Path, fm: dict, errors: list[str], warnings: list[str]) -> None:
+    """Validate last_updated / stale_after formats and surface staleness (#210).
+
+    - `last_updated` and `stale_after`, when present, MUST be ISO YYYY-MM-DD;
+      a malformed value is an ERROR (fail closed).
+    - If `stale_after` is set and today >= it → WARNING.
+    - Else if `last_updated` + `review_cycle` max-age is exceeded → WARNING.
+    Staleness is advisory (warning), never a hard failure — the doc still exists.
+    """
+    today = datetime.date.today()
+
+    raw_updated = fm.get("last_updated")
+    updated: datetime.date | None = None
+    if raw_updated is not None:
+        updated = _parse_iso_date(str(raw_updated))
+        if updated is None:
+            errors.append(f"{path} — last_updated must be ISO YYYY-MM-DD (got {raw_updated!r})")
+
+    raw_stale = fm.get("stale_after")
+    stale_after: datetime.date | None = None
+    if raw_stale is not None:
+        stale_after = _parse_iso_date(str(raw_stale))
+        if stale_after is None:
+            errors.append(f"{path} — stale_after must be ISO YYYY-MM-DD (got {raw_stale!r})")
+
+    if stale_after is not None:
+        if today >= stale_after:
+            warnings.append(
+                f"{path} — content is stale: stale_after {stale_after.isoformat()} has passed; "
+                "review and refresh, then bump last_updated / stale_after (#210)."
+            )
+        return  # explicit stale_after takes precedence over derived staleness
+
+    # Derived staleness from last_updated + review_cycle (the prose rule in
+    # AGENTS.md §13.1, now enforced as a warning).
+    cycle = fm.get("review_cycle")
+    if updated is not None and cycle in _REVIEW_CYCLE_DAYS:
+        max_age = datetime.timedelta(days=_REVIEW_CYCLE_DAYS[cycle])
+        if today - updated > max_age:
+            age_days = (today - updated).days
+            warnings.append(
+                f"{path} — likely stale: last_updated {updated.isoformat()} is {age_days} days "
+                f"old, exceeding the {cycle} review cycle ({_REVIEW_CYCLE_DAYS[cycle]} days). "
+                "Review and bump last_updated, or set stale_after (#210)."
+            )
 
 
 # Control-overlay body rows look like: | **AC-2** | Account Management | ...

@@ -525,7 +525,7 @@ The agent MUST:
 - Not create new content files without adding corresponding frontmatter
 
 The agent SHOULD:
-- Flag documents where `last_updated` exceeds the `review_cycle` (e.g., quarterly = 90 days stale)
+- Flag documents where `last_updated` exceeds the `review_cycle` (e.g., quarterly = 90 days stale). `validate-docs` now enforces this as a warning, and an optional `stale_after` frontmatter date (ISO `YYYY-MM-DD`) sets an explicit expiry that takes precedence over the derived cadence.
 - Suggest updating `INDEX.yaml` when new content files are created
 - Warn when `related_files` references point to non-existent paths
 

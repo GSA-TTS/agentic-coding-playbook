@@ -502,3 +502,76 @@ class TestUpdateHardcodedCounts:
         assert "Framework: NIST 800-53 controls apply." in out
         # the standard's own number is never mangled
         assert "800-53" in out and "800-3" not in out
+
+
+class TestDocFreshness:
+    """stale_after + derived staleness + date-format validation (#210)."""
+
+    def _write(self, tmp_path, fm_lines):
+        p = tmp_path / "d.md"
+        body = "---\ntitle: t\ndescription: d\nstatus: canonical\ntier: 1\n" + fm_lines + "---\n# x\n"
+        p.write_text(body)
+        return p
+
+    def _check(self, tmp_path, fm_lines):
+        from playbook_validator.validate_docs import validate_doc_frontmatter
+
+        return validate_doc_frontmatter(self._write(tmp_path, fm_lines))
+
+    def test_fresh_doc_no_warning(self, tmp_path):
+        import datetime
+
+        recent = (datetime.date.today() - datetime.timedelta(days=5)).isoformat()
+        errors, warnings = self._check(tmp_path, f'last_updated: "{recent}"\nreview_cycle: quarterly\n')
+        assert errors == [] and warnings == []
+
+    def test_derived_staleness_warns(self, tmp_path):
+        import datetime
+
+        old = (datetime.date.today() - datetime.timedelta(days=200)).isoformat()
+        errors, warnings = self._check(tmp_path, f'last_updated: "{old}"\nreview_cycle: quarterly\n')
+        assert errors == []
+        assert warnings and "likely stale" in warnings[0] and "#210" in warnings[0]
+
+    def test_stale_after_passed_warns(self, tmp_path):
+        errors, warnings = self._check(tmp_path, 'stale_after: "2020-01-01"\n')
+        assert errors == []
+        assert warnings and "stale" in warnings[0]
+
+    def test_stale_after_future_no_warning(self, tmp_path):
+        errors, warnings = self._check(tmp_path, 'stale_after: "2999-01-01"\n')
+        assert errors == [] and warnings == []
+
+    def test_stale_after_precedence_over_derived(self, tmp_path):
+        import datetime
+
+        # last_updated is ancient (would derive-warn) but stale_after is future → no warn
+        old = (datetime.date.today() - datetime.timedelta(days=999)).isoformat()
+        errors, warnings = self._check(
+            tmp_path, f'last_updated: "{old}"\nreview_cycle: quarterly\nstale_after: "2999-01-01"\n'
+        )
+        assert errors == [] and warnings == []
+
+    def test_malformed_last_updated_is_error(self, tmp_path):
+        errors, _ = self._check(tmp_path, 'last_updated: "July 2026"\n')
+        assert any("last_updated must be ISO" in e for e in errors)
+
+    def test_malformed_stale_after_is_error(self, tmp_path):
+        errors, _ = self._check(tmp_path, 'stale_after: "2026-13-99"\n')
+        assert any("stale_after must be ISO" in e for e in errors)
+
+    def test_no_freshness_fields_ok(self, tmp_path):
+        errors, warnings = self._check(tmp_path, "")
+        assert errors == [] and warnings == []
+
+    def test_real_repo_no_malformed_dates(self):
+        """Live docs must have no malformed last_updated/stale_after (errors)."""
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import find_content_files, validate_doc_frontmatter
+
+        root = Path(__file__).resolve().parents[2]
+        for f in find_content_files(root):
+            errors, _ = validate_doc_frontmatter(f)
+            date_errors = [e for e in errors if "must be ISO" in e]
+            assert date_errors == [], f"malformed date in {f}: {date_errors}"
