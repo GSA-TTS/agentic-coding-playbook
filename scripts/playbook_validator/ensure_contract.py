@@ -51,7 +51,7 @@ from playbook_validator.frontmatter import extract_frontmatter, parse_frontmatte
 # ── Convention constants (single source of truth) ───────────────────────────
 
 # Environment-agnostic canonical home for the universal contract. Any provider
-# (the sbx mixin kit, a dotfiles setup, a manual clone) may satisfy it.
+# (the acq provisioning kit, a dotfiles setup, a manual clone) may satisfy it.
 DEFAULT_HOME = Path.home() / ".agentic-coding-playbook"
 HOME_OVERRIDE_ENV = "AGENTIC_CODING_PLAYBOOK_HOME"
 CONTRACT_FILENAME = "AGENTS.md"
@@ -232,8 +232,8 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractRes
     stale_warning = (
         "Using a cached copy of the universal contract "
         f"({cache_path}). This is a fallback — the canonical way to provide it "
-        "is documented in the project README (agentic-coding-patterns sbx "
-        "mixin kit). Remove the cache once your environment provides the "
+        "is documented in the project README (agentic-coding-patterns acq "
+        "provisioning kit). Remove the cache once your environment provides the "
         "contract at the home path."
     )
 
@@ -279,6 +279,6 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractRes
             "Universal behavioral contract is NOT available and could not be "
             f"obtained. Expected at {home_path} (or the git-ignored cache). "
             "Do NOT proceed. Provide the contract per the project README "
-            "(agentic-coding-patterns sbx mixin kit), then retry."
+            "(agentic-coding-patterns acq provisioning kit), then retry."
         ),
     )

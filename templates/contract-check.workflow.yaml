@@ -29,7 +29,7 @@ jobs:
 
       # Provide the universal contract to the environment. Replace this step
       # with your organization's standard provisioning (e.g. the
-      # agentic-coding-patterns sbx mixin kit). The probe then verifies offline.
+      # agentic-coding-patterns acq provisioning kit). The probe then verifies offline.
       - name: Provision universal behavioral contract
         run: |
           mkdir -p "$HOME/.agentic-coding-playbook"

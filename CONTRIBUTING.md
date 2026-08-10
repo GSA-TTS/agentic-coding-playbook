@@ -171,47 +171,59 @@ These hooks run automatically on `git commit` and check for:
 
 **CI enforces the same checks** via `make ci`, so hooks are not required — they just provide faster feedback during local development.
 
-#### Working in SBX Containers
+#### Working in a Sandbox Backend
 
-Most users will be working **inside Docker SBX containers** per the [Quickstart guidance](https://github.com/GSA-TTS/agentic-coding-quickstart). This creates additional considerations for pre-commit hooks.
+Most contributors work **inside a sandbox backend** provisioned via the
+[`acq` wrapper](https://github.com/GSA-TTS/agentic-coding-quickstart) — `acq`
+selects the active backend (currently **SBX** or **MSB**; more may be added),
+so the commands below are backend-agnostic. This creates additional
+considerations for pre-commit hooks.
 
-**Installing the pre-commit tools in a container:**
+**Installing the pre-commit tools in a sandbox:**
 
-When you run `make setup` or `make install-hooks` inside an SBX container, the pre-commit tools are installed in that container's environment:
+When you run `make setup` or `make install-hooks` inside a sandbox, the
+pre-commit tools are installed in that sandbox's environment:
 
 ```bash
-sbx exec <sandbox-name> make install-hooks
+acq exec <sandbox-name> make install-hooks
 ```
+
+> `acq exec` routes to whichever backend is active. If you are calling a
+> backend CLI directly instead of through `acq`, substitute its exec command
+> (e.g. `sbx exec …` for the SBX backend).
 
 **Two workflows for committing changes:**
 
-**Workflow A: Edit in container, verify in container, commit on host**
-1. Edit files inside the SBX container
-2. Run `make ci` inside the container to verify all checks pass
-3. Exit the container and commit from your host machine
+**Workflow A: Edit in the sandbox, verify in the sandbox, commit on host**
+1. Edit files inside the sandbox
+2. Run `make ci` inside the sandbox to verify all checks pass
+3. Exit the sandbox and commit from your host machine
 4. Pre-commit hooks (if installed on host) will run again on commit
 
 This workflow is recommended because:
-- Keeps git history on the host (persistent across container restarts)
+- Keeps git history on the host (persistent across sandbox restarts)
 - Verifies changes in the same environment where they'll run in CI
-- No risk of losing commits when containers are destroyed
+- No risk of losing commits when sandboxes are destroyed
 
-**Workflow B: Edit in container, install hooks in container, commit in container**
-1. Edit files inside the SBX container
-2. Install pre-commit hooks inside the container: `make install-hooks`
-3. Commit changes inside the container
+**Workflow B: Edit in the sandbox, install hooks in the sandbox, commit in the sandbox**
+1. Edit files inside the sandbox
+2. Install pre-commit hooks inside the sandbox: `make install-hooks`
+3. Commit changes inside the sandbox
 
-**Important:** SBX containers are ephemeral. If the container is destroyed or recreated, any hooks installed inside it will be lost. You'll need to re-run `make install-hooks` in the new container.
+**Important:** Sandboxes are ephemeral. If the sandbox is destroyed or
+recreated, any hooks installed inside it will be lost. You'll need to re-run
+`make install-hooks` in the new sandbox.
 
 **Recommended practice:**
 
-Before committing on your host machine, verify changes in the container first:
+Before committing on your host machine, verify changes in the sandbox first:
 
 ```bash
-sbx exec <sandbox-name> make ci
+acq exec <sandbox-name> make ci
 ```
 
-This ensures all checks pass in the standardized SBX environment before you commit. CI will run the same checks, so catching issues early saves time.
+This ensures all checks pass in the standardized sandbox environment before you
+commit. CI will run the same checks, so catching issues early saves time.
 
 ## Before Every PR
 
