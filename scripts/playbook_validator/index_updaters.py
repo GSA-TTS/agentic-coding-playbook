@@ -384,6 +384,68 @@ def update_traceability_matrix(root: Path) -> None:
     splice_generated_block(root / _TRACEABILITY_REL, "TRACEABILITY_MATRIX", table)
 
 
+# ── Neutral document inventory (#199) ─────────────────────────────────
+#
+# A single generated "all documents" table sourced from INDEX.yaml — the
+# machine inventory. Per the #199 consensus, this does NOT collapse the three
+# distinct tier taxonomies (INDEX machine-inventory `tier`, docs/README human
+# onboarding order, CONTEXT-GUIDE context-budget loading): those are different
+# semantic axes and stay independently curated. This neutral inventory is the
+# de-drift win — one generated list of every doc with its INDEX tier + purpose —
+# without flattening the editorial views. It lives at the end of docs/README.md
+# under GENERATED:DOC_INVENTORY markers.
+
+_DOC_INVENTORY_REL = "docs/README.md"
+
+
+def _load_index_documents(root: Path) -> list[dict] | None:
+    """Return INDEX.yaml's `documents` list (path/title/description/tier/…), or None."""
+    index = root / "INDEX.yaml"
+    if not index.is_file():
+        return None
+    import yaml
+
+    data = yaml.safe_load(index.read_text(encoding="utf-8")) or {}
+    docs = data.get("documents")
+    return docs if isinstance(docs, list) else None
+
+
+def render_doc_inventory_table(documents: list[dict]) -> str:
+    """Render the neutral all-documents inventory table from INDEX docs (#199).
+
+    Columns: Document (path), Tier (INDEX machine tier), Purpose (INDEX
+    description). Sorted by tier then path for a stable, diffable order.
+    """
+    rows = sorted(
+        documents,
+        key=lambda d: (d.get("tier", 99), str(d.get("path", ""))),
+    )
+    lines = [
+        "| Document | Tier | Purpose |",
+        "|----------|------|---------|",
+    ]
+    for doc in rows:
+        path = str(doc.get("path", "")).strip()
+        tier = doc.get("tier", "—")
+        # description is the INDEX machine description; collapse whitespace.
+        purpose = " ".join(str(doc.get("description", "")).split())
+        lines.append(f"| `{path}` | {tier} | {purpose} |")
+    return "\n".join(lines)
+
+
+def update_doc_inventory(root: Path) -> None:
+    """Regenerate the neutral document inventory in docs/README.md (#199).
+
+    No-op if the GENERATED:DOC_INVENTORY markers or INDEX.yaml are absent. The
+    hand-curated tier tables above the markers are untouched.
+    """
+    documents = _load_index_documents(root)
+    if documents is None:
+        return
+    table = render_doc_inventory_table(documents)
+    splice_generated_block(root / _DOC_INVENTORY_REL, "DOC_INVENTORY", table)
+
+
 # ── CONTEXT-GUIDE word counts ─────────────────────────────────────────
 
 

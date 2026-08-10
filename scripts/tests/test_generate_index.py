@@ -873,3 +873,76 @@ class TestOscalControlNames:
         assert names["SR-3"] == "Supply Chain Controls and Processes"
         # no enhancement ids like AC-2.1 leaked in
         assert not any("." in cid for cid in names)
+
+
+# ── Neutral document inventory generation + guard (#199) ──────────────────────
+
+
+class TestDocInventory:
+    def _write_index(self, root, docs):
+        import yaml as _yaml
+
+        (root / "INDEX.yaml").write_text(_yaml.safe_dump({"documents": docs}))
+
+    def test_render_sorts_by_tier_then_path(self):
+        from playbook_validator.index_updaters import render_doc_inventory_table
+
+        docs = [
+            {"path": "docs/z.md", "tier": 2, "description": "Zed"},
+            {"path": "AGENTS.md", "tier": 1, "description": "Contract"},
+            {"path": "docs/a.md", "tier": 1, "description": "Ay"},
+        ]
+        table = render_doc_inventory_table(docs)
+        lines = [ln for ln in table.splitlines() if ln.startswith("| `")]
+        assert lines[0].startswith("| `AGENTS.md` | 1 |")
+        assert lines[1].startswith("| `docs/a.md` | 1 |")
+        assert lines[2].startswith("| `docs/z.md` | 2 |")
+
+    def test_description_whitespace_collapsed(self):
+        from playbook_validator.index_updaters import render_doc_inventory_table
+
+        table = render_doc_inventory_table([{"path": "x.md", "tier": 1, "description": "multi\n  line   desc"}])
+        assert "| `x.md` | 1 | multi line desc |" in table
+
+    def test_update_is_noop_without_markers(self, tmp_path):
+        from playbook_validator.index_updaters import update_doc_inventory
+
+        self._write_index(tmp_path, [{"path": "a.md", "tier": 1, "description": "d"}])
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "README.md").write_text("# no markers here\n")
+        update_doc_inventory(tmp_path)  # must not raise / not add anything
+        assert "GENERATED:DOC_INVENTORY" not in (tmp_path / "docs" / "README.md").read_text()
+
+    def test_update_fills_marked_block(self, tmp_path):
+        from playbook_validator.index_updaters import update_doc_inventory
+
+        self._write_index(tmp_path, [{"path": "AGENTS.md", "tier": 1, "description": "Contract"}])
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "README.md").write_text(
+            "# R\n\n<!-- GENERATED:DOC_INVENTORY:START -->\nold\n<!-- GENERATED:DOC_INVENTORY:END -->\n"
+        )
+        update_doc_inventory(tmp_path)
+        out = (tmp_path / "docs" / "README.md").read_text()
+        assert "| `AGENTS.md` | 1 | Contract |" in out
+
+    def test_guard_flags_drift(self, tmp_path):
+        from playbook_validator.validate_docs import _validate_doc_inventory
+
+        self._write_index(tmp_path, [{"path": "AGENTS.md", "tier": 1, "description": "Contract"}])
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "README.md").write_text(
+            "# R\n\n<!-- GENERATED:DOC_INVENTORY:START -->\n"
+            "| Document | Tier | Purpose |\n|----------|------|---------|\n"
+            "| `AGENTS.md` | 9 | Contract |\n"  # wrong tier
+            "<!-- GENERATED:DOC_INVENTORY:END -->\n"
+        )
+        errors = _validate_doc_inventory(tmp_path)
+        assert errors and "out of sync" in errors[0]
+
+    def test_real_repo_inventory_consistent(self):
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import _validate_doc_inventory
+
+        root = Path(__file__).resolve().parents[2]
+        assert _validate_doc_inventory(root) == []
