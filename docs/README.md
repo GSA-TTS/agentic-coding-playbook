@@ -18,7 +18,7 @@ Canonical index of all documentation in the agentic-coding-playbook.
 |----------|-------------|
 | [SECURITY-CONTROLS.md](SECURITY-CONTROLS.md) | NIST 800-53 Rev 5 control overlay (35 controls mapped) |
 | [AGENT-IDENTITY.md](AGENT-IDENTITY.md) | Authentication, authorization, RBAC for AI agents |
-| [FEDERAL-AI-LANDSCAPE.md](FEDERAL-AI-LANDSCAPE.md) | Federal AI guidance catalog (39 entries) |
+| [FEDERAL-AI-LANDSCAPE.md](FEDERAL-AI-LANDSCAPE.md) | Federal AI guidance catalog (42 entries) |
 
 ## Tier 3 — Reference
 
