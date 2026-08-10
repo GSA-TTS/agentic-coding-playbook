@@ -42,7 +42,7 @@ import os
 import sys
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DEFAULT_HOME = Path.home() / ".agentic-coding-playbook"
@@ -79,14 +79,44 @@ def _is_present(path: Path) -> bool:
         return False
 
 
+def _role_from_flow_mapping(value: str) -> str | None:
+    """Extract ``role`` from an inline flow mapping like ``{role: universal}``.
+
+    Returns the (unquoted) role string, or None if ``value`` is not a brace-
+    delimited flow mapping. Dependency-free — a small comma-split of the inner
+    ``k: v`` pairs, sufficient for the single-level ``contract`` marker (values
+    are simple scalars, never nested braces).
+    """
+    value = value.strip()
+    if not (value.startswith("{") and value.endswith("}")):
+        return None
+    for pair in value[1:-1].split(","):
+        key, sep, val = pair.partition(":")
+        if sep and key.strip().strip("\"'") == CONTRACT_ROLE_KEY:
+            return val.strip().strip("\"'")
+    return None
+
+
 def _text_declares_universal(text: str) -> bool:
     """True if raw Markdown ``text`` declares ``contract.role: universal`` in its
     frontmatter.
 
-    Dependency-free: scans the leading ``---`` fenced block for the nested
-    ``contract:`` mapping and its ``role:`` child, tracking indentation, rather
-    than importing a YAML parser. Sufficient for the single structured marker we
-    care about; mirrors the playbook's typed frontmatter read.
+    Dependency-free: scans the leading ``---`` fenced block for the ``contract``
+    mapping and its ``role`` child, tracking indentation, rather than importing a
+    YAML parser. Recognizes BOTH YAML forms the module probe (``yaml.safe_load``)
+    accepts, so the two probes agree (#154):
+
+    - block mapping::
+
+          contract:
+            role: universal
+
+    - inline flow mapping::
+
+          contract: {role: universal}
+
+    Sufficient for the single structured marker we care about; mirrors the
+    playbook's typed frontmatter read.
     """
     if not text.startswith("---"):
         return False
@@ -101,13 +131,19 @@ def _text_declares_universal(text: str) -> bool:
         indent = len(raw_line) - len(raw_line.lstrip())
         stripped = raw_line.strip()
         if not in_contract:
+            role = _contract_line_role(stripped)
+            if role is not None:  # inline flow mapping on the `contract:` line
+                return role == CONTRACT_ROLE_UNIVERSAL
             if stripped.rstrip() == f"{CONTRACT_FIELD}:":
                 in_contract = True
                 contract_indent = indent
             continue
-        # Inside the contract: block; a line at or below its indent ends it.
+        # Inside a block contract:; a line at or below its indent ends it.
         if indent <= contract_indent:
             in_contract = False
+            role = _contract_line_role(stripped)
+            if role is not None:
+                return role == CONTRACT_ROLE_UNIVERSAL
             if stripped.rstrip() == f"{CONTRACT_FIELD}:":
                 in_contract = True
                 contract_indent = indent
@@ -116,6 +152,20 @@ def _text_declares_universal(text: str) -> bool:
         if sep and key.strip() == CONTRACT_ROLE_KEY:
             return value.strip().strip("\"'") == CONTRACT_ROLE_UNIVERSAL
     return False
+
+
+def _contract_line_role(stripped: str) -> str | None:
+    """If ``stripped`` is an inline ``contract: {role: ...}`` line, return the
+    role; otherwise None. Keeps the flow-mapping branch out of the main loop.
+
+    Requires the YAML-mandated space after ``contract:`` before the flow
+    mapping (``contract: {...}``); ``contract:{...}`` is not a valid mapping to
+    a YAML parser, so we reject it too — keeping this probe's verdict identical
+    to the module probe's ``yaml.safe_load`` (#154)."""
+    prefix = f"{CONTRACT_FIELD}: "
+    if stripped.startswith(prefix):
+        return _role_from_flow_mapping(stripped[len(prefix) :])
+    return None
 
 
 def _is_playbook_contract(path: Path) -> bool:
@@ -149,9 +199,7 @@ def _write_cache(cache_path: Path, stamp_path: Path, content: str) -> None:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(content, encoding="utf-8")
     stamp = (
-        f"source_url={CONTRACT_RAW_URL}\n"
-        f"release_tag={PINNED_RELEASE_TAG}\n"
-        f"fetched_at={datetime.now(timezone.utc).isoformat()}\n"
+        f"source_url={CONTRACT_RAW_URL}\nrelease_tag={PINNED_RELEASE_TAG}\nfetched_at={datetime.now(UTC).isoformat()}\n"
     )
     stamp_path.write_text(stamp, encoding="utf-8")
 
