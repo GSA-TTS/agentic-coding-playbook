@@ -395,7 +395,35 @@ def validate_count_drift(root: Path) -> tuple[list[str], list[str]]:
                         )
 
     errors += _validate_roadmap_metrics(root)
+    errors += _validate_doc_inventory(root)
     return errors, warnings
+
+
+def _validate_doc_inventory(root: Path) -> list[str]:
+    """Guard the generated document inventory in docs/README.md (#199)."""
+    doc = root / "docs" / "README.md"
+    if not doc.is_file():
+        return []
+    text = doc.read_text(encoding="utf-8")
+    start = "<!-- GENERATED:DOC_INVENTORY:START"
+    end = "<!-- GENERATED:DOC_INVENTORY:END -->"
+    if start not in text or end not in text:
+        return []
+
+    from playbook_validator.index_updaters import (
+        _load_index_documents,
+        render_doc_inventory_table,
+    )
+
+    documents = _load_index_documents(root)
+    if documents is None:
+        return ["docs/README.md declares a DOC_INVENTORY block but INDEX.yaml is missing"]
+    expected = render_doc_inventory_table(documents).strip()
+    block = text.split(start, 1)[1].split(end, 1)[0]
+    body = block.split("\n", 1)[1].strip() if "\n" in block else ""
+    if body != expected:
+        return ["docs/README.md — document inventory is out of sync with INDEX.yaml. Run `make generate` (#199)."]
+    return []
 
 
 # Body banner "> **Version:** X.Y.Z" in the universal contract — must agree with
