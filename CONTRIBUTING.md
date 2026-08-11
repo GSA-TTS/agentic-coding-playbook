@@ -141,7 +141,7 @@ make setup      # Install dependencies only
 
 Pre-commit hooks are **optional** for this repository. They are designed for **contributors** who are actively developing this project.
 
-**If you cloned this repo for guidance only** (to reference standards for your own projects), **you do not need to install the hooks**.
+**If you cloned this repo for reference only** (to copy patterns and standards into your own projects), **you do not need to install the hooks**.
 
 **If you are contributing to this repo**, you can opt-in to pre-commit hooks:
 

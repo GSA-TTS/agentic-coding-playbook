@@ -32,7 +32,7 @@ _EXCLUDED_NAMES = {"CONTRIBUTING.md", "CHANGELOG.md", "README.md", "SECURITY.md"
 
 # Tier descriptions used in the YAML header
 _TIER_DESCRIPTIONS = {
-    1: "Core guidance — authoritative rules and control mappings",
+    1: "Core — behavioral best practices, rules, and control mappings",
     2: "Supporting documentation — how-to guides and setup instructions",
     3: "Templates and checklists — reusable artifacts for projects",
 }
@@ -298,7 +298,7 @@ def _render_documents(documents: list[DocumentInfo]) -> list[str]:
             tier_docs[doc.tier].append(doc)
 
     tier_headers = {
-        1: "  # ── Tier 1: Core Guidance ────────────────────────────────────────",
+        1: "  # ── Tier 1: Core ─────────────────────────────────────────────────",
         2: "  # ── Tier 2: Supporting Documentation ─────────────────────────────",
         3: "  # ── Tier 3: Templates, Checklists, and Examples ──────────────────",
     }

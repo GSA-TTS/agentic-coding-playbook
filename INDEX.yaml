@@ -22,7 +22,7 @@ frontmatter_schema:
   optional: ["audience", "contract", "frameworks", "keywords", "last_updated", "load_priority", "nist_controls", "related_files", "review_cycle", "stale_after"]
   status_values: ["canonical", "deprecated", "draft"]
   tier_values:
-    1: "Core guidance — authoritative rules and control mappings"
+    1: "Core — behavioral best practices, rules, and control mappings"
     2: "Supporting documentation — how-to guides and setup instructions"
     3: "Templates and checklists — reusable artifacts for projects"
   audience_values: ["all", "developers", "isso", "managers"]
@@ -31,7 +31,7 @@ frontmatter_schema:
 
 # Document inventory
 documents:
-  # ── Tier 1: Core Guidance ────────────────────────────────────────
+  # ── Tier 1: Core ─────────────────────────────────────────────────
   - path: "AGENTS.md"
     title: "Federal AI Agent Behavioral Best Practices"
     description: "Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements"
