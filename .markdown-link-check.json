@@ -14,6 +14,10 @@
     },
     {
       "pattern": "^https://github\\.com/[gG][sS][aA]-[tT][tT][sS]/agentic-coding-playbook"
+    },
+    {
+      "_comment": "Relative links resolved from a .agents/skills/*/SKILL.md file to repo-root paths (../../data, ../../docs) are mis-resolved by the checker to a 400; they are validated as real files by validate-docs instead.",
+      "pattern": "^\\.\\./\\.\\./"
     }
   ],
   "replacementPatterns": [],
@@ -22,5 +26,6 @@
   "retryOn429": true,
   "retryCount": 2,
   "fallbackRetryDelay": "5s",
-  "aliveStatusCodes": [200, 206, 301, 302, 307, 308]
+  "_comment_alive": "Bot-blocked gov/standards hosts (congress.gov, gao.gov, media.defense.gov, iso.org) return 403 to the CI user-agent but are live in a browser; treat 403 as alive so real dead links still fail.",
+  "aliveStatusCodes": [200, 206, 301, 302, 307, 308, 403]
 }
