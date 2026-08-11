@@ -3,9 +3,14 @@
 # Single source of truth for the SEMANTIC EQUIVALENCE between this repo's
 # frontmatter keys and the mature, portable metadata vocabularies they echo:
 # Dublin Core (DCMI Terms / ISO 15836) and schema.org (primarily TechArticle ⊂
-# CreativeWork). We keep OUR key names for tooling stability; this crosswalk
-# documents what each key MEANS in standards terms so our metadata is portable
-# and interoperable (ADR 0004, epic #208).
+# CreativeWork), plus Model Context Protocol (MCP) resource annotations — the
+# agent-consumption axis. We keep OUR key names for tooling stability; this
+# crosswalk documents what each key MEANS in standards terms so our metadata is
+# portable and interoperable (ADR 0004, epic #208).
+#
+# NB: YAML frontmatter is a CONVENTION (Jekyll/Hugo/Obsidian), NOT part of the
+# CommonMark or GFM specifications. Our schema is repo-defined and locally
+# validated; this crosswalk — not any Markdown spec — is what makes it portable.
 #
 # This is documentation-as-data: a validator guard (validate-docs) checks that
 # every key in INDEX.yaml `frontmatter_schema` (required + optional) has an entry
@@ -16,8 +21,9 @@
 #   key            our frontmatter key
 #   dublin_core    the equivalent DCMI term (or null if none applies)
 #   schema_org     the equivalent schema.org property (or null)
+#   mcp            the equivalent MCP resource field/annotation (or null)
 #   note           how the mapping holds / caveats
-#   exact_match    true when our key name already equals the standard term
+#   exact_match    true when our key name already equals a standard term
 #
 # NON-GOALS (per ADR 0004 / consensus 7-0):
 #   - We do NOT rename our keys to the standard names (would break the validator
@@ -43,75 +49,93 @@ standards:
     name: "NIST OSCAL control catalog"
     ref: "https://pages.nist.gov/OSCAL/"
     note: "nist_controls VALUES are OSCAL catalog control IDs (see data/nist-800-53-control-names.json)."
+  mcp:
+    name: "Model Context Protocol — resource metadata & annotations"
+    ref: "https://modelcontextprotocol.io/specification"
+    note: "Agent-consumption axis: how an agent runtime describes a resource (title/description + annotations.audience/priority + lastModified). A different axis from the human-citation DC/schema.org mapping; our fields satisfy both."
 
 crosswalk:
   - key: title
     dublin_core: "dc:title"
     schema_org: "name"
+    mcp: "title"
     exact_match: false
     note: "Universal across all standards."
   - key: description
     dublin_core: "dc:description"
     schema_org: "description"
+    mcp: "description"
     exact_match: true
     note: "One-line summary; name matches schema.org verbatim."
   - key: status
     dublin_core: null
     schema_org: "creativeWorkStatus"
+    mcp: null
     exact_match: false
     note: "Our enum {canonical,draft,deprecated} maps to schema.org Draft/Published/Obsolete-style status."
   - key: tier
     dublin_core: null
     schema_org: null
+    mcp: "annotations.priority (0.0-1.0; tier 1 = highest)"
     exact_match: false
     note: "Repo-local load-priority classification (1/2/3); no standard equivalent — intentionally ours."
   - key: last_updated
     dublin_core: "dc:modified"
     schema_org: "dateModified"
+    mcp: "lastModified (ISO 8601)"
     exact_match: false
     note: "ISO YYYY-MM-DD date of last content change. The canonical portable name is `modified`."
   - key: stale_after
     dublin_core: "dcterms:valid"
     schema_org: "expires"
+    mcp: null
     exact_match: false
     note: "Absolute ISO YYYY-MM-DD expiry; content is stale on/after this date (#210). Maps to schema.org expires / DC valid."
   - key: review_cycle
     dublin_core: "dc:accrualPeriodicity"
     schema_org: null
+    mcp: null
     exact_match: false
     note: "Required-review cadence. Freshness/expiry is tracked separately (schema.org expires / stale_after, issue #210)."
   - key: audience
     dublin_core: "dc:audience"
     schema_org: "audience"
+    mcp: "annotations.audience ([\"user\", \"assistant\"])"
     exact_match: true
     note: "Name matches BOTH standards verbatim."
   - key: keywords
     dublin_core: "dc:subject"
     schema_org: "keywords"
+    mcp: null
     exact_match: false
     note: "Name matches schema.org verbatim; DC calls it subject."
   - key: nist_controls
     dublin_core: "dc:conformsTo"
     schema_org: null
+    mcp: null
     exact_match: false
     note: "Values are OSCAL catalog control IDs; `conformsTo` is the DC semantics for standard adherence."
   - key: frameworks
     dublin_core: "dc:conformsTo"
     schema_org: null
+    mcp: null
     exact_match: false
     note: "Standards/frameworks the doc adheres to; canonicalized via data/frameworks.yaml."
   - key: related_files
     dublin_core: "dc:isPartOf / dc:isVersionOf / dc:relation"
     schema_org: "isBasedOn / isPartOf"
+    mcp: null
     exact_match: false
     note: "Repo-relative links to related docs; DC/schema.org express these as relation properties."
   - key: load_priority
     dublin_core: null
     schema_org: null
+    mcp: "annotations.priority (0.0-1.0; always > on-demand > reference-only)"
     exact_match: false
     note: "Repo-local agent context-loading hint {always,task-context,on-demand,reference-only}; no standard equivalent."
   - key: contract
     dublin_core: "dc:conformsTo (role/version); dc:requires (requires_contract)"
     schema_org: "softwareRequirements-style dependency"
+    mcp: null
     exact_match: false
     note: "Behavioral-contract identity block (role/version/requires_contract); repo-specific structure."

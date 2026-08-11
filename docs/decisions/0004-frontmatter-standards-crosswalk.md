@@ -35,6 +35,18 @@ Research (a standards-landscape scan + a schema baseline of this repo, then a
   `audience` and `keywords` already match those vocabularies verbatim.
 - Four concepts recur in every mature standard: freshness, lifecycle-status,
   authorship, provenance.
+- **YAML frontmatter is itself a convention, not a standard.** Neither
+  [CommonMark](https://spec.commonmark.org/) nor GitHub Flavored Markdown
+  defines frontmatter; it is a widely-adopted tooling convention (Jekyll, Hugo,
+  Obsidian) parsed per-tool. Our frontmatter schema is therefore **repo-defined
+  and locally validated** — this crosswalk is what gives it portability, not any
+  Markdown specification.
+- Beyond human-facing metadata (Dublin Core / schema.org), our fields also map
+  cleanly onto **Model Context Protocol (MCP) resource annotations** — the
+  agent-consumption axis (`audience` → `annotations.audience`, `load_priority`/
+  `tier` → `annotations.priority`, `last_updated` → `lastModified`). The
+  crosswalk records this too so the schema is portable to agent runtimes, not
+  only to citation/catalog tools.
 
 ## Decision Drivers
 
