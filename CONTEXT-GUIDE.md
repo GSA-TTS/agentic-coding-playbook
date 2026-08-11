@@ -42,13 +42,13 @@ These define the behavioral contract. Load for **every task**.
 | `docs/SECURITY-CONTROLS.md` | 7,184 | Security controls, ATO, FedRAMP, compliance assessment, ISSO review |
 | `docs/AGENT-IDENTITY.md` | 5,656 | Authentication, authorization, OAuth, RBAC, delegation, identity management |
 
-## Tier 3 — Load On Demand (~7,497 words)
+## Tier 3 — Load On Demand (~7,735 words)
 
 | Document | Words | Load When Task Involves |
 |----------|-------|------------------------|
 | `docs/GETTING-STARTED.md` | 5,173 | New repo setup, CI/CD configuration, environment hardening, pre-commit hooks |
 | `docs/FEDERAL-AI-LANDSCAPE.md` | — | Federal AI guidance catalog (42 entries, EOs, OMB, NIST) |
-| `docs/TRACEABILITY.md` | 2,324 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
+| `docs/TRACEABILITY.md` | 2,562 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
 
 ## Tier 4 — Reference Only (~3,928 words)
 

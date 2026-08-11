@@ -4,7 +4,7 @@ description: "Bidirectional mapping between NIST 800-53 controls, OWASP risks, d
 status: canonical
 tier: 2
 last_updated: "2026-06-12"
-nist_controls: ["AC-2", "AC-3", "AC-5", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3", "AU-6", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "IA-2", "IA-5", "IA-8", "IR-4", "IR-6", "RA-3", "RA-5", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SC-28", "SI-2", "SI-3", "SI-10", "SI-11", "SI-17", "SR-3", "SR-11"]
+nist_controls: ["AC-2", "AC-3", "AC-5", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3", "AU-6", "AU-12", "CA-7", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "CM-10", "CP-10", "IA-2", "IA-5", "IA-8", "IR-4", "IR-6", "PL-4", "RA-3", "RA-5", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-3", "SC-7", "SC-8", "SC-13", "SC-28", "SI-2", "SI-3", "SI-4", "SI-7", "SI-10", "SI-11", "SI-15", "SI-17", "SR-3", "SR-11"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026", "NIST AI RMF 1.0"]
 audience: "isso"
 keywords: ["traceability", "audit", "cross-reference", "control-mapping"]
@@ -38,8 +38,9 @@ Use this matrix to:
 
 For each control referenced in this playbook, this table shows where implementation guidance and verification steps can be found.
 
+<!-- GENERATED:TRACEABILITY_MATRIX:START — do not edit, run: make generate -->
 | Control | Name | AGENTS.md | docs/CODING_PRACTICES.md | SECURITY-CONTROLS.md | AGENT-IDENTITY.md | Checklist |
-|---------|------|-----------|--------------------|--------------------|-------------------|-----------|
+|---|---|---|---|---|---|---|
 | AC-2 | Account Management | §2.1 | — | §3.1 | §2, §3 | — |
 | AC-3 | Access Enforcement | §3.1 | §3.2 | §3.1 | §4 | 4.1, 4.2 |
 | AC-5 | Separation of Duties | — | — | §3.1 | — | 1.1 |
@@ -48,37 +49,53 @@ For each control referenced in this playbook, this table shows where implementat
 | AC-17 | Remote Access | §6.1 | — | §3.1 | — | — |
 | AU-2 | Event Logging | §2.2 | §6.2 | §3.2 | §6 | 6.4 |
 | AU-3 | Content of Audit Records | §2.2 | §6.2 | §3.2 | §6 | 6.5 |
-| AU-6 | Audit Review | §2.2 | — | §3.2 | §6 | — |
+| AU-6 | Audit Record Review, Analysis, and Reporting | §2.2 | — | §3.2 | §6 | — |
 | AU-12 | Audit Record Generation | §2.2, §14.3 | — | §3.2 | §6 | — |
+| CA-7 | Continuous Monitoring | — | — | — | — | — |
 | CM-2 | Baseline Configuration | §12.1, §15.3 | — | §3.3 | — | 10.1 |
 | CM-3 | Configuration Change Control | §3.2, §13, §14.1, §14.2 | — | §3.3 | — | 1.3, 1.4 |
 | CM-5 | Access Restrictions for Change | §3.2, §14.2 | — | §3.3 | — | 10.6 |
 | CM-6 | Configuration Settings | §12.1, §15.3 | — | §3.3 | — | 10.2 |
 | CM-7 | Least Functionality | §3.1, §10 | — | §3.3 | — | — |
-| IA-2 | Identification and Authentication | §2.1 | §3.1 | §3.4 | §2, §3 | 4.1 |
+| CM-10 | Software Usage Restrictions | — | — | — | — | — |
+| CP-10 | System Recovery and Reconstitution | — | — | — | — | — |
+| IA-2 | Identification and Authentication (Organizational Users) | §2.1 | §3.1 | §3.4 | §2, §3 | 4.1 |
 | IA-5 | Authenticator Management | — | §4 | §3.4 | §3 | 2.1, 2.6 |
-| IA-8 | Non-Org User Identification | §2.1 | — | §3.4 | §2 | — |
+| IA-8 | Identification and Authentication (Non-organizational Users) | §2.1 | — | §3.4 | §2 | — |
 | IR-4 | Incident Handling | §9.1 | — | §3.5 | — | — |
 | IR-6 | Incident Reporting | §9.2, §14.5 | — | §3.5 | — | — |
+| PL-4 | Rules of Behavior | — | — | — | — | — |
 | RA-3 | Risk Assessment | §1 | — | §3.6 | — | — |
-| RA-5 | Vulnerability Scanning | §9.2 | §5.2 | §3.6 | — | 9.4, 9.5 |
+| RA-5 | Vulnerability Monitoring and Scanning | §9.2 | §5.2 | §3.6 | — | 9.4, 9.5 |
 | SA-4 | Acquisition Process | — | §5.1 | §3.7 | — | — |
-| SA-11 | Developer Testing | §8, §14.3, §14.4 | §1.1 | §3.7 | — | 9.1, 9.2, 9.3 |
-| SA-15 | Development Process | §15.1, §15.2 | §1.1 | §3.7 | — | — |
 | SA-5 | System Documentation | §15.4 | — | — | — | — |
-| SA-8 | Security Engineering Principles | §15.1, §15.2 | — | §3.7 | — | — |
-| SA-17 | Developer Security Architecture | §15.1 | — | — | — | — |
+| SA-8 | Security and Privacy Engineering Principles | §15.1, §15.2 | — | §3.7 | — | — |
+| SA-11 | Developer Testing and Evaluation | §8, §14.3, §14.4 | §1.1 | §3.7 | — | 9.1, 9.2, 9.3 |
+| SA-15 | Development Process, Standards, and Tools | §15.1, §15.2 | §1.1 | §3.7 | — | — |
+| SA-17 | Developer Security and Privacy Architecture and Design | §15.1 | — | — | — | — |
+| SC-3 | Security Function Isolation | — | — | — | — | — |
 | SC-7 | Boundary Protection | §6.1 | §8 | §3.8 | — | 8.3 |
-| SC-8 | Transmission Confidentiality | §6.1 | §8.1 | §3.8 | — | 7.1, 7.2 |
+| SC-8 | Transmission Confidentiality and Integrity | §6.1 | §8.1 | §3.8 | — | 7.1, 7.2 |
 | SC-13 | Cryptographic Protection | §5.4 | §7 | §3.8 | — | 7.3, 7.4 |
-| SC-28 | Protection at Rest | §4 | §4, §7 | §3.8 | — | 7.5 |
+| SC-28 | Protection of Information at Rest | §4 | §4, §7 | §3.8 | — | 7.5 |
 | SI-2 | Flaw Remediation | §9 | §5.2 | §3.9 | — | — |
 | SI-3 | Malicious Code Protection | §10, §11 | — | §3.9 | — | — |
-| SI-10 | Input Validation | §5.1, §11 | §2 | §3.9 | — | 3.1-3.6 |
+| SI-4 | System Monitoring | — | — | — | — | — |
+| SI-7 | Software, Firmware, and Information Integrity | — | — | — | — | — |
+| SI-10 | Information Input Validation | §5.1, §11 | §2 | §3.9 | — | 3.1-3.6 |
 | SI-11 | Error Handling | — | §6.1 | §3.9 | — | 6.1, 6.2 |
-| SI-17 | Fail-Safe Procedures | §14.5, §14.6 | — | — | — | — |
-| SR-3 | Supply Chain Controls (supersedes withdrawn SA-12) | §7 | §5.2 | §3.10 | — | 5.1-5.7 |
+| SI-15 | Information Output Filtering | — | — | — | — | — |
+| SI-17 | Fail-safe Procedures | §14.5, §14.6 | — | — | — | — |
+| SR-3 | Supply Chain Controls and Processes | §7 | §5.2 | §3.10 | — | 5.1-5.7 |
 | SR-11 | Component Authenticity | §7 | §5.2 | §3.10 | — | 5.5 |
+<!-- GENERATED:TRACEABILITY_MATRIX:END -->
+
+> **Control** and **Name** columns are generated (`make generate`) — Control
+> from the union of `nist_controls:` frontmatter across the mapped documents,
+> Name from NIST SP 800-53 Rev 5 (via the derived
+> [`data/nist-800-53-control-names.json`](../data/nist-800-53-control-names.json),
+> refreshed from NIST OSCAL by `make refresh-oscal`). The per-document section
+> anchors and checklist numbers are maintained by hand.
 
 ---
 

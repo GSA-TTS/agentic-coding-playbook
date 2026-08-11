@@ -326,6 +326,126 @@ def update_doc_inventory(root: Path) -> None:
     splice_generated_block(root / _DOC_INVENTORY_REL, "DOC_INVENTORY", table)
 
 
+# ── TRACEABILITY §1 control matrix (#197) ─────────────────────────────
+#
+# The Control + Name columns are generated from source: the control row-set is
+# the union of `nist_controls:` frontmatter across the matrix's document
+# columns, and the Name is the authoritative NIST title from the derived OSCAL
+# map (data/nist-800-53-control-names.json, refreshed by refresh_oscal_control_names).
+# The per-document presence cells (§-anchors / checklist numbers) are EDITORIAL
+# and preserved verbatim across regeneration — only Control+Name are rebuilt.
+
+_TRACEABILITY_REL = "docs/TRACEABILITY.md"
+_OSCAL_NAMES_REL = "data/nist-800-53-control-names.json"
+# The matrix's document columns, in header order. Each is a repo-relative path
+# whose frontmatter nist_controls contributes to the row-set and whose header
+# label must be reproduced verbatim.
+_TRACEABILITY_COLUMNS: tuple[tuple[str, str], ...] = (
+    ("AGENTS.md", "AGENTS.md"),
+    ("docs/CODING_PRACTICES.md", "docs/CODING_PRACTICES.md"),
+    ("docs/SECURITY-CONTROLS.md", "SECURITY-CONTROLS.md"),
+    ("docs/AGENT-IDENTITY.md", "AGENT-IDENTITY.md"),
+)
+_TRACEABILITY_START = "<!-- GENERATED:TRACEABILITY_MATRIX:START"
+_TRACEABILITY_END = "<!-- GENERATED:TRACEABILITY_MATRIX:END -->"
+
+
+def load_oscal_control_names(root: Path) -> dict[str, str] | None:
+    """Load the derived NIST control id→title map, or None if absent."""
+    path = root / _OSCAL_NAMES_REL
+    if not path.is_file():
+        return None
+    import json
+
+    data = json.loads(path.read_text(encoding="utf-8"))
+    controls = data.get("controls")
+    return controls if isinstance(controls, dict) else None
+
+
+def _control_sort_key(control_id: str) -> tuple[str, int]:
+    """Sort AC-2 before AC-12 before AU-2 (family alpha, then numeric)."""
+    family, _, num = control_id.partition("-")
+    try:
+        return (family, int(num))
+    except ValueError:
+        return (family, 0)
+
+
+def _extract_traceability_editorial(root: Path) -> dict[str, list[str]]:
+    """Parse the CURRENT §1 rows to preserve each control's editorial cells.
+
+    Returns {control_id: [doc1, doc2, doc3, doc4, checklist]} — the 5 non-derived
+    cells. Missing controls default to all em dashes. Only reads the region
+    between the TRACEABILITY markers if present, else the whole file (first-run
+    adoption, before markers exist)."""
+    doc = root / _TRACEABILITY_REL
+    if not doc.is_file():
+        return {}
+    text = doc.read_text(encoding="utf-8")
+    if _TRACEABILITY_START in text and _TRACEABILITY_END in text:
+        text = text.split(_TRACEABILITY_START, 1)[1].split(_TRACEABILITY_END, 1)[0]
+    editorial: dict[str, list[str]] = {}
+    for line in text.splitlines():
+        m = re.match(r"^\|\s*([A-Z]{2}-\d{1,2})\s*\|", line)
+        if not m:
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        # cells: [Control, Name, doc1, doc2, doc3, doc4, checklist]
+        if len(cells) >= 7:
+            editorial[m.group(1)] = cells[2:7]
+    return editorial
+
+
+def compute_traceability_rows(root: Path) -> tuple[list[str], dict[str, str]] | None:
+    """Return (sorted control_ids, id→name) for the §1 matrix (#197).
+
+    Row-set = union of nist_controls frontmatter across the matrix's document
+    columns. Names from the derived OSCAL map. None if the OSCAL map is absent.
+    """
+    from playbook_validator.frontmatter import get_array_field
+
+    names = load_oscal_control_names(root)
+    if names is None:
+        return None
+    control_ids: set[str] = set()
+    for rel, _label in _TRACEABILITY_COLUMNS:
+        for ctrl in get_array_field(root / rel, "nist_controls") or []:
+            if isinstance(ctrl, str) and re.fullmatch(r"[A-Z]{2}-\d{1,2}", ctrl):
+                control_ids.add(ctrl)
+    return sorted(control_ids, key=_control_sort_key), names
+
+
+def render_traceability_matrix(control_ids: list[str], names: dict[str, str], editorial: dict[str, list[str]]) -> str:
+    """Render the §1 matrix. Control+Name derived; presence cells preserved."""
+    header_labels = [label for _rel, label in _TRACEABILITY_COLUMNS]
+    header = "| Control | Name | " + " | ".join(header_labels) + " | Checklist |"
+    sep = "|" + "|".join(["---"] * (len(header_labels) + 3)) + "|"
+    lines = [header, sep]
+    blank = ["—", "—", "—", "—", "—"]
+    for cid in control_ids:
+        name = names.get(cid, "")
+        cells = editorial.get(cid, blank)
+        # pad/truncate defensively to exactly 5 editorial cells
+        cells = (cells + blank)[:5]
+        lines.append(f"| {cid} | {name} | " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
+def update_traceability_matrix(root: Path) -> None:
+    """Regenerate the TRACEABILITY §1 Control+Name columns (#197).
+
+    No-op if the GENERATED:TRACEABILITY_MATRIX markers or the OSCAL map are
+    absent. Editorial presence cells are preserved verbatim.
+    """
+    computed = compute_traceability_rows(root)
+    if computed is None:
+        return
+    control_ids, names = computed
+    editorial = _extract_traceability_editorial(root)
+    table = render_traceability_matrix(control_ids, names, editorial)
+    splice_generated_block(root / _TRACEABILITY_REL, "TRACEABILITY_MATRIX", table)
+
+
 # ── Repo-root llms.txt (#212) ─────────────────────────────────────────
 #
 # The llmstxt.org convention: a curated, link-based map at the repo root that
