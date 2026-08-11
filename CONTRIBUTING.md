@@ -38,6 +38,20 @@ The simplest approach:
 - **Provide actionable examples** — show what to do, not just what the standard says
 - **Include control mappings** — every section should reference applicable NIST 800-53 controls
 
+### Accessibility & Markdown Hygiene
+
+Documentation in this repository must be **accessible** (Section 508 — see
+[ACCESSIBILITY.md](ACCESSIBILITY.md)). When adding or editing docs:
+
+- Start each document with a single top-level heading (H1) and nest sub-headings
+  without skipping levels.
+- Give every image meaningful `alt` text; use `alt=""` only for decorative
+  images (enforced by markdownlint **MD045**).
+- Keep tables as real Markdown tables with a header row.
+- Use descriptive link text and plain language.
+
+`make lint` (and pre-commit) run the image alt-text check; it also runs in CI.
+
 ### What We Need
 
 - **Practitioner feedback** — Does this playbook work in your agency's environment?
