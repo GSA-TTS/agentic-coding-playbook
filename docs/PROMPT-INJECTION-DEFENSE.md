@@ -393,7 +393,7 @@ def process_user_request(
 ## References
 
 - [OWASP Top 10 for LLM Applications — LLM01: Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
-- [OWASP Top 10 for Agentic Applications — Agentic-01: Agent Goal Hijack](https://genai.owasp.org/agentic-risks/)
+- [OWASP Top 10 for Agentic Applications — Agentic-01: Agent Goal Hijack](https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/)
 - NIST SP 800-53 Rev 5: SI-10 (Information Input Validation), SI-15 (Information Output Filtering)
 - AGENTS.md section 11 — Prompt Injection Defense (behavioral rules)
 - docs/CODING_PRACTICES.md section 2 — Input Validation and Output Encoding
