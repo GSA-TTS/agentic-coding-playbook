@@ -254,7 +254,7 @@ We welcome contributions from the federal agentic-coding community.
 - **Questions** — Open a GitHub issue or start a discussion
 - **Not sure how?** — Open an issue to discuss
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for details. This project uses [conventional commits](https://www.conventionalcommits.org/) and automated releases via [release-please](https://github.com/googleapis/release-please).
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for details. This project uses [conventional commits](https://www.conventionalcommits.org/) and automated releases via [release-please](https://github.com/googleapis/release-please). Documentation follows our [accessibility statement](./ACCESSIBILITY.md) (Section 508).
 
 ### Share What You Learn
 
