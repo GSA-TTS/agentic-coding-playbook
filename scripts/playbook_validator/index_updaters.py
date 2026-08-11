@@ -402,6 +402,70 @@ def update_llms_txt(root: Path) -> None:
     (root / _LLMS_TXT_REL).write_text(render_llms_txt(index), encoding="utf-8")
 
 
+# ── Framework references (#198) ───────────────────────────────────────
+#
+# data/frameworks.yaml is the single source of truth for framework NAMES +
+# dates. The AGENTS.md "## Framework References" prose list is generated from
+# the `featured` entries here (make generate), and validate-docs checks every
+# doc's `frameworks:` frontmatter value against the canonical names + aliases.
+
+_FRAMEWORKS_REL = "data/frameworks.yaml"
+_FRAMEWORK_REFS_DOC = "AGENTS.md"
+
+
+def load_frameworks(root: Path) -> list[dict] | None:
+    """Return data/frameworks.yaml's `frameworks` list, or None if absent."""
+    path = root / _FRAMEWORKS_REL
+    if not path.is_file():
+        return None
+    import yaml
+
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    frameworks = data.get("frameworks")
+    return frameworks if isinstance(frameworks, list) else None
+
+
+def framework_name_index(frameworks: list[dict]) -> dict[str, str]:
+    """Map every accepted spelling (canonical name + aliases) → canonical name.
+
+    Used by the frontmatter guard to accept terse aliases while flagging
+    unknown / misspelled framework strings (#198)."""
+    index: dict[str, str] = {}
+    for fw in frameworks:
+        name = str(fw.get("name", "")).strip()
+        if not name:
+            continue
+        index[name] = name
+        for alias in fw.get("aliases", []) or []:
+            index[str(alias).strip()] = name
+    return index
+
+
+def render_framework_refs(frameworks: list[dict]) -> str:
+    """Render the AGENTS.md 'Framework References' bullet list from featured
+    entries, in file order: ``- <name> (<date>)`` (date omitted if absent)."""
+    lines: list[str] = []
+    for fw in frameworks:
+        if not fw.get("featured"):
+            continue
+        name = str(fw.get("name", "")).strip()
+        date = str(fw.get("date", "")).strip()
+        lines.append(f"- {name} ({date})" if date else f"- {name}")
+    return "\n".join(lines)
+
+
+def update_framework_refs(root: Path) -> None:
+    """Regenerate the AGENTS.md Framework References list (#198).
+
+    No-op if the GENERATED:FRAMEWORK_REFS markers or the registry are absent.
+    """
+    frameworks = load_frameworks(root)
+    if frameworks is None:
+        return
+    body = render_framework_refs(frameworks)
+    splice_generated_block(root / _FRAMEWORK_REFS_DOC, "FRAMEWORK_REFS", body)
+
+
 # ── CONTEXT-GUIDE word counts ─────────────────────────────────────────
 
 

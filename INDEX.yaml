@@ -7,10 +7,10 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-08-10
+# Last generated: 2026-08-11
 
 schema_version: "1.0"
-generated: "2026-08-10"
+generated: "2026-08-11"
 repo: "GSA-TTS/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
@@ -62,7 +62,7 @@ documents:
 
   - path: "docs/AGENT-IDENTITY.md"
     title: "Agent Identity, Authentication, Authorization, and Delegation"
-    description: "Agent identity management aligned with NCCOE concept paper — authentication, authorization, delegation, and audit logging for AI agents"
+    description: "Agent identity management aligned with NCCoE concept paper — authentication, authorization, delegation, and audit logging for AI agents"
     status: canonical
     tier: 1
     load_priority: task-context
