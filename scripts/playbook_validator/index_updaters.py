@@ -56,25 +56,274 @@ def inject_readme_table(readme_path: Path, table: str) -> bool:
 
     Returns True if injection happened, False if markers not found.
     """
-    if not readme_path.is_file():
+    return splice_generated_block(readme_path, "SKILLS_TABLE", table)
+
+
+def splice_generated_block(path: Path, marker_id: str, body: str) -> bool:
+    """Replace the content between ``GENERATED:<marker_id>:START/END`` markers.
+
+    Generic marker-splice used by all generated-doc regions (skills table,
+    landscape summary, …). Text outside the marker pair is preserved verbatim;
+    only the region between them is regenerated. Returns True if the markers
+    exist (and the block was written/kept in sync), False if absent (no-op).
+    """
+    if not path.is_file():
         return False
 
-    content = readme_path.read_text(encoding="utf-8")
-    if _START_MARKER not in content:
+    start_marker = f"<!-- GENERATED:{marker_id}:START"
+    end_marker = f"<!-- GENERATED:{marker_id}:END -->"
+
+    content = path.read_text(encoding="utf-8")
+    if start_marker not in content:
         return False
 
-    start_line = f"{_START_MARKER} — do not edit, run: make generate -->"
-    replacement = f"{start_line}\n{table}\n{_END_MARKER}"
+    start_line = f"{start_marker} — do not edit, run: make generate -->"
+    replacement = f"{start_line}\n{body}\n{end_marker}"
 
     pattern = re.compile(
-        re.escape(_START_MARKER) + r"[^\n]*\n.*?" + re.escape(_END_MARKER),
+        re.escape(start_marker) + r"[^\n]*\n.*?" + re.escape(end_marker),
         re.DOTALL,
     )
     new_content = pattern.sub(replacement, content)
 
     if new_content != content:
-        readme_path.write_text(new_content, encoding="utf-8")
+        path.write_text(new_content, encoding="utf-8")
     return True
+
+
+# ── Federal AI landscape Status Summary (#142) ────────────────────────
+
+# Category → display label + fixed row order for the Status Summary table.
+_LANDSCAPE_CATEGORIES: tuple[tuple[str, str], ...] = (
+    ("executive_order", "Executive Orders"),
+    ("omb_memo", "OMB Memoranda"),
+    ("nist_standard", "NIST Standards"),
+    ("legislation", "Federal Legislation"),
+    ("agency_strategy", "Agency Strategies"),
+    ("agency_report", "Agency Reports"),
+    ("industry_standard", "Industry Standards"),
+    ("white_house_plan", "White House Plans"),
+)
+# status → summary column. "final" counts as Active (both denote in-effect).
+_STATUS_COLUMN = {
+    "active": "active",
+    "final": "active",
+    "revoked": "revoked",
+    "rescinded": "revoked",
+    "draft": "draft",
+}
+
+
+def compute_landscape_summary(root: Path) -> tuple[dict[str, dict[str, int]], int] | None:
+    """Return ({category: {active,revoked,draft}}, total_entries) from the YAML.
+
+    Single source of truth for the Status Summary counts, shared by the
+    generator and the drift guard (#142). None if the registry is absent.
+    """
+    landscape = root / "data" / "federal-ai-landscape.yaml"
+    if not landscape.is_file():
+        return None
+    import yaml
+
+    data = yaml.safe_load(landscape.read_text(encoding="utf-8")) or {}
+    entries = data.get("entries", [])
+    counts: dict[str, dict[str, int]] = {
+        cat: {"active": 0, "revoked": 0, "draft": 0} for cat, _ in _LANDSCAPE_CATEGORIES
+    }
+    for entry in entries:
+        cat = entry.get("category")
+        col = _STATUS_COLUMN.get(entry.get("status"))
+        if cat in counts and col is not None:
+            counts[cat][col] += 1
+    return counts, len(entries)
+
+
+def render_landscape_summary_table(counts: dict[str, dict[str, int]]) -> str:
+    """Render the Status Summary markdown table from computed counts (#142)."""
+    lines = [
+        "| Category | Active | Revoked/Rescinded | Draft |",
+        "|---|---|---|---|",
+    ]
+    ta = tr = td = 0
+    for cat, label in _LANDSCAPE_CATEGORIES:
+        b = counts[cat]
+        ta += b["active"]
+        tr += b["revoked"]
+        td += b["draft"]
+        lines.append(f"| {label} | {b['active']} | {b['revoked']} | {b['draft']} |")
+    lines.append(f"| **Total** | **{ta}** | **{tr}** | **{td}** |")
+    return "\n".join(lines)
+
+
+def update_landscape_summary(root: Path) -> None:
+    """Regenerate the Status Summary table in docs/FEDERAL-AI-LANDSCAPE.md (#142).
+
+    No-op if the doc lacks the GENERATED:LANDSCAPE_SUMMARY markers or the
+    registry is absent. Prose outside the markers is untouched.
+    """
+    result = compute_landscape_summary(root)
+    if result is None:
+        return
+    counts, _ = result
+    table = render_landscape_summary_table(counts)
+    splice_generated_block(root / "docs" / "FEDERAL-AI-LANDSCAPE.md", "LANDSCAPE_SUMMARY", table)
+
+
+# ── Federal AI landscape Playbook Phase Mapping (#142) ────────────────
+
+# Phase id → display label. Phase names are editorial (not in the registry);
+# membership is derived from each entry's `playbook_phases`. Order is the
+# playbook's lifecycle order, with 0.5 between 0 and 1.
+_PHASE_LABELS: tuple[tuple[str, str], ...] = (
+    ("0", "Phase 0: Project Plan"),
+    ("0.5", "Phase 0.5: Environment Doctor"),
+    ("1", "Phase 1: Repo Setup"),
+    ("2", "Phase 2: Agent Config"),
+    ("3", "Phase 3: Write Code"),
+    ("4", "Phase 4: Document Decisions"),
+    ("5", "Phase 5: Assess Risk"),
+    ("6", "Phase 6: Pre-Deploy Check"),
+    ("7", "Phase 7: Deploy"),
+)
+
+
+def _landscape_short_ref(entry: dict) -> str:
+    """A compact reference label for a landscape entry in the phase table.
+
+    Prefers a clean short code for the well-known id shapes:
+      eo-14179     → EO 14179
+      m-25-21      → M-25-21
+      nist-ai-100-1→ NIST AI 100-1  (nist-sp-800-218a → NIST SP 800-218A)
+    For ids that don't match those shapes (e.g. slsa, mitre-atlas,
+    ai-action-plan-2025), fall back to the entry title so the cell stays
+    human-readable rather than a shouting slug.
+    """
+    eid = str(entry.get("id", "")).strip()
+    if not eid:
+        return str(entry.get("title", ""))[:48]
+    low = eid.lower()
+    if low.startswith("eo-"):
+        return "EO " + eid[3:]
+    if low.startswith("m-"):
+        return eid.upper()
+    if low.startswith("nist-"):
+        # nist-sp-800-218a → NIST SP 800-218A ; nist-ai-100-1 → NIST AI 100-1
+        return "NIST " + eid[5:].upper().replace("-", " ", 1)
+    # Non-coded ids: use a clean short label from the title — drop any
+    # parenthetical, then trim to a word boundary so the cell stays readable
+    # (no mid-word truncation) without needing a schema field.
+    title = str(entry.get("title", "")).strip()
+    if not title:
+        return eid
+    title = title.split(" (", 1)[0].split(": ", 1)[0].strip()
+    if len(title) > 46:
+        cut = title[:46].rsplit(" ", 1)[0]
+        title = f"{cut}…"
+    return title
+
+
+def compute_phase_mapping(root: Path) -> dict[str, list[str]] | None:
+    """Return {phase_id: [short_ref, ...]} derived from `playbook_phases` (#142)."""
+    landscape = root / "data" / "federal-ai-landscape.yaml"
+    if not landscape.is_file():
+        return None
+    import yaml
+
+    data = yaml.safe_load(landscape.read_text(encoding="utf-8")) or {}
+    mapping: dict[str, list[str]] = {pid: [] for pid, _ in _PHASE_LABELS}
+    for entry in data.get("entries", []):
+        for pid in entry.get("playbook_phases", []) or []:
+            if pid in mapping:
+                mapping[pid].append(_landscape_short_ref(entry))
+    return mapping
+
+
+def render_phase_mapping_table(mapping: dict[str, list[str]]) -> str:
+    """Render the Playbook Phase Mapping markdown table from the mapping (#142).
+
+    Every phase member assigned in the registry is listed; a phase with no
+    assigned entries shows an em dash.
+    """
+    lines = ["| Phase | References (from registry `playbook_phases`) |", "|---|---|"]
+    for pid, label in _PHASE_LABELS:
+        refs = mapping.get(pid, [])
+        cell = ", ".join(refs) if refs else "—"
+        lines.append(f"| **{label}** | {cell} |")
+    return "\n".join(lines)
+
+
+def update_phase_mapping(root: Path) -> None:
+    """Regenerate the Playbook Phase Mapping table in the landscape doc (#142).
+
+    No-op if the GENERATED:LANDSCAPE_PHASES markers or registry are absent.
+    """
+    mapping = compute_phase_mapping(root)
+    if mapping is None:
+        return
+    table = render_phase_mapping_table(mapping)
+    splice_generated_block(root / "docs" / "FEDERAL-AI-LANDSCAPE.md", "LANDSCAPE_PHASES", table)
+
+
+# ── Neutral document inventory (#199) ─────────────────────────────────
+#
+# A single generated "all documents" table sourced from INDEX.yaml — the
+# machine inventory. Per the #199 consensus, this does NOT collapse the three
+# distinct tier taxonomies (INDEX machine-inventory `tier`, docs/README human
+# onboarding order, CONTEXT-GUIDE context-budget loading): those are different
+# semantic axes and stay independently curated. This neutral inventory is the
+# de-drift win — one generated list of every doc with its INDEX tier + purpose —
+# without flattening the editorial views. It lives at the end of docs/README.md
+# under GENERATED:DOC_INVENTORY markers.
+
+_DOC_INVENTORY_REL = "docs/README.md"
+
+
+def _load_index_documents(root: Path) -> list[dict] | None:
+    """Return INDEX.yaml's `documents` list (path/title/description/tier/…), or None."""
+    index = root / "INDEX.yaml"
+    if not index.is_file():
+        return None
+    import yaml
+
+    data = yaml.safe_load(index.read_text(encoding="utf-8")) or {}
+    docs = data.get("documents")
+    return docs if isinstance(docs, list) else None
+
+
+def render_doc_inventory_table(documents: list[dict]) -> str:
+    """Render the neutral all-documents inventory table from INDEX docs (#199).
+
+    Columns: Document (path), Tier (INDEX machine tier), Purpose (INDEX
+    description). Sorted by tier then path for a stable, diffable order.
+    """
+    rows = sorted(
+        documents,
+        key=lambda d: (d.get("tier", 99), str(d.get("path", ""))),
+    )
+    lines = [
+        "| Document | Tier | Purpose |",
+        "|----------|------|---------|",
+    ]
+    for doc in rows:
+        path = str(doc.get("path", "")).strip()
+        tier = doc.get("tier", "—")
+        # description is the INDEX machine description; collapse whitespace.
+        purpose = " ".join(str(doc.get("description", "")).split())
+        lines.append(f"| `{path}` | {tier} | {purpose} |")
+    return "\n".join(lines)
+
+
+def update_doc_inventory(root: Path) -> None:
+    """Regenerate the neutral document inventory in docs/README.md (#199).
+
+    No-op if the GENERATED:DOC_INVENTORY markers or INDEX.yaml are absent. The
+    hand-curated tier tables above the markers are untouched.
+    """
+    documents = _load_index_documents(root)
+    if documents is None:
+        return
+    table = render_doc_inventory_table(documents)
+    splice_generated_block(root / _DOC_INVENTORY_REL, "DOC_INVENTORY", table)
 
 
 # ── CONTEXT-GUIDE word counts ─────────────────────────────────────────
@@ -209,9 +458,62 @@ def update_hardcoded_counts(root: Path, stats: IndexStats, skills: list[SkillInf
 
         if controls_count is not None:
             text = _CONTROLS_RE.sub(rf"{controls_count}\2", text)
+            # "N controls mapped" prose (README/CONTRIBUTING) — the count is the
+            # same documented-control total; keep it in sync too (#142).
+            text = re.sub(
+                r"(?<![\w.\-])\d+(\s+(?:NIST\s+(?:SP\s+)?800-53\s+)?controls\s+mapped\b)",
+                rf"{controls_count}\1",
+                text,
+            )
 
         if text != original:
             md_file.write_text(text, encoding="utf-8")
+
+
+def render_roadmap_metrics_table(root: Path, stats: IndexStats) -> str:
+    """Render the ROADMAP 'Current State' metrics table from live sources (#142).
+
+    Every cell is derived: documents/skills/controls from the index stats,
+    landscape entries from the registry, tests from pytest collection, and
+    checklist items by counting checkbox lines under checklists/.
+    """
+    landscape_count = count_landscape_entries(root)
+    controls_count = count_security_controls(root)
+    test_count = _collect_test_count(root)
+    checklist_count = _count_checklist_items(root)
+    rows = [
+        ("Documents", stats.total_documents),
+        ("Skills", stats.total_skills),
+        ("Tests", test_count),
+        ("Checklist items", checklist_count),
+        ("Landscape entries", landscape_count),
+        ("NIST controls mapped", controls_count),
+    ]
+    lines = ["| Metric | Count |", "|--------|-------|"]
+    for label, value in rows:
+        lines.append(f"| {label} | {value if value is not None else '—'} |")
+    return "\n".join(lines)
+
+
+def _count_checklist_items(root: Path) -> int | None:
+    """Count numbered checklist item rows (``| N.N | … |``) under checklists/.
+
+    The pre-deployment checklist enumerates items as ``| 1.1 | … |`` table rows
+    (Pass/Fail/N/A columns), not markdown checkboxes — count those rows.
+    """
+    checklists = root / "checklists"
+    if not checklists.is_dir():
+        return None
+    total = 0
+    for md in checklists.glob("*.md"):
+        total += len(re.findall(r"^\|\s*\d+\.\d+\s*\|", md.read_text(encoding="utf-8"), re.MULTILINE))
+    return total or None
+
+
+def update_roadmap_metrics(root: Path, stats: IndexStats) -> None:
+    """Regenerate the ROADMAP metrics table (#142). No-op without the markers."""
+    table = render_roadmap_metrics_table(root, stats)
+    splice_generated_block(root / "docs" / "ROADMAP.md", "ROADMAP_METRICS", table)
 
 
 def _collect_test_count(root: Path) -> int | None:

@@ -12,6 +12,7 @@ REQUIRED_FRONTMATTER_FIELDS = frozenset({"title", "description", "status", "tier
 OPTIONAL_FRONTMATTER_FIELDS = frozenset(
     {
         "last_updated",
+        "stale_after",
         "nist_controls",
         "frameworks",
         "audience",
