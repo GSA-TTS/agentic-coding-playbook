@@ -7,10 +7,10 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-08-10
+# Last generated: 2026-08-11
 
 schema_version: "1.0"
-generated: "2026-08-10"
+generated: "2026-08-11"
 repo: "GSA-TTS/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
@@ -160,7 +160,7 @@ documents:
     load_priority: on-demand
     last_updated: "2026-06-12"
     audience: isso
-    nist_controls_count: 39
+    nist_controls_count: 47
     review_cycle: quarterly
 
   - path: "templates/SKILL.md.template"

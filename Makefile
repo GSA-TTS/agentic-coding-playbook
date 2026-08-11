@@ -95,6 +95,10 @@ generate: ## Regenerate INDEX.yaml and README skills table
 generate-check: ## Verify INDEX.yaml is up to date (CI mode)
 	$(VALIDATOR) generate-index --check --root .
 
+.PHONY: refresh-oscal
+refresh-oscal: ## Refresh derived NIST 800-53 control-name map from NIST OSCAL (maintainer, network)
+	PYTHONPATH=scripts python3 scripts/refresh_oscal_control_names.py --root .
+
 # ── Project Bootstrap ──────────────────────────────────────────────
 
 .PHONY: new-project

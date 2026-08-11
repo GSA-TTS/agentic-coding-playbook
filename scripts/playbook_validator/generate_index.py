@@ -404,6 +404,7 @@ def generate_index(root: Path) -> None:
         update_llms_txt,
         update_phase_mapping,
         update_roadmap_metrics,
+        update_traceability_matrix,
     )
 
     documents = collect_documents(root)
@@ -424,6 +425,7 @@ def generate_index(root: Path) -> None:
     update_landscape_summary(root)
     update_phase_mapping(root)
     update_roadmap_metrics(root, stats)
+    update_traceability_matrix(root)
     update_doc_inventory(root)
     update_llms_txt(root)
 

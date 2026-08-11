@@ -395,6 +395,7 @@ def validate_count_drift(root: Path) -> tuple[list[str], list[str]]:
                         )
 
     errors += _validate_roadmap_metrics(root)
+    errors += _validate_traceability_matrix(root)
     errors += _validate_doc_inventory(root)
     errors += _validate_llms_txt(root)
     return errors, warnings
@@ -546,3 +547,53 @@ def _validate_roadmap_metrics(root: Path) -> list[str]:
             "repository sources. Run `make generate` (#142)."
         ]
     return []
+
+
+def _validate_traceability_matrix(root: Path) -> list[str]:
+    """Guard the generated Control+Name columns of the TRACEABILITY matrix (#197).
+
+    Checks only the DERIVED cells (control row-set + Name), not the editorial
+    presence anchors — so hand-edits to the §-anchor cells never trip the guard
+    while a stale/incorrect control set or name does. Fails closed.
+    """
+    doc = root / "docs" / "TRACEABILITY.md"
+    if not doc.is_file():
+        return []
+    text = doc.read_text(encoding="utf-8")
+    start = "<!-- GENERATED:TRACEABILITY_MATRIX:START"
+    end = "<!-- GENERATED:TRACEABILITY_MATRIX:END -->"
+    if start not in text or end not in text:
+        return []
+
+    from playbook_validator.index_updaters import compute_traceability_rows
+
+    computed = compute_traceability_rows(root)
+    if computed is None:
+        return [
+            "docs/TRACEABILITY.md declares a TRACEABILITY_MATRIX block but the derived "
+            "NIST control-name map (data/nist-800-53-control-names.json) is missing. "
+            "Run `make refresh-oscal`."
+        ]
+    expected_ids, names = computed
+
+    block = text.split(start, 1)[1].split(end, 1)[0]
+    actual: list[tuple[str, str]] = []
+    for line in block.splitlines():
+        m = re.match(r"^\|\s*([A-Z]{2}-\d{1,2})\s*\|\s*([^|]+?)\s*\|", line)
+        if m:
+            actual.append((m.group(1), m.group(2).strip()))
+
+    errors: list[str] = []
+    actual_ids = [cid for cid, _ in actual]
+    if actual_ids != expected_ids:
+        errors.append(
+            "docs/TRACEABILITY.md — §1 control set is out of sync with the mapped "
+            "documents' nist_controls frontmatter. Run `make generate` (#197)."
+        )
+    for cid, name in actual:
+        want = names.get(cid)
+        if want is not None and name != want:
+            errors.append(
+                f"docs/TRACEABILITY.md — {cid} name '{name}' != NIST title '{want}'. Run `make generate` (#197)."
+            )
+    return errors
