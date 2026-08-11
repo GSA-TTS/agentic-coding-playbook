@@ -181,7 +181,7 @@ class TestValidateDocFrontmatter:
 class TestValidateContractRole:
     """Repository-level canonical-designation invariant (#151)."""
 
-    def _write(self, path, role=None, version=None):
+    def _write(self, path, role=None, version=None, banner=None):
         lines = ["---", 'title: "x"', 'description: "d"', "status: canonical", "tier: 1"]
         if role is not None:
             lines.append("contract:")
@@ -189,13 +189,15 @@ class TestValidateContractRole:
             if version is not None:
                 lines.append(f'  version: "{version}"')
         lines += ["---", "# body"]
+        if banner is not None:
+            lines.append(f"> **Version:** {banner} | **Impact Level:** FIPS Moderate")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("\n".join(lines) + "\n")
 
     def test_universal_and_thin_layers_valid(self, tmp_path):
         from playbook_validator.validate_docs import validate_contract_role
 
-        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0")
+        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0", banner="1.0.0")
         self._write(tmp_path / "templates/AGENTS.md.template", role="project-layer")
         self._write(tmp_path / "examples/AGENTS.md.example", role="project-layer")
         errors, _ = validate_contract_role(tmp_path)
@@ -211,10 +213,56 @@ class TestValidateContractRole:
     def test_thin_layer_claiming_universal_errors(self, tmp_path):
         from playbook_validator.validate_docs import validate_contract_role
 
-        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0")
+        self._write(tmp_path / "AGENTS.md", role="universal", version="1.0.0", banner="1.0.0")
         self._write(tmp_path / "templates/AGENTS.md.template", role="universal", version="1.0.0")
         errors, _ = validate_contract_role(tmp_path)
         assert any("thin project layer MUST NOT declare" in e for e in errors)
+
+    def test_frontmatter_version_mismatch_config_errors(self, tmp_path):
+        """#191: contract.version must equal config.CURRENT_CONTRACT_VERSION."""
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(tmp_path / "AGENTS.md", role="universal", version="0.4.0", banner="0.4.0")
+        errors, _ = validate_contract_role(tmp_path)
+        assert any("CURRENT_CONTRACT_VERSION" in e and "#191" in e for e in errors)
+
+    def test_banner_version_mismatch_frontmatter_errors(self, tmp_path):
+        """#191: the body banner Version must equal contract.version."""
+        from playbook_validator.config import CURRENT_CONTRACT_VERSION
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(
+            tmp_path / "AGENTS.md",
+            role="universal",
+            version=CURRENT_CONTRACT_VERSION,
+            banner="0.3.0",
+        )
+        errors, _ = validate_contract_role(tmp_path)
+        assert any("body banner Version" in e and "#191" in e for e in errors)
+
+    def test_version_consistent_passes(self, tmp_path):
+        """All three version copies agree → no error."""
+        from playbook_validator.config import CURRENT_CONTRACT_VERSION
+        from playbook_validator.validate_docs import validate_contract_role
+
+        self._write(
+            tmp_path / "AGENTS.md",
+            role="universal",
+            version=CURRENT_CONTRACT_VERSION,
+            banner=CURRENT_CONTRACT_VERSION,
+        )
+        errors, _ = validate_contract_role(tmp_path)
+        assert errors == []
+
+    def test_real_repo_contract_version_consistent(self):
+        """The live AGENTS.md must have frontmatter == banner == config version."""
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import validate_contract_role
+
+        root = Path(__file__).resolve().parents[2]
+        errors, _ = validate_contract_role(root)
+        assert errors == [], f"live contract-version drift: {errors}"
 
 
 class TestFindContentFiles:
@@ -502,3 +550,147 @@ class TestUpdateHardcodedCounts:
         assert "Framework: NIST 800-53 controls apply." in out
         # the standard's own number is never mangled
         assert "800-53" in out and "800-3" not in out
+
+
+class TestDocFreshness:
+    """stale_after + derived staleness + date-format validation (#210)."""
+
+    def _write(self, tmp_path, fm_lines):
+        p = tmp_path / "d.md"
+        body = "---\ntitle: t\ndescription: d\nstatus: canonical\ntier: 1\n" + fm_lines + "---\n# x\n"
+        p.write_text(body)
+        return p
+
+    def _check(self, tmp_path, fm_lines):
+        from playbook_validator.validate_docs import validate_doc_frontmatter
+
+        return validate_doc_frontmatter(self._write(tmp_path, fm_lines))
+
+    def test_fresh_doc_no_warning(self, tmp_path):
+        import datetime
+
+        recent = (datetime.date.today() - datetime.timedelta(days=5)).isoformat()
+        errors, warnings = self._check(tmp_path, f'last_updated: "{recent}"\nreview_cycle: quarterly\n')
+        assert errors == [] and warnings == []
+
+    def test_derived_staleness_warns(self, tmp_path):
+        import datetime
+
+        old = (datetime.date.today() - datetime.timedelta(days=200)).isoformat()
+        errors, warnings = self._check(tmp_path, f'last_updated: "{old}"\nreview_cycle: quarterly\n')
+        assert errors == []
+        assert warnings and "likely stale" in warnings[0] and "#210" in warnings[0]
+
+    def test_stale_after_passed_warns(self, tmp_path):
+        errors, warnings = self._check(tmp_path, 'stale_after: "2020-01-01"\n')
+        assert errors == []
+        assert warnings and "stale" in warnings[0]
+
+    def test_stale_after_future_no_warning(self, tmp_path):
+        errors, warnings = self._check(tmp_path, 'stale_after: "2999-01-01"\n')
+        assert errors == [] and warnings == []
+
+    def test_stale_after_precedence_over_derived(self, tmp_path):
+        import datetime
+
+        # last_updated is ancient (would derive-warn) but stale_after is future → no warn
+        old = (datetime.date.today() - datetime.timedelta(days=999)).isoformat()
+        errors, warnings = self._check(
+            tmp_path, f'last_updated: "{old}"\nreview_cycle: quarterly\nstale_after: "2999-01-01"\n'
+        )
+        assert errors == [] and warnings == []
+
+    def test_malformed_last_updated_is_error(self, tmp_path):
+        errors, _ = self._check(tmp_path, 'last_updated: "July 2026"\n')
+        assert any("last_updated must be ISO" in e for e in errors)
+
+    def test_malformed_stale_after_is_error(self, tmp_path):
+        errors, _ = self._check(tmp_path, 'stale_after: "2026-13-99"\n')
+        assert any("stale_after must be ISO" in e for e in errors)
+
+    def test_no_freshness_fields_ok(self, tmp_path):
+        errors, warnings = self._check(tmp_path, "")
+        assert errors == [] and warnings == []
+
+    def test_real_repo_no_malformed_dates(self):
+        """Live docs must have no malformed last_updated/stale_after (errors)."""
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import find_content_files, validate_doc_frontmatter
+
+        root = Path(__file__).resolve().parents[2]
+        for f in find_content_files(root):
+            errors, _ = validate_doc_frontmatter(f)
+            date_errors = [e for e in errors if "must be ISO" in e]
+            assert date_errors == [], f"malformed date in {f}: {date_errors}"
+
+
+class TestFrontmatterCrosswalk:
+    """Guard that every frontmatter_schema key is crosswalked (#209, ADR 0004)."""
+
+    def _setup(self, tmp_path, *, schema_keys, crosswalk_keys):
+        import yaml as _yaml
+
+        (tmp_path / "INDEX.yaml").write_text(
+            _yaml.safe_dump(
+                {
+                    "frontmatter_schema": {
+                        "required": list(schema_keys[:2]),
+                        "optional": list(schema_keys[2:]),
+                    }
+                }
+            )
+        )
+        (tmp_path / "data").mkdir(exist_ok=True)
+        (tmp_path / "data" / "frontmatter-crosswalk.yaml").write_text(
+            _yaml.safe_dump({"version": "1.0", "crosswalk": [{"key": k} for k in crosswalk_keys]})
+        )
+
+    def test_all_keys_mapped_passes(self, tmp_path):
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        self._setup(
+            tmp_path,
+            schema_keys=["title", "description", "status", "tier"],
+            crosswalk_keys=["title", "description", "status", "tier"],
+        )
+        errors, _ = validate_frontmatter_crosswalk(tmp_path)
+        assert errors == []
+
+    def test_unmapped_schema_key_fails(self, tmp_path):
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        self._setup(
+            tmp_path,
+            schema_keys=["title", "description", "status", "newkey"],
+            crosswalk_keys=["title", "description", "status"],  # newkey missing
+        )
+        errors, _ = validate_frontmatter_crosswalk(tmp_path)
+        assert errors and "newkey" in errors[0] and "no crosswalk entry" in errors[0]
+
+    def test_stale_crosswalk_entry_warns(self, tmp_path):
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        self._setup(
+            tmp_path,
+            schema_keys=["title", "description"],
+            crosswalk_keys=["title", "description", "gone"],  # gone not in schema
+        )
+        errors, warnings = validate_frontmatter_crosswalk(tmp_path)
+        assert errors == []
+        assert any("gone" in w for w in warnings)
+
+    def test_noop_without_files(self, tmp_path):
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        errors, warnings = validate_frontmatter_crosswalk(tmp_path)
+        assert errors == [] and warnings == []
+
+    def test_real_repo_crosswalk_complete(self):
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import validate_frontmatter_crosswalk
+
+        root = Path(__file__).resolve().parents[2]
+        errors, _ = validate_frontmatter_crosswalk(root)
+        assert errors == [], f"live crosswalk gap: {errors}"

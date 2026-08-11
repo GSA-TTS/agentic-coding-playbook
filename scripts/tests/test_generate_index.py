@@ -565,3 +565,335 @@ class TestUpdateContextGuideWordCounts:
     def test_no_guide_file(self, tmp_path):
         # Should not crash when CONTEXT-GUIDE.md doesn't exist
         update_context_guide_word_counts(tmp_path)
+
+
+# ── Landscape doc generation + guards (#142) ──────────────────────────────────
+
+
+class TestLandscapeSummaryGeneration:
+    """Status Summary + Phase Mapping generated from the registry (#142)."""
+
+    def _write_registry(self, root, entries):
+        (root / "data").mkdir(exist_ok=True)
+        import yaml as _yaml
+
+        (root / "data" / "federal-ai-landscape.yaml").write_text(
+            _yaml.safe_dump({"total_entries": len(entries), "entries": entries})
+        )
+
+    def test_summary_counts_by_category_and_status(self, tmp_path):
+        from playbook_validator.index_updaters import (
+            compute_landscape_summary,
+            render_landscape_summary_table,
+        )
+
+        self._write_registry(
+            tmp_path,
+            [
+                {"id": "eo-1", "category": "executive_order", "status": "active"},
+                {"id": "eo-2", "category": "executive_order", "status": "revoked"},
+                {"id": "n-1", "category": "nist_standard", "status": "final"},  # → Active
+                {"id": "n-2", "category": "nist_standard", "status": "draft"},
+            ],
+        )
+        counts, total = compute_landscape_summary(tmp_path)
+        assert total == 4
+        assert counts["executive_order"] == {"active": 1, "revoked": 1, "draft": 0}
+        assert counts["nist_standard"] == {"active": 1, "revoked": 0, "draft": 1}
+        table = render_landscape_summary_table(counts)
+        assert "| **Total** | **2** | **1** | **1** |" in table  # final counts as active
+
+    def test_phase_mapping_derived_from_playbook_phases(self, tmp_path):
+        from playbook_validator.index_updaters import (
+            compute_phase_mapping,
+            render_phase_mapping_table,
+        )
+
+        self._write_registry(
+            tmp_path,
+            [
+                {"id": "eo-14179", "category": "executive_order", "status": "active", "playbook_phases": ["0"]},
+                {"id": "m-25-22", "category": "omb_memo", "status": "active", "playbook_phases": ["0.5", "7"]},
+                {
+                    "id": "slsa",
+                    "title": "SLSA (Supply-chain Levels)",
+                    "category": "industry_standard",
+                    "status": "active",
+                    "playbook_phases": ["1"],
+                },
+            ],
+        )
+        mapping = compute_phase_mapping(tmp_path)
+        assert mapping["0"] == ["EO 14179"]
+        assert mapping["0.5"] == ["M-25-22"]
+        assert mapping["7"] == ["M-25-22"]
+        assert mapping["1"] == ["SLSA"]  # non-coded id → title, parenthetical dropped
+        table = render_phase_mapping_table(mapping)
+        assert "**Phase 4: Document Decisions** | —" in table  # empty phase → em dash
+
+    def test_short_ref_shapes(self, tmp_path):
+        from playbook_validator.index_updaters import _landscape_short_ref
+
+        assert _landscape_short_ref({"id": "eo-14179"}) == "EO 14179"
+        assert _landscape_short_ref({"id": "m-25-21"}) == "M-25-21"
+        assert _landscape_short_ref({"id": "nist-ai-100-1"}) == "NIST AI 100-1"
+        assert _landscape_short_ref({"id": "nist-sp-800-218a"}) == "NIST SP 800-218A"
+        assert (
+            _landscape_short_ref({"id": "gao-ai-framework", "title": "GAO AI Accountability Framework"})
+            == "GAO AI Accountability Framework"
+        )
+
+
+class TestRoadmapMetricsGeneration:
+    def test_metrics_table_derives_all_cells(self, tmp_path, monkeypatch):
+        from playbook_validator import index_updaters as iu
+        from playbook_validator.generate_index import IndexStats
+
+        (tmp_path / "data").mkdir()
+        # count_landscape_entries matches "^\s+- id:" (indented list), so emit
+        # the same 2-space-indented shape the real registry uses.
+        entry_lines = "\n".join(f"  - id: e-{i}\n    category: omb_memo\n    status: active" for i in range(5))
+        (tmp_path / "data" / "federal-ai-landscape.yaml").write_text(f"total_entries: 5\nentries:\n{entry_lines}\n")
+        docs = tmp_path / "docs"
+        docs.mkdir()
+        (docs / "SECURITY-CONTROLS.md").write_text(
+            "---\ntitle: SC\nstatus: canonical\ntier: 1\n---\n"
+            "| **AC-2** | n | P1 | d | i | v | x |\n| **AC-3** | n | P1 | d | i | v | x |\n"
+        )
+        (tmp_path / "checklists").mkdir()
+        (tmp_path / "checklists" / "pre-deployment.md").write_text(
+            "| 1.1 | a | [ ] Pass | |\n| 1.2 | b | [ ] Pass | |\n| 2.1 | c | [ ] Pass | |\n"
+        )
+        monkeypatch.setattr(iu, "_collect_test_count", lambda root: 100)
+        stats = IndexStats(total_documents=7, total_skills=3)
+        table = iu.render_roadmap_metrics_table(tmp_path, stats)
+        assert "| Documents | 7 |" in table
+        assert "| Skills | 3 |" in table
+        assert "| Tests | 100 |" in table
+        assert "| Checklist items | 3 |" in table
+        assert "| Landscape entries | 5 |" in table
+        assert "| NIST controls mapped | 2 |" in table
+
+
+class TestLandscapeDocGuard:
+    """validate_landscape_doc_summary fails closed on generated-block drift."""
+
+    def _setup(self, root, summary_table, phases_table):
+        (root / "data").mkdir(exist_ok=True)
+        import yaml as _yaml
+
+        entries = [
+            {"id": "eo-1", "category": "executive_order", "status": "active", "playbook_phases": ["0"]},
+        ]
+        (root / "data" / "federal-ai-landscape.yaml").write_text(
+            _yaml.safe_dump({"total_entries": 1, "entries": entries})
+        )
+        (root / "docs").mkdir(exist_ok=True)
+        (root / "docs" / "FEDERAL-AI-LANDSCAPE.md").write_text(
+            "# L\n\n"
+            "<!-- GENERATED:LANDSCAPE_SUMMARY:START -->\n"
+            + summary_table
+            + "\n<!-- GENERATED:LANDSCAPE_SUMMARY:END -->\n\n"
+            "<!-- GENERATED:LANDSCAPE_PHASES:START -->\n" + phases_table + "\n<!-- GENERATED:LANDSCAPE_PHASES:END -->\n"
+        )
+
+    def test_in_sync_passes(self, tmp_path):
+        from playbook_validator.index_updaters import (
+            compute_landscape_summary,
+            compute_phase_mapping,
+            render_landscape_summary_table,
+            render_phase_mapping_table,
+        )
+        from playbook_validator.validate_landscape import validate_landscape_doc_summary
+
+        # build the registry first so we can render the correct expected tables
+        (tmp_path / "data").mkdir()
+        import yaml as _yaml
+
+        entries = [
+            {"id": "eo-1", "category": "executive_order", "status": "active", "playbook_phases": ["0"]},
+        ]
+        (tmp_path / "data" / "federal-ai-landscape.yaml").write_text(
+            _yaml.safe_dump({"total_entries": 1, "entries": entries})
+        )
+        summary = render_landscape_summary_table(compute_landscape_summary(tmp_path)[0])
+        phases = render_phase_mapping_table(compute_phase_mapping(tmp_path))
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "FEDERAL-AI-LANDSCAPE.md").write_text(
+            "# L\n\n<!-- GENERATED:LANDSCAPE_SUMMARY:START -->\n"
+            + summary
+            + "\n<!-- GENERATED:LANDSCAPE_SUMMARY:END -->\n\n"
+            "<!-- GENERATED:LANDSCAPE_PHASES:START -->\n" + phases + "\n<!-- GENERATED:LANDSCAPE_PHASES:END -->\n"
+        )
+        assert validate_landscape_doc_summary(tmp_path) == []
+
+    def test_drifted_summary_fails(self, tmp_path):
+        from playbook_validator.validate_landscape import validate_landscape_doc_summary
+
+        self._setup(
+            tmp_path,
+            summary_table=(
+                "| Category | Active | Revoked/Rescinded | Draft |\n"
+                "|---|---|---|---|\n"
+                "| **Total** | **99** | **0** | **0** |"
+            ),
+            phases_table="| Phase | x |\n|---|---|",
+        )
+        errors = validate_landscape_doc_summary(tmp_path)
+        assert errors and "out of sync" in errors[0]
+
+
+class TestDocInventory:
+    def _write_index(self, root, docs):
+        import yaml as _yaml
+
+        (root / "INDEX.yaml").write_text(_yaml.safe_dump({"documents": docs}))
+
+    def test_render_sorts_by_tier_then_path(self):
+        from playbook_validator.index_updaters import render_doc_inventory_table
+
+        docs = [
+            {"path": "docs/z.md", "tier": 2, "description": "Zed"},
+            {"path": "AGENTS.md", "tier": 1, "description": "Contract"},
+            {"path": "docs/a.md", "tier": 1, "description": "Ay"},
+        ]
+        table = render_doc_inventory_table(docs)
+        lines = [ln for ln in table.splitlines() if ln.startswith("| `")]
+        assert lines[0].startswith("| `AGENTS.md` | 1 |")
+        assert lines[1].startswith("| `docs/a.md` | 1 |")
+        assert lines[2].startswith("| `docs/z.md` | 2 |")
+
+    def test_description_whitespace_collapsed(self):
+        from playbook_validator.index_updaters import render_doc_inventory_table
+
+        table = render_doc_inventory_table([{"path": "x.md", "tier": 1, "description": "multi\n  line   desc"}])
+        assert "| `x.md` | 1 | multi line desc |" in table
+
+    def test_update_is_noop_without_markers(self, tmp_path):
+        from playbook_validator.index_updaters import update_doc_inventory
+
+        self._write_index(tmp_path, [{"path": "a.md", "tier": 1, "description": "d"}])
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "README.md").write_text("# no markers here\n")
+        update_doc_inventory(tmp_path)  # must not raise / not add anything
+        assert "GENERATED:DOC_INVENTORY" not in (tmp_path / "docs" / "README.md").read_text()
+
+    def test_update_fills_marked_block(self, tmp_path):
+        from playbook_validator.index_updaters import update_doc_inventory
+
+        self._write_index(tmp_path, [{"path": "AGENTS.md", "tier": 1, "description": "Contract"}])
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "README.md").write_text(
+            "# R\n\n<!-- GENERATED:DOC_INVENTORY:START -->\nold\n<!-- GENERATED:DOC_INVENTORY:END -->\n"
+        )
+        update_doc_inventory(tmp_path)
+        out = (tmp_path / "docs" / "README.md").read_text()
+        assert "| `AGENTS.md` | 1 | Contract |" in out
+
+    def test_guard_flags_drift(self, tmp_path):
+        from playbook_validator.validate_docs import _validate_doc_inventory
+
+        self._write_index(tmp_path, [{"path": "AGENTS.md", "tier": 1, "description": "Contract"}])
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "README.md").write_text(
+            "# R\n\n<!-- GENERATED:DOC_INVENTORY:START -->\n"
+            "| Document | Tier | Purpose |\n|----------|------|---------|\n"
+            "| `AGENTS.md` | 9 | Contract |\n"  # wrong tier
+            "<!-- GENERATED:DOC_INVENTORY:END -->\n"
+        )
+        errors = _validate_doc_inventory(tmp_path)
+        assert errors and "out of sync" in errors[0]
+
+    def test_real_repo_inventory_consistent(self):
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import _validate_doc_inventory
+
+        root = Path(__file__).resolve().parents[2]
+        assert _validate_doc_inventory(root) == []
+
+
+# ── Repo-root llms.txt generation + guard (#212) ──────────────────────────────
+
+
+class TestLlmsTxt:
+    def _index(self):
+        return {
+            "repo": "GSA-TTS/agentic-coding-playbook",
+            "scope": "FIPS Moderate | Single-agent",
+            "documents": [
+                {"path": "AGENTS.md", "title": "Agent Rules", "description": "Behavioral contract.", "tier": 1},
+                {"path": "docs/SETUP.md", "title": "Setup", "description": "How to set up.", "tier": 2},
+                {"path": "AGENTS.md.older", "title": "Older", "description": "", "tier": 1},
+            ],
+        }
+
+    def test_render_structure_and_sort(self):
+        from playbook_validator.index_updaters import render_llms_txt
+
+        out = render_llms_txt(self._index())
+        assert out.startswith("<!-- GENERATED")
+        assert "# agentic-coding-playbook" in out
+        assert "> Federal AI agent behavioral playbook" in out
+        assert "[llms.txt](https://llmstxt.org/)" in out
+        # tier headings
+        assert "## Core (always load)" in out
+        assert "## Supporting" in out
+        # tier-1 entries sorted by path (AGENTS.md before AGENTS.md.older)
+        core = out.split("## Core (always load)", 1)[1].split("## Supporting", 1)[0]
+        assert core.index("(AGENTS.md)") < core.index("(AGENTS.md.older)")
+        # link format with + without description
+        assert "- [Agent Rules](AGENTS.md): Behavioral contract." in out
+        assert "- [Older](AGENTS.md.older)\n" in out
+        # data section
+        assert "[INDEX.yaml](INDEX.yaml)" in out
+        assert out.endswith("\n")
+
+    def test_update_writes_file(self, tmp_path):
+        import yaml as _yaml
+        from playbook_validator.index_updaters import update_llms_txt
+
+        (tmp_path / "INDEX.yaml").write_text(_yaml.safe_dump(self._index()))
+        update_llms_txt(tmp_path)
+        assert (tmp_path / "llms.txt").is_file()
+        assert "# agentic-coding-playbook" in (tmp_path / "llms.txt").read_text()
+
+    def test_update_noop_without_index(self, tmp_path):
+        from playbook_validator.index_updaters import update_llms_txt
+
+        update_llms_txt(tmp_path)  # no INDEX.yaml
+        assert not (tmp_path / "llms.txt").exists()
+
+    def test_guard_flags_missing(self, tmp_path):
+        import yaml as _yaml
+        from playbook_validator.validate_docs import _validate_llms_txt
+
+        (tmp_path / "INDEX.yaml").write_text(_yaml.safe_dump(self._index()))
+        errors = _validate_llms_txt(tmp_path)
+        assert errors and "missing" in errors[0]
+
+    def test_guard_flags_drift(self, tmp_path):
+        import yaml as _yaml
+        from playbook_validator.validate_docs import _validate_llms_txt
+
+        (tmp_path / "INDEX.yaml").write_text(_yaml.safe_dump(self._index()))
+        (tmp_path / "llms.txt").write_text("stale content\n")
+        errors = _validate_llms_txt(tmp_path)
+        assert errors and "out of sync" in errors[0]
+
+    def test_guard_passes_when_synced(self, tmp_path):
+        import yaml as _yaml
+        from playbook_validator.index_updaters import update_llms_txt
+        from playbook_validator.validate_docs import _validate_llms_txt
+
+        (tmp_path / "INDEX.yaml").write_text(_yaml.safe_dump(self._index()))
+        update_llms_txt(tmp_path)
+        assert _validate_llms_txt(tmp_path) == []
+
+    def test_real_repo_llms_txt_consistent(self):
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import _validate_llms_txt
+
+        root = Path(__file__).resolve().parents[2]
+        assert _validate_llms_txt(root) == []

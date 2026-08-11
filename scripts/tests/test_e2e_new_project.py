@@ -55,6 +55,12 @@ UNIVERSAL_PROSE_FINGERPRINTS = (
 # Markdown inline links: [text](target)
 _MD_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 
+# Backtick inline-code path references, e.g. `docs/TRACEABILITY.md`, `INDEX.yaml`.
+# These are the refs the markdown-link check misses (#189): a copied skill that
+# points at a playbook-only path in inline code dangles downstream but the
+# link-only check stays green.
+_BACKTICK_PATH_RE = re.compile(r"`([A-Za-z0-9_][A-Za-z0-9_./-]*\.(?:md|yaml|yml|json))`")
+
 
 @pytest.fixture(scope="module")
 def bootstrapped_project(tmp_path_factory) -> Path:
@@ -177,6 +183,54 @@ def test_no_dangling_markdown_links_including_skills(bootstrapped_project: Path)
             if not resolved.exists():
                 dangling.append(f"{md_file.relative_to(bootstrapped_project)} -> {link}")
     assert not dangling, "dangling intra-project links found:\n" + "\n".join(dangling)
+
+
+def test_no_dangling_backtick_refs_in_copied_skills(bootstrapped_project: Path):
+    """Backtick inline-code path refs in COPIED skills resolve in the project (#189).
+
+    The markdown-link check above only catches `[text](target)` syntax. Copied
+    downstream skills reference playbook-only files as inline code (e.g.
+    `` `docs/TRACEABILITY.md` ``, `` `INDEX.yaml` ``) which are NOT copied into a
+    bootstrapped project — so they ship a broken reference while the link-only
+    check stays green.
+
+    Scope: `.md` under the copied ``skills/`` tree. To stay fail-closed without
+    false positives, a backtick token is a dangle only when it is a KNOWN
+    playbook-only path (a `docs/…`, `data/…`, or root inventory file the
+    playbook owns) that the bootstrap did not copy — not an illustrative example
+    filename (`SECURITY.md` a user creates, a `README.md` the skill generates)
+    that merely happens to share a name with a repo-root file.
+    """
+    # Playbook-internal directories/files whose contents are NOT copied
+    # wholesale downstream. A backtick ref under these that isn't present in the
+    # project is a genuine dangle.
+    playbook_only_prefixes = ("docs/", "data/", "templates/")
+    playbook_only_files = {"INDEX.yaml"}
+    # Paths a skill CREATES at runtime (its own output), not a playbook-only
+    # dependency — referencing these is correct, not a dangle.
+    skill_generated = {"docs/ato-package-index.md"}
+
+    skills_dir = bootstrapped_project / "skills"
+    dangling: list[str] = []
+    for md_file in skills_dir.rglob("*.md"):
+        text = md_file.read_text(encoding="utf-8")
+        for ref in _BACKTICK_PATH_RE.findall(text):
+            ref_path = ref.strip()
+            if ref_path in skill_generated:
+                continue
+            is_playbook_owned = ref_path.startswith(playbook_only_prefixes) or ref_path in playbook_only_files
+            if not is_playbook_owned:
+                continue  # illustrative / user-created / skill-generated name
+            # Resolves inside the project (root-relative or file-relative)? OK.
+            if (bootstrapped_project / ref_path).exists():
+                continue
+            if (md_file.parent / ref_path).exists():
+                continue
+            dangling.append(f"{md_file.relative_to(bootstrapped_project)} -> `{ref_path}`")
+    assert not dangling, (
+        "copied skills reference playbook-only files that are not in the "
+        "bootstrapped project (#189):\n" + "\n".join(sorted(dangling))
+    )
 
 
 def test_referenced_docs_exist_in_project(bootstrapped_project: Path):

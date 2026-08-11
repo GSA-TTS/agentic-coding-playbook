@@ -4,6 +4,7 @@ Validates that all content Markdown files have correct frontmatter
 with required fields and valid enum values.
 """
 
+import datetime
 import re
 from pathlib import Path
 
@@ -131,7 +132,73 @@ def validate_doc_frontmatter(path: Path) -> tuple[list[str], list[str]]:
                 if vval is not None and (not isinstance(vval, str) or not vval.strip()):
                     errors.append(f"{path} — contract.{vkey} must be a non-empty string")
 
+    _validate_freshness(path, fm, errors, warnings)
+
     return errors, warnings
+
+
+# Freshness fields (#210). Dates are ISO YYYY-MM-DD. `review_cycle` → max age in
+# days used to DERIVE staleness from `last_updated` when no explicit `stale_after`
+# is set. Staleness is a WARNING (content present, just due for review); a
+# malformed date is an ERROR (fail closed — a bad date must never read as fresh).
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_REVIEW_CYCLE_DAYS = {"quarterly": 90, "semi-annually": 182, "annually": 365}
+
+
+def _parse_iso_date(value: str) -> datetime.date | None:
+    if not isinstance(value, str) or not _ISO_DATE_RE.match(value.strip()):
+        return None
+    try:
+        return datetime.date.fromisoformat(value.strip())
+    except ValueError:
+        return None
+
+
+def _validate_freshness(path: Path, fm: dict, errors: list[str], warnings: list[str]) -> None:
+    """Validate last_updated / stale_after formats and surface staleness (#210).
+
+    - `last_updated` and `stale_after`, when present, MUST be ISO YYYY-MM-DD;
+      a malformed value is an ERROR (fail closed).
+    - If `stale_after` is set and today >= it → WARNING.
+    - Else if `last_updated` + `review_cycle` max-age is exceeded → WARNING.
+    Staleness is advisory (warning), never a hard failure — the doc still exists.
+    """
+    today = datetime.date.today()
+
+    raw_updated = fm.get("last_updated")
+    updated: datetime.date | None = None
+    if raw_updated is not None:
+        updated = _parse_iso_date(str(raw_updated))
+        if updated is None:
+            errors.append(f"{path} — last_updated must be ISO YYYY-MM-DD (got {raw_updated!r})")
+
+    raw_stale = fm.get("stale_after")
+    stale_after: datetime.date | None = None
+    if raw_stale is not None:
+        stale_after = _parse_iso_date(str(raw_stale))
+        if stale_after is None:
+            errors.append(f"{path} — stale_after must be ISO YYYY-MM-DD (got {raw_stale!r})")
+
+    if stale_after is not None:
+        if today >= stale_after:
+            warnings.append(
+                f"{path} — content is stale: stale_after {stale_after.isoformat()} has passed; "
+                "review and refresh, then bump last_updated / stale_after (#210)."
+            )
+        return  # explicit stale_after takes precedence over derived staleness
+
+    # Derived staleness from last_updated + review_cycle (the prose rule in
+    # AGENTS.md §13.1, now enforced as a warning).
+    cycle = fm.get("review_cycle")
+    if updated is not None and cycle in _REVIEW_CYCLE_DAYS:
+        max_age = datetime.timedelta(days=_REVIEW_CYCLE_DAYS[cycle])
+        if today - updated > max_age:
+            age_days = (today - updated).days
+            warnings.append(
+                f"{path} — likely stale: last_updated {updated.isoformat()} is {age_days} days "
+                f"old, exceeding the {cycle} review cycle ({_REVIEW_CYCLE_DAYS[cycle]} days). "
+                "Review and bump last_updated, or set stale_after (#210)."
+            )
 
 
 # Control-overlay body rows look like: | **AC-2** | Account Management | ...
@@ -232,6 +299,8 @@ def validate_contract_role(root: Path) -> tuple[list[str], list[str]]:
             )
         elif not contract_version(fm):
             errors.append(f"{universal} — universal contract MUST declare contract.{CONTRACT_VERSION_KEY}")
+        else:
+            errors.extend(_check_contract_version_consistency(universal, fm))
 
     for rel in _THIN_LAYER_PATHS:
         thin = root / rel
@@ -269,6 +338,7 @@ _COUNT_PROSE_FILES = (
     "docs/SECURITY-CONTROLS.md",
     "docs/ROADMAP.md",
     "CONTEXT-GUIDE.md",
+    "CONTRIBUTING.md",
 )
 # Contexts where "N entries" is NOT the landscape catalog (avoid false positives).
 _LANDSCAPE_CONTEXT_RE = re.compile(r"(?i)(landscape|federal ai guidance catalog|entries total)")
@@ -324,4 +394,155 @@ def validate_count_drift(root: Path) -> tuple[list[str], list[str]]:
                             "count (#184)."
                         )
 
+    errors += _validate_roadmap_metrics(root)
+    errors += _validate_doc_inventory(root)
+    errors += _validate_llms_txt(root)
     return errors, warnings
+
+
+def _validate_llms_txt(root: Path) -> list[str]:
+    """Guard the generated repo-root llms.txt against INDEX.yaml (#212).
+
+    Fully-generated file — fail closed if it is missing or out of sync. No-op
+    only when INDEX.yaml itself is absent (nothing to generate from).
+    """
+    index_path = root / "INDEX.yaml"
+    if not index_path.is_file():
+        return []
+    llms = root / "llms.txt"
+    if not llms.is_file():
+        return ["llms.txt is missing. Run `make generate` (#212)."]
+
+    import yaml
+
+    from playbook_validator.index_updaters import render_llms_txt
+
+    index = yaml.safe_load(index_path.read_text(encoding="utf-8")) or {}
+    expected = render_llms_txt(index)
+    if llms.read_text(encoding="utf-8") != expected:
+        return ["llms.txt is out of sync with INDEX.yaml. Run `make generate` (#212)."]
+    return []
+
+
+def _validate_doc_inventory(root: Path) -> list[str]:
+    """Guard the generated document inventory in docs/README.md (#199)."""
+    doc = root / "docs" / "README.md"
+    if not doc.is_file():
+        return []
+    text = doc.read_text(encoding="utf-8")
+    start = "<!-- GENERATED:DOC_INVENTORY:START"
+    end = "<!-- GENERATED:DOC_INVENTORY:END -->"
+    if start not in text or end not in text:
+        return []
+
+    from playbook_validator.index_updaters import (
+        _load_index_documents,
+        render_doc_inventory_table,
+    )
+
+    documents = _load_index_documents(root)
+    if documents is None:
+        return ["docs/README.md declares a DOC_INVENTORY block but INDEX.yaml is missing"]
+    expected = render_doc_inventory_table(documents).strip()
+    block = text.split(start, 1)[1].split(end, 1)[0]
+    body = block.split("\n", 1)[1].strip() if "\n" in block else ""
+    if body != expected:
+        return ["docs/README.md — document inventory is out of sync with INDEX.yaml. Run `make generate` (#199)."]
+    return []
+
+
+# Body banner "> **Version:** X.Y.Z" in the universal contract — must agree with
+# the frontmatter contract.version and config.CURRENT_CONTRACT_VERSION so the
+# three copies can never drift apart again (#191).
+_BANNER_VERSION_RE = re.compile(r">\s*\*\*Version:\*\*\s*([0-9]+\.[0-9]+\.[0-9]+)")
+
+
+def _check_contract_version_consistency(universal: Path, fm: dict) -> list[str]:
+    """The universal contract's version appears in three places: the
+    ``contract.version`` frontmatter marker, the ``> **Version:**`` body banner,
+    and ``config.CURRENT_CONTRACT_VERSION``. They MUST all agree (#191) — a prior
+    drift (frontmatter 0.4.0 / banner 0.3.0 / config 1.0.0) meant the shipped
+    thin template's ``requires_contract: ">=1.0"`` was unsatisfiable."""
+    from playbook_validator.config import CURRENT_CONTRACT_VERSION
+
+    errors: list[str] = []
+    fm_version = contract_version(fm)
+    if fm_version != CURRENT_CONTRACT_VERSION:
+        errors.append(
+            f"{universal} — contract.version ({fm_version!r}) != "
+            f"config.CURRENT_CONTRACT_VERSION ({CURRENT_CONTRACT_VERSION!r}); "
+            "reconcile the two (#191)."
+        )
+    banner = _BANNER_VERSION_RE.search(universal.read_text(encoding="utf-8"))
+    if banner and banner.group(1) != fm_version:
+        errors.append(
+            f"{universal} — body banner Version ({banner.group(1)!r}) != "
+            f"contract.version ({fm_version!r}); reconcile the two (#191)."
+        )
+    return errors
+
+
+def validate_frontmatter_crosswalk(root: Path) -> tuple[list[str], list[str]]:
+    """Every INDEX.yaml frontmatter_schema key must be crosswalked (#209, ADR 0004).
+
+    Keeps `data/frontmatter-crosswalk.yaml` in sync with the declared schema so a
+    newly-added frontmatter key must be mapped to its Dublin Core / schema.org
+    equivalent deliberately, rather than drifting outside any standard. No-op if
+    either file is absent. Fails closed on a schema key with no crosswalk entry.
+    """
+    import yaml
+
+    index_path = root / "INDEX.yaml"
+    crosswalk_path = root / "data" / "frontmatter-crosswalk.yaml"
+    if not index_path.is_file() or not crosswalk_path.is_file():
+        return [], []
+
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    index = yaml.safe_load(index_path.read_text(encoding="utf-8")) or {}
+    schema = index.get("frontmatter_schema", {}) or {}
+    schema_keys = set(schema.get("required", []) or []) | set(schema.get("optional", []) or [])
+
+    crosswalk = yaml.safe_load(crosswalk_path.read_text(encoding="utf-8")) or {}
+    mapped_keys = {entry.get("key") for entry in (crosswalk.get("crosswalk", []) or []) if isinstance(entry, dict)}
+
+    for key in sorted(schema_keys - mapped_keys):
+        errors.append(
+            f"data/frontmatter-crosswalk.yaml — frontmatter key '{key}' is declared in "
+            "INDEX.yaml frontmatter_schema but has no crosswalk entry. Add its Dublin "
+            "Core / schema.org mapping (#209, ADR 0004)."
+        )
+    for key in sorted(mapped_keys - schema_keys):
+        warnings.append(
+            f"data/frontmatter-crosswalk.yaml — crosswalk entry '{key}' is not in "
+            "INDEX.yaml frontmatter_schema (stale mapping?)."
+        )
+
+    return errors, warnings
+
+
+def _validate_roadmap_metrics(root: Path) -> list[str]:
+    """Guard the generated ROADMAP metrics table against live sources (#142)."""
+    doc = root / "docs" / "ROADMAP.md"
+    if not doc.is_file():
+        return []
+    text = doc.read_text(encoding="utf-8")
+    start = "<!-- GENERATED:ROADMAP_METRICS:START"
+    end = "<!-- GENERATED:ROADMAP_METRICS:END -->"
+    if start not in text or end not in text:
+        return []
+
+    from playbook_validator.generate_index import collect_documents, collect_skills, compute_stats
+    from playbook_validator.index_updaters import render_roadmap_metrics_table
+
+    stats = compute_stats(collect_documents(root), collect_skills(root))
+    expected = render_roadmap_metrics_table(root, stats).strip()
+    block = text.split(start, 1)[1].split(end, 1)[0]
+    body = block.split("\n", 1)[1].strip() if "\n" in block else ""
+    if body != expected:
+        return [
+            "docs/ROADMAP.md — Current State metrics table is out of sync with "
+            "repository sources. Run `make generate` (#142)."
+        ]
+    return []

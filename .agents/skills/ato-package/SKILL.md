@@ -93,8 +93,9 @@ Populate Status as: **Complete**, **Partial**, or **Missing**.
 Pull last-updated dates from file frontmatter `last_updated` field if present,
 otherwise use the git log date (`git log -1 --format=%ai -- <path>`).
 
-Reference `docs/SECURITY-CONTROLS.md` for NIST control family mappings and
-`docs/TRACEABILITY.md` for the control-to-document matrix.
+Reference `docs/SECURITY-CONTROLS.md` for NIST control family mappings and the
+playbook's control-to-document matrix (docs/TRACEABILITY.md in the
+agentic-coding-playbook repo).
 
 ### Step 4: Gap Analysis
 
@@ -157,6 +158,6 @@ Output a readiness assessment in this format:
 - This skill is **read-only** — it inventories and validates but does not create or modify artifacts.
 - The package index (`docs/ato-package-index.md`) is the only file this skill generates.
 - All sign-off lines require human signatures. The agent cannot sign on behalf of reviewers.
-- NIST control mappings come from `docs/SECURITY-CONTROLS.md` and `docs/TRACEABILITY.md`.
+- NIST control mappings come from `docs/SECURITY-CONTROLS.md` and the playbook's traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo).
 - Use dependency skills to fill gaps: `federal-risk-assessment`, `federal-pre-deployment-check`, `federal-decision-records`.
-- **Policy reference:** `docs/SECURITY-CONTROLS.md` (control mappings), `docs/TRACEABILITY.md` (control-to-document matrix).
+- **Policy reference:** `docs/SECURITY-CONTROLS.md` (control mappings); the playbook traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) for the control-to-document matrix.
