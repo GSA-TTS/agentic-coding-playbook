@@ -398,6 +398,8 @@ def validate_count_drift(root: Path) -> tuple[list[str], list[str]]:
     errors += _validate_traceability_matrix(root)
     errors += _validate_doc_inventory(root)
     errors += _validate_llms_txt(root)
+    errors += _validate_framework_refs(root)
+    errors += _validate_framework_frontmatter(root)
     return errors, warnings
 
 
@@ -596,4 +598,55 @@ def _validate_traceability_matrix(root: Path) -> list[str]:
             errors.append(
                 f"docs/TRACEABILITY.md — {cid} name '{name}' != NIST title '{want}'. Run `make generate` (#197)."
             )
+    return errors
+
+
+def _validate_framework_refs(root: Path) -> list[str]:
+    """Guard the generated AGENTS.md Framework References list (#198)."""
+    doc = root / "AGENTS.md"
+    if not doc.is_file():
+        return []
+    text = doc.read_text(encoding="utf-8")
+    start = "<!-- GENERATED:FRAMEWORK_REFS:START"
+    end = "<!-- GENERATED:FRAMEWORK_REFS:END -->"
+    if start not in text or end not in text:
+        return []
+
+    from playbook_validator.index_updaters import load_frameworks, render_framework_refs
+
+    frameworks = load_frameworks(root)
+    if frameworks is None:
+        return ["AGENTS.md declares a FRAMEWORK_REFS block but data/frameworks.yaml is missing"]
+    expected = render_framework_refs(frameworks).strip()
+    block = text.split(start, 1)[1].split(end, 1)[0]
+    body = block.split("\n", 1)[1].strip() if "\n" in block else ""
+    if body != expected:
+        return [
+            "AGENTS.md — Framework References list is out of sync with "
+            "data/frameworks.yaml. Run `make generate` (#198)."
+        ]
+    return []
+
+
+def _validate_framework_frontmatter(root: Path) -> list[str]:
+    """Every doc's `frameworks:` frontmatter value must be a known canonical
+    name or alias in data/frameworks.yaml — catches misspellings / casing drift
+    (e.g. NCCOE vs NCCoE) and orphaned framework strings (#198). Fail closed.
+    """
+    from playbook_validator.index_updaters import framework_name_index, load_frameworks
+
+    frameworks = load_frameworks(root)
+    if frameworks is None:
+        return []
+    known = framework_name_index(frameworks)
+    errors: list[str] = []
+    for path in find_content_files(root):
+        fm = extract_frontmatter(path)
+        for value in fm.get("frameworks", []) or []:
+            if isinstance(value, str) and value.strip() and value.strip() not in known:
+                rel = path.relative_to(root)
+                errors.append(
+                    f"{rel} — frameworks: '{value}' is not a known framework in "
+                    "data/frameworks.yaml (add it or fix the spelling/casing) (#198)."
+                )
     return errors

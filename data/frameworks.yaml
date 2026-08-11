@@ -1,0 +1,87 @@
+# frameworks.yaml — Canonical registry of framework references
+#
+# Single source of truth for the framework NAMES + reference dates used across
+# the playbook. The "## Framework References" prose list in AGENTS.md is
+# generated from this file (make generate), and every doc's `frameworks:`
+# frontmatter value is validated against the canonical name + aliases here
+# (validate-docs fails closed on an unknown / misspelled entry). Prevents the
+# prose-vs-frontmatter divergence and casing drift (#198).
+#
+# Each entry:
+#   id:        stable short key (lowercase, hyphenated)
+#   name:      canonical display name (authoritative spelling/casing)
+#   date:      optional reference/publication date shown in the prose list
+#   aliases:   optional terse forms permitted in `frameworks:` frontmatter
+#   featured:  true → included in the generated AGENTS.md prose list, in order
+
+version: "1.0"
+
+frameworks:
+  - id: nist-800-53
+    name: "NIST SP 800-53 Rev 5.2"
+    date: "September 2024"
+    featured: true
+  - id: nist-ai-rmf
+    name: "NIST AI RMF 1.0"
+    date: "January 2023"
+    featured: true
+  - id: nist-ai-600-1
+    name: "NIST AI 600-1 Generative AI Profile"
+    date: "July 2024"
+    aliases: ["NIST AI 600-1"]
+    featured: true
+  - id: nist-800-218a
+    name: "NIST SP 800-218A SSDF for Generative AI"
+    date: "June 2024"
+    aliases: ["NIST SP 800-218A"]
+    featured: true
+  - id: nccoe-agent-identity
+    name: "NCCoE AI Agent Identity & Authorization Concept Paper"
+    date: "February 2026"
+    aliases: ["NCCoE Agent Identity & Authorization", "NCCoE Agent Identity"]
+    featured: true
+  - id: nist-caisi
+    name: "NIST CAISI AI Agent Standards Initiative"
+    date: "February 2026"
+    aliases: ["NIST CAISI"]
+    featured: true
+  - id: owasp-llm-2025
+    name: "OWASP Top 10 for LLM Applications 2025"
+    date: "November 2024"
+    aliases: ["OWASP Top 10 LLM 2025"]
+    featured: true
+  - id: owasp-agentic-2026
+    name: "OWASP Top 10 for Agentic Applications 2026"
+    date: "December 2025"
+    aliases: ["OWASP Top 10 Agentic 2026"]
+    featured: true
+  - id: cisa-secure-by-design
+    name: "CISA Secure by Design Principles"
+    date: "2025"
+    aliases: ["CISA Secure by Design"]
+    featured: true
+  - id: omb-m-25-21
+    name: "OMB M-25-21"
+    date: "April 2025"
+    featured: true
+  # Referenced in doc frontmatter but not in the featured AGENTS.md prose list:
+  - id: nist-cosais
+    name: "NIST COSAiS"
+  - id: fedramp-moderate
+    name: "FedRAMP Moderate"
+  - id: nist-800-218
+    name: "NIST SP 800-218"
+  - id: nist-800-63
+    name: "NIST SP 800-63"
+  - id: omb-m-16-21
+    name: "OMB M-16-21"
+  - id: omb-m-26-04
+    name: "OMB M-26-04"
+  - id: omb-a-130
+    name: "OMB Circular A-130"
+  - id: usco-ai-part2
+    name: "U.S. Copyright Office AI Part 2"
+  - id: privacy-act-1974
+    name: "Privacy Act of 1974"
+  - id: e-gov-act-2002
+    name: "E-Government Act of 2002"

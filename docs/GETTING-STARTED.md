@@ -205,7 +205,7 @@ your-project/
 
 <!-- NIST SP 800-53: PL-4 (Rules of Behavior), CM-6 (Configuration Settings) -->
 <!-- NIST AI RMF: GOVERN 1 (Policies), GOVERN 6 (Accountability) -->
-<!-- NCCOE Agent Identity: Identification -->
+<!-- NCCoE Agent Identity: Identification -->
 
 ### 3.1 What Is AGENTS.md?
 
@@ -726,7 +726,7 @@ With the controls in this guide implemented, your repository has a security base
 | [AGENTS.md](../AGENTS.md) | Universal agent behavior rules — apply to every project, made available to your agent globally | Before your first AI-assisted coding session |
 | [docs/CODING_PRACTICES.md](../docs/CODING_PRACTICES.md) | Secure coding standards for AI-generated and human-written code | Before writing or reviewing any code |
 | [docs/SECURITY-CONTROLS.md](./SECURITY-CONTROLS.md) | NIST 800-53 control overlay specific to agentic AI systems | When building your SSP or preparing for ATO |
-| [docs/AGENT-IDENTITY.md](./AGENT-IDENTITY.md) | Agent identity, authentication, and delegation (NCCOE-aligned) | When configuring agent service accounts or tokens |
+| [docs/AGENT-IDENTITY.md](./AGENT-IDENTITY.md) | Agent identity, authentication, and delegation (NCCoE-aligned) | When configuring agent service accounts or tokens |
 | [templates/AGENTS.md.template](../templates/AGENTS.md.template) | Thin project-layer AGENTS.md for new projects | When starting a new repository |
 | [checklists/pre-deployment.md](../checklists/pre-deployment.md) | Pre-deployment security checklist | Before deploying to staging or production |
 
@@ -777,7 +777,7 @@ Before moving on, verify you have completed:
 - NIST SP 800-218A Secure Software Development Practices for Generative AI (June 2024)
 - NIST AI RMF 1.0 (January 2023)
 - NIST AI 600-1 Generative AI Profile (July 2024)
-- NCCOE AI Agent Identity & Authorization Concept Paper (February 2026)
+- NCCoE AI Agent Identity & Authorization Concept Paper (February 2026)
 - OWASP Top 10 for LLM Applications 2025 (November 2024)
 - CISA Secure by Design Principles (2025)
 - FedRAMP 20x Authorization Framework (2025)

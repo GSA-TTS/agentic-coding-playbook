@@ -290,7 +290,7 @@ These controls improve operational maturity. No controls in this overlay are ass
 - [NIST AI RMF 1.0](https://www.nist.gov/itl/ai-risk-management-framework) — AI Risk Management Framework (January 2023)
 - [NIST AI 600-1](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence) — Generative AI Profile for AI RMF (July 2024)
 - [NIST SP 800-218A](https://csrc.nist.gov/pubs/sp/800/218/a/final) — Secure Software Development Practices for Generative AI and Dual-Use Foundation Models (June 2024)
-- [NCCOE AI Agent Identity](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization) — Software and AI Agent Identity and Authorization Concept Paper (February 2026)
+- [NCCoE AI Agent Identity](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization) — Software and AI Agent Identity and Authorization Concept Paper (February 2026)
 - [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/) (November 2024)
 - [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/) (December 2025)
 - [OMB M-25-21](https://www.whitehouse.gov/) — AI Governance (April 2025)

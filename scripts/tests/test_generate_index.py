@@ -1026,3 +1026,78 @@ class TestOscalControlNames:
         assert names["SR-3"] == "Supply Chain Controls and Processes"
         # no enhancement ids like AC-2.1 leaked in
         assert not any("." in cid for cid in names)
+
+
+class TestFrameworkRefs:
+    def _write_frameworks(self, root, entries):
+        import yaml as _yaml
+
+        (root / "data").mkdir(exist_ok=True)
+        (root / "data" / "frameworks.yaml").write_text(_yaml.safe_dump({"version": "1.0", "frameworks": entries}))
+
+    def test_render_featured_in_order_with_dates(self):
+        from playbook_validator.index_updaters import render_framework_refs
+
+        body = render_framework_refs(
+            [
+                {"id": "a", "name": "Framework A", "date": "2025", "featured": True},
+                {"id": "b", "name": "Framework B", "featured": True},  # no date
+                {"id": "c", "name": "Framework C"},  # not featured → excluded
+            ]
+        )
+        assert body == "- Framework A (2025)\n- Framework B"
+
+    def test_name_index_includes_aliases(self):
+        from playbook_validator.index_updaters import framework_name_index
+
+        idx = framework_name_index([{"id": "x", "name": "Canonical Name", "aliases": ["Short", "Alt"]}])
+        assert idx["Canonical Name"] == "Canonical Name"
+        assert idx["Short"] == "Canonical Name"
+        assert idx["Alt"] == "Canonical Name"
+
+    def test_update_fills_marked_block(self, tmp_path):
+        from playbook_validator.index_updaters import update_framework_refs
+
+        self._write_frameworks(tmp_path, [{"id": "a", "name": "NIST X", "date": "2024", "featured": True}])
+        (tmp_path / "AGENTS.md").write_text(
+            "# A\n\n<!-- GENERATED:FRAMEWORK_REFS:START -->\nold\n<!-- GENERATED:FRAMEWORK_REFS:END -->\n"
+        )
+        update_framework_refs(tmp_path)
+        assert "- NIST X (2024)" in (tmp_path / "AGENTS.md").read_text()
+
+    def test_refs_guard_flags_drift(self, tmp_path):
+        from playbook_validator.validate_docs import _validate_framework_refs
+
+        self._write_frameworks(tmp_path, [{"id": "a", "name": "NIST X", "date": "2024", "featured": True}])
+        (tmp_path / "AGENTS.md").write_text(
+            "# A\n\n<!-- GENERATED:FRAMEWORK_REFS:START -->\n- Stale Y\n<!-- GENERATED:FRAMEWORK_REFS:END -->\n"
+        )
+        errors = _validate_framework_refs(tmp_path)
+        assert errors and "out of sync" in errors[0]
+
+    def test_frontmatter_guard_flags_unknown(self, tmp_path):
+        from playbook_validator.validate_docs import _validate_framework_frontmatter
+
+        self._write_frameworks(tmp_path, [{"id": "a", "name": "NIST X", "aliases": ["NX"]}])
+        d = tmp_path / "docs"
+        d.mkdir()
+        (d / "thing.md").write_text(
+            "---\ntitle: t\ndescription: d\nstatus: canonical\ntier: 2\n"
+            'frameworks: ["NX", "Bogus Framework"]\n---\n# x\n'
+        )
+        errors = _validate_framework_frontmatter(tmp_path)
+        assert errors and "Bogus Framework" in errors[0]
+        # the alias "NX" is accepted (not flagged)
+        assert not any("NX" in e for e in errors)
+
+    def test_real_repo_frameworks_consistent(self):
+        from pathlib import Path
+
+        from playbook_validator.validate_docs import (
+            _validate_framework_frontmatter,
+            _validate_framework_refs,
+        )
+
+        root = Path(__file__).resolve().parents[2]
+        assert _validate_framework_refs(root) == []
+        assert _validate_framework_frontmatter(root) == []

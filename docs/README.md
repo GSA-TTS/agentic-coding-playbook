@@ -56,7 +56,7 @@ Canonical index of all documentation in the agentic-coding-playbook.
 | `AGENTS.md` | 1 | Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements |
 | `CONTEXT-GUIDE.md` | 1 | Compact routing document for AI agents — read this FIRST to determine which documents to load for your current task |
 | `PLAYBOOK.md` | 1 | Step-by-step guide for starting a federal coding project with AI agents |
-| `docs/AGENT-IDENTITY.md` | 1 | Agent identity management aligned with NCCOE concept paper — authentication, authorization, delegation, and audit logging for AI agents |
+| `docs/AGENT-IDENTITY.md` | 1 | Agent identity management aligned with NCCoE concept paper — authentication, authorization, delegation, and audit logging for AI agents |
 | `docs/AGENT-INSTRUCTIONS.md` | 1 | Model-agnostic repo-specific reference for any AI coding agent working in this repository |
 | `docs/CODING_PRACTICES.md` | 1 | Secure coding standards for AI-assisted development — input validation, secrets management, dependency security, architecture discipline, change safety, SOLID principles, OWASP/SSDF alignment |
 | `docs/CODING_STANDARDS_COMPACT.md` | 1 | LLM-optimized coding standards for inclusion in code generation context (~500 words) |
