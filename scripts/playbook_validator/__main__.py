@@ -27,6 +27,7 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
         validate_contract_role,
         validate_count_drift,
         validate_doc_frontmatter,
+        validate_frontmatter_crosswalk,
         validate_security_controls_count,
     )
 
@@ -75,6 +76,16 @@ def cmd_validate_docs(args: argparse.Namespace) -> int:
     if not cd_errors:
         print("  OK: prose landscape/control counts match their source lists")
 
+    print("\n=== Frontmatter Standards Crosswalk ===")
+    cw_errors, cw_warnings = validate_frontmatter_crosswalk(root)
+    for e in cw_errors:
+        print(f"ERROR: {e}")
+        total_errors += 1
+    for w in cw_warnings:
+        print(f"WARNING: {w}")
+    if not cw_errors:
+        print("  OK: every frontmatter_schema key is crosswalked to Dublin Core / schema.org")
+
     print(f"\n=== Summary ===\nErrors: {total_errors}")
     if total_errors > 0:
         print(f"FAILED — {total_errors} error(s) found")
@@ -110,7 +121,10 @@ def cmd_validate_skills(args: argparse.Namespace) -> int:
 
 
 def cmd_validate_landscape(args: argparse.Namespace) -> int:
-    from playbook_validator.validate_landscape import validate_landscape
+    from playbook_validator.validate_landscape import (
+        validate_landscape,
+        validate_landscape_doc_summary,
+    )
 
     path = Path(args.path)
     if not path.exists():
@@ -118,6 +132,10 @@ def cmd_validate_landscape(args: argparse.Namespace) -> int:
         return 2
 
     errors, warnings, count = validate_landscape(path)
+    # Guard the generated Status Summary + Phase Mapping in the companion doc
+    # against the registry (#142). Root is the registry's grandparent (repo root).
+    doc_errors = validate_landscape_doc_summary(path.parent.parent)
+    errors = errors + doc_errors
     for w in warnings:
         print(f"WARN: {w}", file=sys.stderr)
     for e in errors:
