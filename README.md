@@ -79,8 +79,7 @@ it to be provided by the environment at a conventional location:
 
 The supported way to provision it is the **`agentic-coding-patterns` `acq`
 provisioning kit**, applied by the [`acq` wrapper](https://github.com/GSA-TTS/agentic-coding-quickstart),
-which selects a sandbox backend (currently **SBX** or **MSB**; the neutral kit
-format supports adding more) and makes the contract available to agents in a
+which selects a sandbox backend and makes the contract available to agents in a
 sandboxed environment:
 
 <https://github.com/GSA-TTS/agentic-coding-patterns/tree/main/integrations/isolation/acq-kits>

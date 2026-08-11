@@ -175,9 +175,8 @@ These hooks run automatically on `git commit` and check for:
 
 Most contributors work **inside a sandbox backend** provisioned via the
 [`acq` wrapper](https://github.com/GSA-TTS/agentic-coding-quickstart) — `acq`
-selects the active backend (currently **SBX** or **MSB**; more may be added),
-so the commands below are backend-agnostic. This creates additional
-considerations for pre-commit hooks.
+selects the active backend, so the commands below are backend-agnostic. This
+creates additional considerations for pre-commit hooks.
 
 **Installing the pre-commit tools in a sandbox:**
 
