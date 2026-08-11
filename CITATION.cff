@@ -1,0 +1,49 @@
+# CITATION.cff — how to cite this repository.
+# Citation File Format v1.2.0 (https://citation-file-format.github.io/).
+# Root type is `software`: the repo ships a versioned, installable component
+# (the `playbook_validator` Python package + generators/validators + CLI, with
+# tagged releases). The practical practices and working examples it contains are
+# described in the abstract and keywords rather than as a separate root type,
+# because CFF 1.2.0 permits only one root type and tooling (GitHub "Cite this
+# repository", Zenodo, Zotero) renders it. Decided by multi-model consensus
+# (approved 4/0). This corpus is NOT federal "guidance" (a specific legal term);
+# it is practical, copy-and-use practices and working examples.
+cff-version: 1.2.0
+message: "If you reference or reuse this repository, please cite it as below."
+title: "Agentic Coding Playbook"
+abstract: >-
+  Practical practices and working examples for AI-assisted (agentic) software
+  development in federal environments: copy-and-use-verbatim patterns, a NIST
+  SP 800-53 control overlay for agentic AI systems, secure coding practices,
+  templates, checklists, and reference registries — plus the `playbook_validator`
+  tooling (generators and fail-closed validators) that keeps them consistent.
+  Built for cross-government reuse and contribution. This repository provides
+  informational best practices; it is not official policy or authoritative
+  federal guidance.
+type: software
+version: "0.14.1"
+license: CC0-1.0
+repository-code: "https://github.com/GSA-TTS/agentic-coding-playbook"
+url: "https://github.com/GSA-TTS/agentic-coding-playbook"
+keywords:
+  - agentic-coding
+  - ai-assisted-development
+  - federal
+  - secure-coding
+  - nist-800-53
+  - working-examples
+  - practices
+  - gsa-tts
+authors:
+  - name: "GSA Technology Transformation Services (GSA-TTS)"
+    website: "https://www.gsa.gov/tts"
+  - given-names: "William"
+    family-names: "Zujkowski"
+    email: "william.zujkowski@gsa.gov"
+    affiliation: "GSA Technology Transformation Services"
+    alias: "wz-gsa"
+  - given-names: "Bret"
+    family-names: "Mogilefsky"
+    email: "bret.mogilefsky@gsa.gov"
+    affiliation: "GSA Technology Transformation Services"
+    alias: "mogul"
