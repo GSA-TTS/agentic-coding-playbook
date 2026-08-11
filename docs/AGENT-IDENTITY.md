@@ -1,13 +1,13 @@
 ---
 title: "Agent Identity, Authentication, Authorization, and Delegation"
-description: "Agent identity management aligned with NCCOE concept paper — authentication, authorization, delegation, and audit logging for AI agents"
+description: "Agent identity management aligned with NCCoE concept paper — authentication, authorization, delegation, and audit logging for AI agents"
 status: canonical
 tier: 1
 last_updated: "2026-06-12"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "IA-2", "IA-5", "IA-8"]
-frameworks: ["NCCOE Agent Identity & Authorization", "NIST CAISI", "NIST SP 800-53 Rev 5.2", "NIST SP 800-63"]
+frameworks: ["NCCoE Agent Identity & Authorization", "NIST CAISI", "NIST SP 800-53 Rev 5.2", "NIST SP 800-63"]
 audience: "developers"
-keywords: ["agent-identity", "OAuth", "RBAC", "delegation", "audit-logging", "NCCOE", "authentication"]
+keywords: ["agent-identity", "OAuth", "RBAC", "delegation", "audit-logging", "NCCoE", "authentication"]
 related_files: ["AGENTS.md", "docs/SECURITY-CONTROLS.md", "templates/risk-assessment.md"]
 load_priority: "task-context"
 review_cycle: "quarterly"
@@ -31,7 +31,7 @@ review_cycle: "quarterly"
 | Audit | Log every action with: agent ID, delegating user, timestamp, action, outcome |
 | Revocation | Immediate credential revocation capability, break-glass procedures documented |
 
-> **Full guidance with NCCOE alignment and implementation patterns in sections below.**
+> **Full guidance with NCCoE alignment and implementation patterns in sections below.**
 
 ---
 
@@ -40,7 +40,7 @@ review_cycle: "quarterly"
 This document provides practical guidance for managing AI coding agent identities within federal systems. It covers how agents are identified, how they authenticate, what they are authorized to do, how user identity delegates to agent identity, and how all of it gets logged for audit.
 
 **Alignment:** This guidance aligns with:
-- **NCCOE** — [Accelerating the Adoption of Software and AI Agent Identity and Authorization](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization) Concept Paper (February 2026)
+- **NCCoE** — [Accelerating the Adoption of Software and AI Agent Identity and Authorization](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization) Concept Paper (February 2026)
 - **NIST CAISI** — [AI Agent Standards Initiative](https://www.nist.gov/caisi/ai-agent-standards-initiative) (February 2026)
 
 **Key words:** "MUST", "MUST NOT", "SHOULD", "SHOULD NOT", and "MAY" are used per [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
@@ -62,7 +62,7 @@ This document provides practical guidance for managing AI coding agent identitie
 
 ## 1. Introduction
 
-<!-- NCCOE Agent Identity: All Focus Areas -->
+<!-- NCCoE Agent Identity: All Focus Areas -->
 <!-- NIST CAISI: AI Agent Standards -->
 <!-- NIST SP 800-53: IA-1 (Policy and Procedures) -->
 
@@ -70,9 +70,9 @@ AI coding agents present a new identity management challenge for federal systems
 
 Federal identity and access management (IAM) systems were designed around two categories: **human users** and **service accounts**. AI agents fall somewhere in between. They interact conversationally like humans, execute automated tasks like services, and operate with delegated authority from the user who invoked them.
 
-The NCCOE concept paper (February 2026) identifies four focus areas for managing this new category of identity:
+The NCCoE concept paper (February 2026) identifies four focus areas for managing this new category of identity:
 
-| # | NCCOE Focus Area | This Document |
+| # | NCCoE Focus Area | This Document |
 |---|---|---|
 | 1 | **Identification** — Distinguishing AI agents from human users and managing metadata about agent capabilities | [Section 2](#2-agent-identity-model) |
 | 2 | **Authorization** — Using OAuth 2.0, RBAC, and policy-based access control for agent rights | [Section 4](#4-authorization) |
@@ -89,7 +89,7 @@ The NIST CAISI initiative is developing standards for AI agent behavior more bro
 
 ## 2. Agent Identity Model
 
-<!-- NCCOE Agent Identity: Focus Area 1 — Identification -->
+<!-- NCCoE Agent Identity: Focus Area 1 — Identification -->
 <!-- NIST SP 800-53: AC-2 (Account Management), IA-2 (Identification), IA-8 (Non-Organizational Users) -->
 <!-- OWASP Agentic: Identity and Privilege Abuse -->
 
@@ -186,7 +186,7 @@ Naming rules:
 
 ## 3. Authentication
 
-<!-- NCCOE Agent Identity: Focus Areas 1, 3 -->
+<!-- NCCoE Agent Identity: Focus Areas 1, 3 -->
 <!-- NIST SP 800-53: IA-2 (Identification), IA-5 (Authenticator Management), IA-8 (Non-Org Users), SC-23 (Session Authenticity) -->
 <!-- NIST SP 800-63: Digital Identity Guidelines -->
 
@@ -291,7 +291,7 @@ Tokens MUST NOT include wildcard or administrative scopes. If the agent needs el
 
 ## 4. Authorization
 
-<!-- NCCOE Agent Identity: Focus Area 2 — Authorization -->
+<!-- NCCoE Agent Identity: Focus Area 2 — Authorization -->
 <!-- NIST SP 800-53: AC-3 (Access Enforcement), AC-6 (Least Privilege), AC-16 (Security and Privacy Attributes) -->
 <!-- OWASP Agentic: Tool Misuse and Exploitation, Identity and Privilege Abuse -->
 
@@ -386,7 +386,7 @@ This is the opposite of how many developer tools work by default (which typicall
 
 ## 5. Delegation Model
 
-<!-- NCCOE Agent Identity: Focus Area 3 — Access Delegation -->
+<!-- NCCoE Agent Identity: Focus Area 3 — Access Delegation -->
 <!-- NIST SP 800-53: AC-2 (Account Management), AC-3 (Access Enforcement), AC-17 (Remote Access) -->
 <!-- OWASP Agentic: Human Agent Trust Exploitation -->
 
@@ -469,7 +469,7 @@ Agents MUST NOT impersonate users. The distinction is important: acting on behal
 
 ## 6. Audit and Non-Repudiation
 
-<!-- NCCOE Agent Identity: Focus Area 4 — Logging and Transparency -->
+<!-- NCCoE Agent Identity: Focus Area 4 — Logging and Transparency -->
 <!-- NIST SP 800-53: AU-2 (Audit Events), AU-3 (Content of Audit Records), AU-6 (Audit Review), AU-10 (Non-Repudiation), AU-12 (Audit Generation) -->
 
 Every action taken by an agent MUST be logged in a way that answers: Who requested it? Which agent did it? What was done? When? What was the result? This section defines the audit requirements for agent operations.
@@ -581,7 +581,7 @@ Non-repudiation means proving that a specific agent took a specific action at a 
 
 ## 7. Human-in-the-Loop Patterns
 
-<!-- NCCOE Agent Identity: Focus Areas 2, 3 -->
+<!-- NCCoE Agent Identity: Focus Areas 2, 3 -->
 <!-- NIST SP 800-53: AC-6 (Least Privilege), CM-3 (Configuration Change Control), CM-5 (Access Restrictions for Change) -->
 <!-- NIST AI RMF: GOVERN 6 (Accountability), MANAGE 1 (Risk Treatment) -->
 <!-- OWASP Agentic: Human Agent Trust Exploitation -->
@@ -706,7 +706,7 @@ Use this checklist when setting up agent identity and access management for a pr
 
 ## NIST SP 800-53 Control Cross-Reference
 
-| Section | Primary Controls | NCCOE Focus Area |
+| Section | Primary Controls | NCCoE Focus Area |
 |---------|-----------------|------------------|
 | 2. Agent Identity Model | AC-2, IA-2, IA-4, IA-8 | 1 — Identification |
 | 3. Authentication | IA-2, IA-5, SC-12, SC-23 | 1 — Identification, 3 — Delegation |
@@ -721,7 +721,7 @@ Use this checklist when setting up agent identity and access management for a pr
 
 | Date | Version | Change |
 |------|---------|--------|
-| 2026-02-25 | 0.1.0 | Initial release — NCCOE concept paper alignment, single-agent scope |
+| 2026-02-25 | 0.1.0 | Initial release — NCCoE concept paper alignment, single-agent scope |
 
 ## Framework References
 
@@ -729,7 +729,7 @@ Use this checklist when setting up agent identity and access management for a pr
 - NIST SP 800-63-4 Digital Identity Guidelines (December 2024)
 - NIST AI RMF 1.0 (January 2023)
 - NIST AI 600-1 Generative AI Profile (July 2024)
-- NCCOE Accelerating the Adoption of Software and AI Agent Identity and Authorization — Concept Paper (February 2026)
+- NCCoE Accelerating the Adoption of Software and AI Agent Identity and Authorization — Concept Paper (February 2026)
 - NIST CAISI AI Agent Standards Initiative (February 2026)
 - OWASP Top 10 for Agentic Applications 2026 (December 2025)
 - OAuth 2.0 Authorization Framework — RFC 6749

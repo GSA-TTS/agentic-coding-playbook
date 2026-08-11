@@ -11,7 +11,7 @@ This file follows the [llms.txt](https://llmstxt.org/) convention: a curated map
 - [Federal AI Agent Behavioral Best Practices](AGENTS.md): Best practices for AI coding agent behavior in federal development environments — includes behavioral standards, engineering discipline enforcement, and verification requirements
 - [Agent Context Loading Guide](CONTEXT-GUIDE.md): Compact routing document for AI agents — read this FIRST to determine which documents to load for your current task
 - [Federal AI Coding Playbook](PLAYBOOK.md): Step-by-step guide for starting a federal coding project with AI agents
-- [Agent Identity, Authentication, Authorization, and Delegation](docs/AGENT-IDENTITY.md): Agent identity management aligned with NCCOE concept paper — authentication, authorization, delegation, and audit logging for AI agents
+- [Agent Identity, Authentication, Authorization, and Delegation](docs/AGENT-IDENTITY.md): Agent identity management aligned with NCCoE concept paper — authentication, authorization, delegation, and audit logging for AI agents
 - [Agent Instructions](docs/AGENT-INSTRUCTIONS.md): Model-agnostic repo-specific reference for any AI coding agent working in this repository
 - [Secure Coding Practices for AI-Assisted Federal Development](docs/CODING_PRACTICES.md): Secure coding standards for AI-assisted development — input validation, secrets management, dependency security, architecture discipline, change safety, SOLID principles, OWASP/SSDF alignment
 - [Coding Standards — Compact Reference](docs/CODING_STANDARDS_COMPACT.md): LLM-optimized coding standards for inclusion in code generation context (~500 words)

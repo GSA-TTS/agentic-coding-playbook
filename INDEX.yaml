@@ -62,7 +62,7 @@ documents:
 
   - path: "docs/AGENT-IDENTITY.md"
     title: "Agent Identity, Authentication, Authorization, and Delegation"
-    description: "Agent identity management aligned with NCCOE concept paper — authentication, authorization, delegation, and audit logging for AI agents"
+    description: "Agent identity management aligned with NCCoE concept paper — authentication, authorization, delegation, and audit logging for AI agents"
     status: canonical
     tier: 1
     load_priority: task-context
