@@ -101,7 +101,12 @@ Skills are structured procedures in `skills/*/SKILL.md`. Each has YAML frontmatt
 
 ## Frontmatter Schema
 
-All content `.md` files must have YAML frontmatter:
+All content `.md` files must have YAML frontmatter (a **repo-defined
+convention** — YAML frontmatter is not part of the CommonMark or GFM
+specifications; see [ADR 0004](decisions/0004-frontmatter-standards-crosswalk.md)).
+Field names are crosswalked to Dublin Core / schema.org / MCP in
+[`data/frontmatter-crosswalk.yaml`](../data/frontmatter-crosswalk.yaml) for
+portability:
 
 ```yaml
 ---
