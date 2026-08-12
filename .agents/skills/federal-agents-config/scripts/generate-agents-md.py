@@ -238,7 +238,7 @@ proceeds — this project does **not** vendor a copy of them (to avoid drift).
 - **How it is provided:** the universal contract is made available by your
   environment at `~/.agentic-coding-playbook/AGENTS.md` (override with
   `$AGENTIC_CODING_PLAYBOOK_HOME`). See this project's README for the supported
-  setup (the `agentic-coding-patterns` sbx mixin kit). If the home path is
+  setup (the `agentic-coding-patterns` `acq` provisioning kit). If the home path is
   unavailable, a git-ignored fallback cache at `.agents/cache/AGENTS.universal.md`
   may be populated automatically.
 
