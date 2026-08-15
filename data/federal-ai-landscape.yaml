@@ -5,7 +5,10 @@
 # Statuses: active, revoked, rescinded, draft, final
 #
 # This file is the single source of truth. docs/FEDERAL-AI-LANDSCAPE.md is generated from it.
-# Last reviewed: 2026-04-06
+# `last_reviewed` below is the canonical review date; `make generate` propagates it into the
+# doc's frontmatter + "Last reviewed" line. The discovery/update path advances it only when
+# the entries actually change (see bump_landscape_reviewed_if_changed). Do not hand-edit the
+# date in the doc — edit it here.
 
 version: "1.0"
 last_reviewed: "2026-08-04"

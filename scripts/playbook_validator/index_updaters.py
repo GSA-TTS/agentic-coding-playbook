@@ -264,6 +264,130 @@ def update_phase_mapping(root: Path) -> None:
     splice_generated_block(root / "docs" / "FEDERAL-AI-LANDSCAPE.md", "LANDSCAPE_PHASES", table)
 
 
+# ── Federal AI landscape freshness stamp (evergreen last-reviewed date) ──
+#
+# The landscape doc's "Last reviewed" date used to be hand-typed in three
+# places (frontmatter last_updated, frontmatter last_reviewed, and an intro
+# prose line) and drifted from the YAML registry's own last_reviewed. This
+# updater makes the YAML registry's `last_reviewed` the single source of truth
+# and propagates it into the doc on `make generate`, so the doc's date can no
+# longer drift. The registry date itself is bumped when the entries change (see
+# bump_landscape_reviewed_if_changed), not on every generate — so the date stays
+# an honest "as of when the data last changed" signal, not a churn timestamp.
+
+_LANDSCAPE_YAML_REL = "data/federal-ai-landscape.yaml"
+_LANDSCAPE_DOC_REL = "docs/FEDERAL-AI-LANDSCAPE.md"
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def read_landscape_reviewed(root: Path) -> str | None:
+    """Return the registry's `last_reviewed` ISO date, or None if absent/invalid."""
+    landscape = root / _LANDSCAPE_YAML_REL
+    if not landscape.is_file():
+        return None
+    import yaml
+
+    data = yaml.safe_load(landscape.read_text(encoding="utf-8")) or {}
+    value = data.get("last_reviewed")
+    if isinstance(value, str) and _ISO_DATE_RE.match(value.strip()):
+        return value.strip()
+    return None
+
+
+def _set_frontmatter_date(text: str, field: str, date: str) -> str:
+    """Replace a single top-level frontmatter `field: "date"` line in-place.
+
+    Only touches a line inside the leading `---` frontmatter block. No-op if the
+    field is absent (we do not invent frontmatter keys here).
+    """
+    if not text.startswith("---"):
+        return text
+    end = text.find("\n---", 3)
+    if end == -1:
+        return text
+    head, rest = text[: end + 1], text[end + 1 :]
+    pattern = re.compile(rf'(?m)^({re.escape(field)}:\s*)"?[^"\n]*"?\s*$')
+    if not pattern.search(head):
+        return text
+    new_head = pattern.sub(rf'\1"{date}"', head, count=1)
+    return new_head + rest
+
+
+def update_landscape_reviewed(root: Path) -> None:
+    """Propagate the registry `last_reviewed` date into the landscape doc.
+
+    Writes the date into the doc's frontmatter `last_updated` and `last_reviewed`
+    and into the `GENERATED:LANDSCAPE_REVIEWED` prose fence. No-op if the registry
+    date is unreadable or the doc is absent; the prose line only updates if the
+    fence markers exist. Prose outside the fence is preserved verbatim.
+    """
+    date = read_landscape_reviewed(root)
+    if date is None:
+        return
+    doc = root / _LANDSCAPE_DOC_REL
+    if not doc.is_file():
+        return
+    text = doc.read_text(encoding="utf-8")
+    updated = _set_frontmatter_date(text, "last_updated", date)
+    updated = _set_frontmatter_date(updated, "last_reviewed", date)
+    if updated != text:
+        doc.write_text(updated, encoding="utf-8")
+    # The visible prose stamp lives inside a generated fence so it cannot drift.
+    body = (
+        f"> **Last reviewed:** {date}. Federal AI policy is evolving rapidly. "
+        "Verify status before citing in compliance documents."
+    )
+    splice_generated_block(doc, "LANDSCAPE_REVIEWED", body)
+
+
+def bump_landscape_reviewed_if_changed(root: Path, today: str, previous_entries_hash: str | None) -> bool:
+    """Advance the registry `last_reviewed` to ``today`` iff the entries changed.
+
+    Intended for the discovery/update path (not `make generate`): the caller
+    supplies a hash of the entries taken BEFORE its edits; if the current entries
+    hash differs, the registry data changed and the review date is bumped. Returns
+    True if the date was advanced. Keeps `last_reviewed` an honest "as of the last
+    data change" signal rather than a per-run timestamp.
+    """
+    landscape = root / _LANDSCAPE_YAML_REL
+    if not landscape.is_file():
+        return False
+    if not _ISO_DATE_RE.match(today):
+        return False
+    text = landscape.read_text(encoding="utf-8")
+    if previous_entries_hash is not None and previous_entries_hash == landscape_entries_hash(root):
+        return False  # entries unchanged — do not bump
+    pattern = re.compile(r'(?m)^(last_reviewed:\s*)"?[^"\n]*"?\s*$')
+    if not pattern.search(text):
+        return False
+    new_text = pattern.sub(rf'\1"{today}"', text, count=1)
+    if new_text != text:
+        landscape.write_text(new_text, encoding="utf-8")
+        return True
+    return False
+
+
+def landscape_entries_hash(root: Path) -> str | None:
+    """Stable hash of the registry entries (order-independent), or None if absent.
+
+    Used to detect real data changes (add/remove/modify) without storing a full
+    prior copy. Excludes the header fields (version, last_reviewed, total_entries)
+    so a date bump alone does not look like a data change.
+    """
+    landscape = root / _LANDSCAPE_YAML_REL
+    if not landscape.is_file():
+        return None
+    import hashlib
+    import json
+
+    import yaml
+
+    data = yaml.safe_load(landscape.read_text(encoding="utf-8")) or {}
+    entries = data.get("entries", [])
+    canonical = json.dumps(entries, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 # ── Neutral document inventory (#199) ─────────────────────────────────
 #
 # A single generated "all documents" table sourced from INDEX.yaml — the

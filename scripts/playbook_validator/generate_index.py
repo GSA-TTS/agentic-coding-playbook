@@ -401,6 +401,7 @@ def generate_index(root: Path) -> None:
         update_doc_inventory,
         update_framework_refs,
         update_hardcoded_counts,
+        update_landscape_reviewed,
         update_landscape_summary,
         update_llms_txt,
         update_phase_mapping,
@@ -425,6 +426,7 @@ def generate_index(root: Path) -> None:
     update_hardcoded_counts(root, stats, skills)
     update_landscape_summary(root)
     update_phase_mapping(root)
+    update_landscape_reviewed(root)
     update_roadmap_metrics(root, stats)
     update_traceability_matrix(root)
     update_doc_inventory(root)

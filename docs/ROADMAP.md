@@ -20,7 +20,7 @@ Long-term plan for making the Agentic Coding Playbook a living, learnable resour
 |--------|-------|
 | Documents | 23 |
 | Skills | 12 |
-| Tests | 520 |
+| Tests | 527 |
 | Checklist items | 62 |
 | Landscape entries | 42 |
 | NIST controls mapped | 35 |

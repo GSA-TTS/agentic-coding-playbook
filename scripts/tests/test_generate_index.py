@@ -743,6 +743,98 @@ class TestLandscapeDocGuard:
         assert errors and "out of sync" in errors[0]
 
 
+class TestLandscapeReviewedFreshness:
+    """The evergreen last-reviewed stamp: generated from the registry, drift-guarded."""
+
+    def _write(self, root, registry_date, doc_body):
+        (root / "data").mkdir(exist_ok=True)
+        (root / "data" / "federal-ai-landscape.yaml").write_text(
+            f'version: "1.0"\nlast_reviewed: "{registry_date}"\ntotal_entries: 1\n'
+            "entries:\n  - id: eo-1\n    category: executive_order\n    status: active\n"
+        )
+        (root / "docs").mkdir(exist_ok=True)
+        (root / "docs" / "FEDERAL-AI-LANDSCAPE.md").write_text(doc_body)
+
+    def _doc(self, front_date, stamp_date):
+        return (
+            f'---\ntitle: "L"\nstatus: canonical\ntier: 2\n'
+            f'last_updated: "{front_date}"\nlast_reviewed: "{front_date}"\n---\n\n# L\n\n'
+            "<!-- GENERATED:LANDSCAPE_REVIEWED:START -->\n"
+            f"> **Last reviewed:** {stamp_date}. Verify status before citing.\n"
+            "<!-- GENERATED:LANDSCAPE_REVIEWED:END -->\n"
+        )
+
+    def test_read_landscape_reviewed(self, tmp_path):
+        from playbook_validator.index_updaters import read_landscape_reviewed
+
+        self._write(tmp_path, "2026-08-04", "# L\n")
+        assert read_landscape_reviewed(tmp_path) == "2026-08-04"
+
+    def test_generate_propagates_date_into_doc(self, tmp_path):
+        from playbook_validator.index_updaters import update_landscape_reviewed
+
+        self._write(tmp_path, "2026-08-04", self._doc("2026-06-29", "2026-06-29"))
+        update_landscape_reviewed(tmp_path)
+        text = (tmp_path / "docs" / "FEDERAL-AI-LANDSCAPE.md").read_text()
+        assert 'last_updated: "2026-08-04"' in text
+        assert 'last_reviewed: "2026-08-04"' in text
+        assert "**Last reviewed:** 2026-08-04" in text
+        assert "2026-06-29" not in text  # old date fully replaced
+
+    def test_generate_is_idempotent(self, tmp_path):
+        from playbook_validator.index_updaters import update_landscape_reviewed
+
+        self._write(tmp_path, "2026-08-04", self._doc("2026-06-29", "2026-06-29"))
+        update_landscape_reviewed(tmp_path)
+        once = (tmp_path / "docs" / "FEDERAL-AI-LANDSCAPE.md").read_text()
+        update_landscape_reviewed(tmp_path)
+        twice = (tmp_path / "docs" / "FEDERAL-AI-LANDSCAPE.md").read_text()
+        assert once == twice
+
+    def test_drifted_frontmatter_fails(self, tmp_path):
+        from playbook_validator.validate_landscape import validate_landscape_doc_summary
+
+        self._write(tmp_path, "2026-08-04", self._doc("2020-01-01", "2026-08-04"))
+        errors = validate_landscape_doc_summary(tmp_path)
+        assert errors and any("frontmatter" in e and "2020-01-01" in e for e in errors)
+
+    def test_drifted_stamp_fails(self, tmp_path):
+        from playbook_validator.validate_landscape import validate_landscape_doc_summary
+
+        self._write(tmp_path, "2026-08-04", self._doc("2026-08-04", "2020-01-01"))
+        errors = validate_landscape_doc_summary(tmp_path)
+        assert errors and any("Last reviewed" in e for e in errors)
+
+    def test_in_sync_passes(self, tmp_path):
+        from playbook_validator.validate_landscape import validate_landscape_doc_summary
+
+        self._write(tmp_path, "2026-08-04", self._doc("2026-08-04", "2026-08-04"))
+        assert validate_landscape_doc_summary(tmp_path) == []
+
+    def test_bump_only_when_entries_change(self, tmp_path):
+        from playbook_validator.index_updaters import (
+            bump_landscape_reviewed_if_changed,
+            landscape_entries_hash,
+        )
+
+        self._write(tmp_path, "2026-08-04", "# L\n")
+        # unchanged entries → no bump
+        h = landscape_entries_hash(tmp_path)
+        assert bump_landscape_reviewed_if_changed(tmp_path, "2026-09-01", h) is False
+        assert 'last_reviewed: "2026-08-04"' in (tmp_path / "data" / "federal-ai-landscape.yaml").read_text()
+        # changed entries → bump to today
+        reg = tmp_path / "data" / "federal-ai-landscape.yaml"
+        reg.write_text(
+            reg.read_text().replace(
+                "  - id: eo-1\n    category: executive_order\n    status: active\n",
+                "  - id: eo-1\n    category: executive_order\n    status: active\n"
+                "  - id: eo-2\n    category: executive_order\n    status: active\n",
+            )
+        )
+        assert bump_landscape_reviewed_if_changed(tmp_path, "2026-09-01", h) is True
+        assert 'last_reviewed: "2026-09-01"' in reg.read_text()
+
+
 class TestDocInventory:
     def _write_index(self, root, docs):
         import yaml as _yaml
