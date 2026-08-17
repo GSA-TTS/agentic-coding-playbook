@@ -3,20 +3,23 @@ title: "Federal AI Landscape"
 description: "Canonical catalog of federal AI guidance, executive orders, standards, and legislation relevant to AI-assisted software development"
 status: canonical
 tier: 2
-last_updated: "2026-06-29"
+last_updated: "2026-08-04"
 load_priority: on-demand
 audience: ["developers", "isso", "managers", "agents"]
 keywords: ["federal", "AI", "guidance", "executive order", "NIST", "OMB", "OWASP", "compliance", "legislation"]
-last_reviewed: "2026-06-29"
+last_reviewed: "2026-08-04"
+review_cycle: "quarterly"
 ---
 
 # Federal AI Landscape
 
 Canonical reference for all federal AI guidance relevant to AI-assisted software development. Each entry includes current status, relevance to this playbook, and official source URL.
 
-> **Last reviewed:** 2026-06-29. Federal AI policy is evolving rapidly. Verify status before citing in compliance documents.
+<!-- GENERATED:LANDSCAPE_REVIEWED:START — do not edit, run: make generate -->
+> **Last reviewed:** 2026-08-04. Federal AI policy is evolving rapidly. Verify status before citing in compliance documents.
+<!-- GENERATED:LANDSCAPE_REVIEWED:END -->
 >
-> **Machine-readable data:** [`data/federal-ai-landscape.yaml`](../data/federal-ai-landscape.yaml) — structured registry with IDs, dates, statuses, cross-references, and compliance deadlines. Use the YAML for programmatic access; this document is the human-readable companion.
+> **Machine-readable data:** [`data/federal-ai-landscape.yaml`](../data/federal-ai-landscape.yaml) — structured registry with IDs, dates, statuses, cross-references, and compliance deadlines. Use the YAML for programmatic access; this document is the human-readable companion. The "Last reviewed" date, the counts, and the tables above/below are generated from that file by `make generate` — edit the YAML, not this doc.
 
 ## Status Summary
 

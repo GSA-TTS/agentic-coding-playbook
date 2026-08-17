@@ -135,6 +135,7 @@ def validate_landscape_doc_summary(root: Path) -> list[str]:
     from playbook_validator.index_updaters import (
         compute_landscape_summary,
         compute_phase_mapping,
+        read_landscape_reviewed,
         render_landscape_summary_table,
         render_phase_mapping_table,
     )
@@ -151,6 +152,46 @@ def validate_landscape_doc_summary(root: Path) -> list[str]:
         expected = render_phase_mapping_table(mapping)
         errors += _check_generated_block(doc, text, "LANDSCAPE_PHASES", expected, "Playbook Phase Mapping table")
 
+    errors += _check_landscape_reviewed(root, doc, text, read_landscape_reviewed(root))
+
+    return errors
+
+
+def _check_landscape_reviewed(root: Path, doc: Path, text: str, date: str | None) -> list[str]:
+    """Fail closed if the doc's freshness date drifts from the registry (evergreen guard).
+
+    Cross-artifact check: the registry's `last_reviewed` is the single source of
+    truth. The doc's frontmatter `last_updated`/`last_reviewed` and the
+    ``GENERATED:LANDSCAPE_REVIEWED`` prose stamp must all equal it. No-op if the
+    registry date is unreadable (that is validate_landscape's own count-contract
+    job, handled elsewhere). Guards a field/marker only when it is present.
+    """
+    if date is None:
+        return []
+    errors: list[str] = []
+
+    # Generated prose stamp (only if the fence exists — mirrors _check_generated_block).
+    start = "<!-- GENERATED:LANDSCAPE_REVIEWED:START"
+    end = "<!-- GENERATED:LANDSCAPE_REVIEWED:END -->"
+    if start in text and end in text:
+        block = text.split(start, 1)[1].split(end, 1)[0]
+        if f"**Last reviewed:** {date}" not in block:
+            errors.append(
+                f"{doc} — 'Last reviewed' stamp is out of sync with "
+                f"data/federal-ai-landscape.yaml last_reviewed ({date}). Run `make generate`."
+            )
+
+    # Frontmatter dates (only fields that are present).
+    if text.startswith("---"):
+        fm_end = text.find("\n---", 3)
+        head = text[: fm_end + 1] if fm_end != -1 else ""
+        for field in ("last_updated", "last_reviewed"):
+            m = re.search(rf'(?m)^{field}:\s*"?([^"\n]+?)"?\s*$', head)
+            if m and m.group(1).strip() != date:
+                errors.append(
+                    f"{doc} — frontmatter {field} ({m.group(1).strip()}) does not match "
+                    f"data/federal-ai-landscape.yaml last_reviewed ({date}). Run `make generate`."
+                )
     return errors
 
 
