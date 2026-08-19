@@ -24,7 +24,7 @@ review_cycle: "semi-annually"
   3. Update when the agent, system, or environment changes materially
   4. Retain completed assessments as part of your ATO documentation
 
-  Based on: Agentic Coding Playbook v0.4.0
+  Based on: the Agentic Coding Playbook
   Aligned with: NIST AI RMF 1.0 (GOVERN, MAP, MEASURE, MANAGE)
   NIST SP 800-53: RA-3 (Risk Assessment)
 -->

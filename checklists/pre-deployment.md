@@ -25,7 +25,7 @@ review_cycle: "semi-annually"
   4. Retain completed checklists as part of your deployment records
   5. The reviewer completing this checklist MUST NOT be the same person who directed the agent
 
-  Based on: Agentic Coding Playbook v0.4.0
+  Based on: the Agentic Coding Playbook
   Aligned with: NIST SP 800-53 Rev 5.2, OWASP Top 10 for LLM/Agentic Applications
 -->
 

@@ -38,7 +38,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: always
-    last_updated: "2026-07-22"
+    last_updated: "2026-08-19"
     audience: all
     nist_controls_count: 28
     review_cycle: quarterly

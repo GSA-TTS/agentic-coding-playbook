@@ -13,7 +13,7 @@ keywords: ["roadmap", "plan", "future", "strategy"]
 
 Long-term plan for making the Agentic Coding Playbook a living, learnable resource for federal engineers.
 
-## Current State (v0.6.0)
+## Current State
 
 <!-- GENERATED:ROADMAP_METRICS:START — do not edit, run: make generate -->
 | Metric | Count |

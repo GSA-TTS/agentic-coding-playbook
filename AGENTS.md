@@ -6,7 +6,7 @@ tier: 1
 contract:
   role: universal
   version: "1.0.0"
-last_updated: "2026-07-22"
+last_updated: "2026-08-19"
 nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "CM-10", "IA-8", "IR-4", "IR-6", "PL-4", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCoE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
@@ -573,6 +573,8 @@ The plan-before-execute discipline MUST scale with risk, not be applied uniforml
 
 > Rationale: a heavyweight gate applied to every keystroke loses credibility and gets ignored where it matters. Proportionality keeps the mandatory plan meaningful for the changes that carry real risk.
 
+### 14.2 Pull Request Requirements
+
 The agent MUST ensure all changes are submitted via pull requests that include:
 
 1. **Context** — What problem is being solved and why
@@ -729,6 +731,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-08-19 | 1.0.0 | Editorial: restore the missing `### 14.2 Pull Request Requirements` heading so the mandatory PR-requirements block is no longer orphaned inside §14.1.1 (#236); sync `last_updated` to the newest Version History entry (#240). No behavioral rule changed. |
 | 2026-08-07 | 1.0.0 | Reconcile the contract version: the `contract.version` marker, the document banner, `config.CURRENT_CONTRACT_VERSION`, and the thin template's `requires_contract: ">=1.0"` are now all **1.0.0** (was frontmatter 0.4.0 / banner 0.3.0 / config 1.0.0 — a contradiction where 0.4.0 failed the template's `>=1.0`). No behavioral rule changed; this is a version-truth fix (#191) so downstream `requires_contract` compatibility (#153) is well-defined. |
 | 2026-07-22 | 0.4.0 | Add license-acceptance rules: §3.2 requires human approval before accepting a license/EULA on the org's behalf; §5.2 forbids auto-accepting license terms and prefers license-unencumbered equivalents (e.g. CINC over Chef InSpec); add SA-4, CM-10 mappings |
 | 2026-07-06 | 0.3.0 | Split into universal contract + thin project layer; add fail-closed contract-prerequisite probe; designate canonical via a versioned `contract:` frontmatter block (`role: universal`, `version: 1.0.0`) recognized by structure, not content |
