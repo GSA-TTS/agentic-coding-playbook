@@ -61,7 +61,7 @@ CONTRACT_ROLE_KEY = "role"
 CONTRACT_ROLE_UNIVERSAL = "universal"
 
 # Pinned release the cache is fetched from and measured against. Hard-coded.
-PINNED_RELEASE_TAG = "v0.13.0"
+PINNED_RELEASE_TAG = "v0.14.1"
 CONTRACT_RAW_URL = f"https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/{PINNED_RELEASE_TAG}/AGENTS.md"
 _FETCH_TIMEOUT_SECONDS = 15
 
@@ -232,10 +232,21 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> int:
         print(f"present-home: universal contract is this repository's own {self_contract.name}")
         return 0
 
+    # A file at the home path satisfies the gate ONLY if it is genuinely the
+    # universal contract (declares contract.role: universal). Existence alone is
+    # not enough — a role-less/project-layer AGENTS.md must fail closed, or the
+    # gate passes green on a contract that cannot satisfy `requires_contract`.
     home_path = _home_contract_path()
     if _is_present(home_path):
-        print(f"present-home: universal contract at {home_path}")
-        return 0
+        if _is_playbook_contract(home_path):
+            print(f"present-home: universal contract at {home_path}")
+            return 0
+        print(
+            f"absent: a file exists at {home_path} but it does not declare "
+            "contract.role: universal — it is not the universal contract. Do NOT proceed.",
+            file=sys.stderr,
+        )
+        return 1
 
     cache_path = repo_root / CACHE_RELPATH
     stamp_path = repo_root / STAMP_RELPATH
@@ -247,11 +258,18 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> int:
     )
 
     if _is_present(cache_path):
-        if _read_stamp_tag(stamp_path) == PINNED_RELEASE_TAG:
+        if _read_stamp_tag(stamp_path) == PINNED_RELEASE_TAG and _is_playbook_contract(cache_path):
             print(warn, file=sys.stderr)
             print(f"present-cache-fresh: universal contract in cache ({cache_path})")
             return 0
         if not allow_fetch:
+            if not _is_playbook_contract(cache_path):
+                print(
+                    f"absent: cached contract at {cache_path} does not declare "
+                    "contract.role: universal; fetch disabled. Do NOT proceed.",
+                    file=sys.stderr,
+                )
+                return 1
             print(warn, file=sys.stderr)
             print(f"present-cache-stale: cached contract not {PINNED_RELEASE_TAG}; fetch disabled")
             return 0

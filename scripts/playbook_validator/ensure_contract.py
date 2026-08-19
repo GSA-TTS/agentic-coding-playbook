@@ -62,7 +62,7 @@ STAMP_RELPATH = Path(".agents/cache/AGENTS.universal.stamp")
 
 # Pinned release the cache is fetched from and measured against. The raw URL is
 # hard-coded (never taken from untrusted content) per §11.
-PINNED_RELEASE_TAG = "v0.13.0"
+PINNED_RELEASE_TAG = "v0.14.1"
 CONTRACT_RAW_URL = f"https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/{PINNED_RELEASE_TAG}/AGENTS.md"
 
 _FETCH_TIMEOUT_SECONDS = 15
@@ -217,14 +217,31 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractRes
             message=f"Universal contract is this repository's own {self_contract.name}.",
         )
 
-    # 1. Environment-provided home contract short-circuits everything.
+    # 1. Environment-provided home contract short-circuits everything — but only
+    #    if it is genuinely the universal contract, not merely a non-empty file.
+    #    Existence alone is NOT sufficient: a role-less or project-layer AGENTS.md
+    #    at the home path must fail closed, or the gate passes green on a contract
+    #    that cannot satisfy a downstream `requires_contract`. Validate the
+    #    structured `contract.role: universal` marker, the same signal used to
+    #    recognize the playbook's own contract.
     home_path = _home_contract_path()
     if _is_present(home_path):
+        if _is_playbook_contract(home_path):
+            return ContractResult(
+                status=ContractStatus.HOME,
+                ok=True,
+                path=home_path,
+                message=f"Universal contract present at {home_path}.",
+            )
         return ContractResult(
-            status=ContractStatus.HOME,
-            ok=True,
+            status=ContractStatus.ABSENT,
+            ok=False,
             path=home_path,
-            message=f"Universal contract present at {home_path}.",
+            message=(
+                f"A file exists at {home_path} but it does not declare "
+                "`contract.role: universal` — it is not the universal contract. "
+                "Do NOT proceed; provide the real universal contract at the home path."
+            ),
         )
 
     cache_path = repo_root / CACHE_RELPATH
@@ -237,9 +254,12 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractRes
         "contract at the home path."
     )
 
-    # 2. Fresh cache (present and matching the pinned release tag).
+    # 2. Fresh cache (present, matching the pinned release tag, AND still a
+    #    genuine universal contract). The stamp tag alone is not sufficient — a
+    #    truncated or tampered cache file must fail closed rather than satisfy the
+    #    gate on tag-match alone.
     if _is_present(cache_path):
-        if _read_stamp_tag(stamp_path) == PINNED_RELEASE_TAG:
+        if _read_stamp_tag(stamp_path) == PINNED_RELEASE_TAG and _is_playbook_contract(cache_path):
             return ContractResult(
                 status=ContractStatus.CACHE_FRESH,
                 ok=True,
@@ -247,8 +267,19 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> ContractRes
                 message=f"Universal contract present in cache ({cache_path}).",
                 warning=stale_warning,
             )
-        # Cache exists but is behind the pinned release → try to refresh.
+        # Cache exists but is behind the pinned release (or no longer declares the
+        # universal role) → try to refresh.
         if not allow_fetch:
+            if not _is_playbook_contract(cache_path):
+                return ContractResult(
+                    status=ContractStatus.ABSENT,
+                    ok=False,
+                    path=cache_path,
+                    message=(
+                        f"Cached contract at {cache_path} does not declare "
+                        "`contract.role: universal`; fetch disabled. Do NOT proceed."
+                    ),
+                )
             return ContractResult(
                 status=ContractStatus.STALE,
                 ok=True,
