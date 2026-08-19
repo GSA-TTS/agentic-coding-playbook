@@ -16,11 +16,11 @@ Model-agnostic reference for any AI coding agent working in this repository. Rea
 ## Quick Reference
 
 ```bash
-# Validation (Python package — 530 tests)
+# Validation (Python package — 536 tests)
 PYTHONPATH=scripts python3 -m playbook_validator validate-docs
 PYTHONPATH=scripts python3 -m playbook_validator validate-skills
 PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
-PYTHONPATH=scripts python3 -m playbook_validator validate-adrs --dir docs/adr
+PYTHONPATH=scripts python3 -m playbook_validator validate-adrs --dir docs/decisions
 PYTHONPATH=scripts python3 -m playbook_validator validate-plan --path PROJECT_PLAN.md
 PYTHONPATH=scripts python3 -m playbook_validator validate-risk-assessment --path templates/risk-assessment.md
 PYTHONPATH=scripts python3 -m playbook_validator doctor [--json]

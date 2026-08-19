@@ -121,5 +121,19 @@ jobs:
       - name: Validate skills
         run: PYTHONPATH=scripts python3 -m playbook_validator validate-skills --root .
 
+      - name: Validate ADRs (decision records)
+        run: PYTHONPATH=scripts python3 -m playbook_validator validate-adrs --dir docs/decisions
+
+      - name: Audit repo compliance baseline
+        run: PYTHONPATH=scripts python3 -m playbook_validator audit-repo --path .
+
+      # Advisory (non-gating) until the self-scan false-positives + lock-file
+      # item are resolved (tracked in GSA-TTS/agentic-coding-playbook#259 and a
+      # pre-deploy self-scan-exclusion follow-up). Surfaces the checks without
+      # knowingly redding main; promote to gating once green.
+      - name: Pre-deployment security checks (advisory)
+        continue-on-error: true
+        run: PYTHONPATH=scripts python3 -m playbook_validator pre-deploy --path .
+
       - name: Verify INDEX.yaml is up to date
         run: PYTHONPATH=scripts python3 -m playbook_validator generate-index --check --root .

@@ -52,8 +52,57 @@ CRYPTO_KEY_PATTERN = re.compile(
 SAST_TOOLS = re.compile(r"(semgrep|bandit|gosec|spotbugs|security-code-scan|codeql)")
 SCA_TOOLS = re.compile(r"(npm audit|pip-audit|safety|snyk|trivy|dependency-check|govulncheck|cargo-audit)")
 
+# Requirement-string scanning for pyproject.toml dependency arrays (#239).
+# A requirement is UNPINNED if it carries a floating/range operator, or lacks an
+# exact `==` pin. This scans ONLY the dependency arrays — never the whole file —
+# so the project name, tool-table keys, and lint rule codes are not mistaken for
+# dependencies (the old whole-file regex flagged the bare quoted project name and
+# every quoted table key, so no pyproject could ever pass).
+DEP_FLOATING = re.compile(r"[\^~*]|>=?|<=?|!=")
+DEP_REQ_STRING = re.compile(r"""["']([^"']+)["']""")
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────
+
+
+def _iter_dep_arrays(text: str) -> list[str]:
+    """Return the raw bodies of pyproject dependency arrays only.
+
+    Scans the top-level ``dependencies = [...]`` and every array under the
+    ``[project.optional-dependencies]`` table — never the whole file, so table
+    keys, tool config, and the project name are not treated as dependencies.
+    """
+    bodies: list[str] = []
+    for m in re.finditer(r"(?m)^\s*dependencies\s*=\s*\[(.*?)\]", text, re.DOTALL):
+        bodies.append(m.group(1))
+    opt = re.search(r"(?ms)^\[project\.optional-dependencies\](.*?)(?=^\[|\Z)", text)
+    if opt:
+        for m in re.finditer(r"=\s*\[(.*?)\]", opt.group(1), re.DOTALL):
+            bodies.append(m.group(1))
+    return bodies
+
+
+def _req_is_unpinned(req: str) -> bool:
+    """True if a PEP 508 requirement string is not pinned to an exact version."""
+    req = req.split(";", 1)[0].strip()  # drop any environment marker
+    if not req or "@" in req:  # empty, or a git/URL dep pinned by ref
+        return False
+    if DEP_FLOATING.search(req):
+        return True
+    return "==" not in req
+
+
+def _pyproject_has_unpinned(text: str) -> bool:
+    """Scan only the dependency arrays for any unpinned requirement (#239)."""
+    for body in _iter_dep_arrays(text):
+        for line in body.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            for rm in DEP_REQ_STRING.finditer(line):
+                if _req_is_unpinned(rm.group(1)):
+                    return True
+    return False
 
 
 def _iter_files(repo: Path, extensions: set[str]) -> list[Path]:
@@ -157,9 +206,9 @@ def check_dependency_pinning(repo: Path, rc: ResultCollector) -> None:
             rc.add_result(AUDIT_FILE, "Dependencies pinned to exact versions", passed=True)
     elif (repo / "pyproject.toml").is_file():
         text = (repo / "pyproject.toml").read_text(errors="ignore")
-        # Check [project.dependencies] and [project.optional-dependencies] for unpinned versions
-        unpinned_re = re.compile(r'"[a-zA-Z][a-zA-Z0-9_-]*[>~^]|"[a-zA-Z][a-zA-Z0-9_-]*"')
-        if re.search(r"\bdependencies\s*=", text) and unpinned_re.search(text):
+        # Inspect only the dependency arrays for unpinned specifiers (#239); the
+        # project name and tool-table keys are not dependencies.
+        if _pyproject_has_unpinned(text):
             rc.add_result(
                 AUDIT_FILE,
                 "Dependencies pinned to exact versions",

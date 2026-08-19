@@ -162,7 +162,7 @@ Based on the decision category, suggest follow-up actions:
 Run the validation script:
 
 ```bash
-PYTHONPATH=scripts python3 -m playbook_validator validate-adrs --dir docs/adr
+PYTHONPATH=scripts python3 -m playbook_validator validate-adrs --dir docs/decisions
 ```
 
 The script checks:
