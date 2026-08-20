@@ -23,12 +23,16 @@ from playbook_validator.config import (
     DOC_STATUS_VALUES,
     OPTIONAL_FRONTMATTER_FIELDS,
     REQUIRED_FRONTMATTER_FIELDS,
+    STRUCTURAL_EXCLUDED_DIRS,
+    STRUCTURAL_EXCLUDED_FILENAMES,
 )
 from playbook_validator.frontmatter import extract_frontmatter
 
-# Files and directories excluded from content scanning (matches generate-index.sh)
-_EXCLUDED_DIRS = {".git", ".github", "node_modules", "skills"}
-_EXCLUDED_NAMES = {"CONTRIBUTING.md", "CHANGELOG.md", "README.md", "SECURITY.md", "LICENSE"}
+# Files and directories excluded from content scanning. Single-sourced in
+# config.py (#248) so the index generator and the frontmatter validator can
+# never disagree on the corpus.
+_EXCLUDED_DIRS = set(STRUCTURAL_EXCLUDED_DIRS)
+_EXCLUDED_NAMES = set(STRUCTURAL_EXCLUDED_FILENAMES)
 
 # Tier descriptions used in the YAML header
 _TIER_DESCRIPTIONS = {

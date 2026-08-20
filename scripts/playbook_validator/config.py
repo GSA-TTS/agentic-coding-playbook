@@ -26,9 +26,51 @@ OPTIONAL_FRONTMATTER_FIELDS = frozenset(
 
 DOC_STATUS_VALUES = frozenset({"canonical", "draft", "deprecated"})
 DOC_TIER_VALUES = frozenset({1, 2, 3})
-DOC_AUDIENCE_VALUES = frozenset({"developers", "isso", "managers", "all"})
+DOC_AUDIENCE_VALUES = frozenset({"developers", "isso", "managers", "agents", "all"})
 DOC_LOAD_PRIORITY_VALUES = frozenset({"always", "task-context", "on-demand", "reference-only"})
 DOC_REVIEW_CYCLE_VALUES = frozenset({"quarterly", "semi-annually", "annually"})
+
+# ── Structural (non-content) files & dirs excluded from doc scanning ──
+#
+# SINGLE SOURCE OF TRUTH (#248). Both the frontmatter validator
+# (validate_docs) and the index generator (generate_index) exclude these, and
+# they MUST agree — otherwise a file can be indexed by one and never validated
+# by the other (a real gap: a tier-3 template shipped an invalid enum value that
+# was indexed into INDEX.yaml but structurally unreachable by validation).
+#
+# Repository meta-files: standard OSS/community health files that legitimately
+# carry no frontmatter. The AGENTS.md §13.2 exemption prose is reconciled to
+# THIS list (#247) — keep the two in lockstep.
+STRUCTURAL_EXCLUDED_FILENAMES = frozenset(
+    {
+        "README.md",
+        "CONTRIBUTING.md",
+        "CHANGELOG.md",
+        "SECURITY.md",
+        "CODE_OF_CONDUCT.md",
+        "SUPPORT.md",
+        "GOVERNANCE.md",
+        "ACCESSIBILITY.md",
+        "LICENSE",
+        "TRANSFER.md",
+    }
+)
+
+# Directories excluded from *content* discovery. `.agents` holds the canonical
+# skills tree (validated by validate-skills, not validate-docs); the rest are
+# VCS/CI/build/data dirs with no frontmatter-bearing content docs.
+STRUCTURAL_EXCLUDED_DIRS = frozenset(
+    {
+        ".git",
+        ".github",
+        ".claude",
+        ".agents",
+        "node_modules",
+        "skills",
+        "data",
+        "decisions",
+    }
+)
 
 # ── Behavioral-Contract Designation (canonical, versioned) ───────────
 #

@@ -23,17 +23,17 @@ review_cycle: "quarterly"
 3. **Load on demand** — do NOT load all documents preemptively
 4. **Security is non-negotiable** — when in doubt about a security requirement, load the relevant doc rather than guessing
 
-## Tier 1 — Always Load (~15,549 words)
+## Tier 1 — Always Load (~15,668 words)
 
 These define the behavioral contract. Load for **every task**.
 
 | Document | Words | What It Covers |
 |----------|-------|----------------|
-| `AGENTS.md` | 5,790 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
+| `AGENTS.md` | 5,905 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
 | `PLAYBOOK.md` | 1,202 | Step-by-step guide: project setup → deployment (9 phases, 12 skills) |
 | `docs/CODING_PRACTICES.md` | 6,886 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
-| `docs/CODING_STANDARDS_COMPACT.md` | 450 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
-| `docs/AGENT-INSTRUCTIONS.md` | 1,221 | Repo-specific tooling reference: canonical paths, validation commands, context budgets |
+| `docs/CODING_STANDARDS_COMPACT.md` | 452 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
+| `docs/AGENT-INSTRUCTIONS.md` | 1,223 | Repo-specific tooling reference: canonical paths, validation commands, context budgets |
 
 ## Tier 2 — Load When Task Matches (~12,840 words)
 

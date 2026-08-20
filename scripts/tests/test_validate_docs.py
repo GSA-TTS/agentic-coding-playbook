@@ -92,6 +92,57 @@ class TestValidateDocFrontmatter:
         errors, warnings = validate_doc_frontmatter(md)
         assert any("load_priority" in e for e in errors)
 
+    def test_invalid_audience(self, tmp_path):
+        # #243: audience enum enforced (scalar or list)
+        md = tmp_path / "test.md"
+        md.write_text(
+            textwrap.dedent("""\
+            ---
+            title: "Test"
+            description: "A test"
+            status: canonical
+            tier: 2
+            audience: ["developers", "wizards"]
+            ---
+        """)
+        )
+        errors, warnings = validate_doc_frontmatter(md)
+        assert any("audience" in e and "wizards" in e for e in errors)
+
+    def test_valid_audience_agents(self, tmp_path):
+        # #243: 'agents' is a valid audience value (18 live docs use it)
+        md = tmp_path / "test.md"
+        md.write_text(
+            textwrap.dedent("""\
+            ---
+            title: "Test"
+            description: "A test"
+            status: canonical
+            tier: 2
+            audience: ["developers", "agents"]
+            ---
+        """)
+        )
+        errors, warnings = validate_doc_frontmatter(md)
+        assert not any("audience" in e for e in errors)
+
+    def test_invalid_review_cycle(self, tmp_path):
+        # #243: review_cycle enum enforced
+        md = tmp_path / "test.md"
+        md.write_text(
+            textwrap.dedent("""\
+            ---
+            title: "Test"
+            description: "A test"
+            status: canonical
+            tier: 2
+            review_cycle: fortnightly
+            ---
+        """)
+        )
+        errors, warnings = validate_doc_frontmatter(md)
+        assert any("review_cycle" in e and "fortnightly" in e for e in errors)
+
     def test_valid_optional_fields(self, tmp_path):
         md = tmp_path / "test.md"
         md.write_text(
@@ -611,6 +662,13 @@ class TestDocFreshness:
     def test_no_freshness_fields_ok(self, tmp_path):
         errors, warnings = self._check(tmp_path, "")
         assert errors == [] and warnings == []
+
+    def test_last_updated_without_cycle_warns(self, tmp_path):
+        # #249: last_updated but no review_cycle/stale_after → staleness cannot be
+        # derived, so the doc is silently exempt; surface the coverage gap.
+        errors, warnings = self._check(tmp_path, 'last_updated: "2026-01-01"\n')
+        assert errors == []
+        assert warnings and "staleness cannot be derived" in warnings[0] and "#249" in warnings[0]
 
     def test_real_repo_no_malformed_dates(self):
         """Live docs must have no malformed last_updated/stale_after (errors)."""
