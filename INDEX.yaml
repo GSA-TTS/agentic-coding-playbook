@@ -79,7 +79,6 @@ documents:
     load_priority: always
     last_updated: "2026-06-01"
     audience: [developers, agents]
-    review_cycle: quarterly
 
   - path: "docs/CODING_PRACTICES.md"
     title: "Secure Coding Practices for AI-Assisted Federal Development"
@@ -215,7 +214,6 @@ documents:
     load_priority: reference-only
     last_updated: "2026-06-01"
     audience: [developers, managers]
-    review_cycle: quarterly
 
   - path: "examples/AGENTS.md.example"
     title: "Example: AGENTS.md for a Federal Web Application"

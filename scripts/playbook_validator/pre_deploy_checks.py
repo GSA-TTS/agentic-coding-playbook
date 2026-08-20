@@ -228,10 +228,20 @@ def check_dependency_pinning(repo: Path, rc: ResultCollector) -> None:
 
 
 def check_lock_file(repo: Path, rc: ResultCollector) -> None:
-    """5.2: A dependency lock file is committed."""
+    """5.2: A dependency lock file is committed (git-tracked, not merely present) (#259)."""
+    from playbook_validator.audit_repo import _is_git_tracked
+
     for name in LOCK_FILES:
-        if (repo / name).is_file():
+        if _is_git_tracked(repo, name):
             rc.add_result(AUDIT_FILE, "Lock file committed", passed=True)
+            return
+        if (repo / name).is_file():
+            rc.add_result(
+                AUDIT_FILE,
+                "Lock file committed",
+                passed=False,
+                note=f"'{name}' exists but is not git-tracked; commit it: git add -f {name}",
+            )
             return
     rc.add_result(
         AUDIT_FILE,

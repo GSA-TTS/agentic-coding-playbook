@@ -137,14 +137,43 @@ def check_agents_md(repo: Path, rc: ResultCollector) -> None:
     rc.add_result(AUDIT_FILE, "agents-config", passed=False, note="Create AGENTS.md with federal compliance rules")
 
 
+def _is_git_tracked(repo: Path, name: str) -> bool:
+    """True if `name` is tracked by git in `repo`. A lock file that exists on
+    disk but is untracked (e.g. hidden by a global gitignore) does NOT satisfy
+    "commit them" (§7.1) — the check must verify tracking, not mere presence
+    (#259)."""
+    if not (repo / ".git").is_dir():
+        # Not a git repo (or a worktree without .git dir here) — fall back to
+        # on-disk presence so non-git consumers aren't penalized.
+        return (repo / name).is_file()
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo), "ls-files", "--error-unmatch", name],
+            capture_output=True,
+            timeout=10,
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        # git unavailable — fall back to on-disk presence rather than failing hard.
+        return (repo / name).is_file()
+
+
 def check_lock_file(repo: Path, rc: ResultCollector) -> None:
-    """Check 7: Dependency lock file present."""
+    """Check 7: A dependency lock file is present AND git-tracked (#259)."""
     for lock_file in LOCK_FILES:
-        if (repo / lock_file).is_file():
+        if _is_git_tracked(repo, lock_file):
             rc.add_result(AUDIT_FILE, "lock-file", passed=True)
             return
+        if (repo / lock_file).is_file():
+            # Present but untracked — the exact gap #259 hit (uv.lock hidden by a
+            # global gitignore). Surface it rather than passing on presence alone.
+            rc.add_warning(
+                f"Dependency lock file '{lock_file}' exists but is not git-tracked. "
+                f"Commit it for reproducible builds: git add -f {lock_file}"
+            )
+            return
 
-    rc.add_warning("No dependency lock file found. Commit lock file for reproducible builds.")
+    rc.add_warning("No dependency lock file found. Commit a lock file for reproducible builds.")
 
 
 def audit_repo(repo_path: Path) -> ResultCollector:

@@ -148,7 +148,7 @@ Skills convert best practices into step-by-step workflows that any AI coding age
 
 ## Developer Tools
 
-All validation and generation tools live in the `scripts/playbook_validator/` Python package (542 tests).
+All validation and generation tools live in the `scripts/playbook_validator/` Python package (546 tests).
 
 ```bash
 make help              # Show all available commands
@@ -212,7 +212,7 @@ agentic-coding-playbook/
 ├── data/
 │   └── federal-ai-landscape.yaml    # Machine-readable guidance registry
 ├── scripts/
-│   ├── playbook_validator/          # Python validation package (542 tests)
+│   ├── playbook_validator/          # Python validation package (546 tests)
 │   └── tests/                       # TDD test suite
 ├── skills/                          # 12 executable compliance procedures
 ├── templates/                       # PROJECT_PLAN.md, AGENTS.md.template

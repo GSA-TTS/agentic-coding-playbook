@@ -256,6 +256,26 @@ class TestCheckLockFile:
         check_lock_file(tmp_path, rc)
         assert rc.checks_failed == 1
 
+    def test_fail_untracked_lock_in_git_repo(self, tmp_path):
+        # #259: present-but-untracked lock fails (git repo present).
+        import subprocess
+
+        subprocess.run(["git", "-C", str(tmp_path), "init", "-q"], check=True)
+        (tmp_path / "uv.lock").write_text("version = 1\n")
+        rc = ResultCollector()
+        check_lock_file(tmp_path, rc)
+        assert rc.checks_failed == 1
+
+    def test_pass_tracked_lock_in_git_repo(self, tmp_path):
+        import subprocess
+
+        subprocess.run(["git", "-C", str(tmp_path), "init", "-q"], check=True)
+        (tmp_path / "uv.lock").write_text("version = 1\n")
+        subprocess.run(["git", "-C", str(tmp_path), "add", "-f", "uv.lock"], check=True)
+        rc = ResultCollector()
+        check_lock_file(tmp_path, rc)
+        assert rc.checks_passed == 1
+
 
 # ── 6. Empty catch block detection ───────────────────────────────────────
 

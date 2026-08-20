@@ -4,7 +4,6 @@ description: "Long-term plan for the Agentic Coding Playbook — making it a liv
 status: canonical
 tier: 3
 last_updated: "2026-06-01"
-review_cycle: "quarterly"
 load_priority: reference-only
 audience: ["developers", "managers"]
 keywords: ["roadmap", "plan", "future", "strategy"]
@@ -21,7 +20,7 @@ Long-term plan for making the Agentic Coding Playbook a living, learnable resour
 |--------|-------|
 | Documents | 23 |
 | Skills | 12 |
-| Tests | 542 |
+| Tests | 546 |
 | Checklist items | 62 |
 | Landscape entries | 42 |
 | NIST controls mapped | 35 |
