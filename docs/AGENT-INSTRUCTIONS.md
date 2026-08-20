@@ -4,7 +4,6 @@ description: "Model-agnostic repo-specific reference for any AI coding agent wor
 status: canonical
 tier: 1
 last_updated: "2026-06-01"
-review_cycle: "quarterly"
 load_priority: always
 audience: ["developers", "agents"]
 keywords: ["agent", "instructions", "commands", "paths", "skills", "validation"]
@@ -17,7 +16,7 @@ Model-agnostic reference for any AI coding agent working in this repository. Rea
 ## Quick Reference
 
 ```bash
-# Validation (Python package — 542 tests)
+# Validation (Python package — 546 tests)
 PYTHONPATH=scripts python3 -m playbook_validator validate-docs
 PYTHONPATH=scripts python3 -m playbook_validator validate-skills
 PYTHONPATH=scripts python3 -m playbook_validator validate-landscape

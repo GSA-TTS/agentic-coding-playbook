@@ -207,6 +207,30 @@ class TestCheckLockFile:
         d = rc.to_dict()
         assert len(d["warnings"]) == 1
 
+    def test_untracked_lock_in_git_repo_warns(self, tmp_path):
+        # #259: a lock file present on disk but NOT git-tracked must NOT pass
+        # (the exact gap uv.lock hit, hidden by a global gitignore).
+        import subprocess
+
+        subprocess.run(["git", "-C", str(tmp_path), "init", "-q"], check=True)
+        (tmp_path / "uv.lock").write_text("version = 1\n")  # on disk, never `git add`
+        rc = ResultCollector()
+        check_lock_file(tmp_path, rc)
+        assert rc.checks_passed == 0
+        d = rc.to_dict()
+        assert len(d["warnings"]) == 1
+        assert "not git-tracked" in d["warnings"][0]
+
+    def test_tracked_lock_in_git_repo_passes(self, tmp_path):
+        import subprocess
+
+        subprocess.run(["git", "-C", str(tmp_path), "init", "-q"], check=True)
+        (tmp_path / "uv.lock").write_text("version = 1\n")
+        subprocess.run(["git", "-C", str(tmp_path), "add", "-f", "uv.lock"], check=True)
+        rc = ResultCollector()
+        check_lock_file(tmp_path, rc)
+        assert rc.checks_passed == 1
+
 
 class TestAuditRepo:
     """Integration: audit_repo runs all checks and returns ResultCollector."""
