@@ -317,7 +317,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--path", default="data/federal-ai-landscape.yaml")
 
     p = sub.add_parser("validate-adrs", help="Validate ADR files")
-    p.add_argument("--dir", default="docs/adr", help="ADR directory")
+    p.add_argument("--dir", default="docs/decisions", help="ADR (decision record) directory")
 
     p = sub.add_parser("doctor", help="Check environment readiness")
     p.add_argument("--json", action="store_true", help="JSON output")

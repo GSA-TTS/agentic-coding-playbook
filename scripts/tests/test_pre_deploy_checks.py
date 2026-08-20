@@ -1,6 +1,7 @@
 """Tests for pre-deployment security checks module."""
 
 import json
+from pathlib import Path
 
 from playbook_validator.output import ResultCollector
 from playbook_validator.pre_deploy_checks import (
@@ -153,6 +154,78 @@ class TestCheckDependencyPinning:
         rc = ResultCollector()
         check_dependency_pinning(tmp_path, rc)
         assert rc.checks_failed == 1
+
+    def test_pass_pinned_pyproject_with_name_and_tables(self, tmp_path):
+        """Regression (#239): a fully-pinned pyproject with a project name and
+        tool tables must PASS. The old whole-file regex matched the bare quoted
+        name (e.g. "playbook-validator") and any quoted table key/rule code, so
+        this always failed and no pyproject could ever pass."""
+        (tmp_path / "pyproject.toml").write_text(
+            "[project]\n"
+            'name = "playbook-validator"\n'
+            "dependencies = [\n"
+            '    "PyYAML==6.0.3",\n'
+            '    "feedparser==6.0.14",\n'
+            "]\n\n"
+            "[project.optional-dependencies]\n"
+            "dev = [\n"
+            '    "pytest==9.1.1",\n'
+            '    "ruff==0.16.2",\n'
+            "]\n\n"
+            "[tool.ruff.lint]\n"
+            'select = ["E", "W", "F", "S101"]\n'
+        )
+        rc = ResultCollector()
+        check_dependency_pinning(tmp_path, rc)
+        assert rc.checks_passed == 1
+        assert rc.checks_failed == 0
+
+    def test_fail_pyproject_caret_tilde_and_bare(self, tmp_path):
+        for spec in ('"PyYAML^6.0"', '"PyYAML~=6.0"', '"PyYAML"'):
+            (tmp_path / "pyproject.toml").write_text(f'[project]\nname = "x"\ndependencies = [\n    {spec},\n]\n')
+            rc = ResultCollector()
+            check_dependency_pinning(tmp_path, rc)
+            assert rc.checks_failed == 1, f"{spec} should be flagged unpinned"
+
+    def test_pass_pyproject_extras_marker_and_git(self, tmp_path):
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "x"\ndependencies = [\n'
+            '    "uvicorn[standard]==0.30.0",\n'
+            "    \"tomli==2.0.1; python_version < '3.11'\",\n"
+            '    "mylib @ git+https://example.com/mylib.git@v1.0",\n'
+            "]\n"
+        )
+        rc = ResultCollector()
+        check_dependency_pinning(tmp_path, rc)
+        assert rc.checks_passed == 1
+        assert rc.checks_failed == 0
+
+    def test_pass_pyproject_commented_floating(self, tmp_path):
+        """A floating spec that appears only in a comment must not fail."""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "x"\ndependencies = [\n'
+            '    # "flask>=2.0" was rejected; pinned below\n'
+            '    "PyYAML==6.0.3",\n'
+            "]\n"
+        )
+        rc = ResultCollector()
+        check_dependency_pinning(tmp_path, rc)
+        assert rc.checks_passed == 1
+
+    def test_fail_pyproject_optional_floating(self, tmp_path):
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "x"\n[project.optional-dependencies]\ndev = [\n    "pytest>=9",\n]\n'
+        )
+        rc = ResultCollector()
+        check_dependency_pinning(tmp_path, rc)
+        assert rc.checks_failed == 1
+
+    def test_real_repo_pyproject_passes(self):
+        """The playbook's OWN fully-pinned pyproject must pass (#239 false-fail)."""
+        repo_root = Path(__file__).resolve().parents[2]
+        rc = ResultCollector()
+        check_dependency_pinning(repo_root, rc)
+        assert rc.checks_failed == 0, "the repo's own pinned pyproject must not be flagged"
 
     def test_pass_no_manifest(self, tmp_path):
         rc = ResultCollector()

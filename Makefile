@@ -76,7 +76,7 @@ validate-risk-assessment: ## Validate risk assessment worksheet
 
 .PHONY: validate-adrs
 validate-adrs: ## Validate ADR decision records
-	$(VALIDATOR) validate-adrs --dir $(or $(ADR_DIR),docs/adr)
+	$(VALIDATOR) validate-adrs --dir $(or $(ADR_DIR),docs/decisions)
 
 .PHONY: audit-repo
 audit-repo: ## Audit repository compliance baseline
