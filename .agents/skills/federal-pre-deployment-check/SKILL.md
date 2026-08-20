@@ -27,7 +27,7 @@ human-verified items to produce a completed checklist report.
 ## Check Classification
 
 See [references/CHECK_AUTOMATION.md](references/CHECK_AUTOMATION.md) for the full
-classification of all 60 items. Summary:
+classification of every checklist item. Summary:
 
 | Type | Count | How It Works |
 |------|-------|-------------|
@@ -134,7 +134,7 @@ python3 skills/federal-pre-deployment-check/scripts/generate-checklist-report.py
 ```
 
 Or, construct the completed checklist inline by filling in the Pass/Fail/N/A
-status and notes for each of the 60 items in the checklist format from
+status and notes for each item in the checklist format from
 `checklists/pre-deployment.md`.
 
 ### Step 6: Present Results
@@ -168,5 +168,5 @@ with references to the relevant policy documents (use the
 - The reviewer MUST NOT be the same person who directed the agent (per checklist instructions).
 - Automated checks are best-effort — tool availability varies by environment.
 - The automated checks (`make pre-deploy`) are read-only. They do not modify files, install packages, or make network calls.
-- All 60 items trace back to NIST SP 800-53 controls via the playbook's traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) Table 3.
+- All checklist items trace back to NIST SP 800-53 controls via the playbook's traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) Table 3.
 - **Policy reference:** `checklists/pre-deployment.md` for the full checklist; the playbook traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) for control mappings.

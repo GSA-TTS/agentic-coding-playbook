@@ -24,7 +24,7 @@ review_cycle: "annually"
   3. Update when AI components, data flows, or system purpose change materially
   4. Retain completed PIAs as part of your ATO documentation package
 
-  Based on: Agentic Coding Playbook v0.4.0
+  Based on: the Agentic Coding Playbook
   Aligned with: Privacy Act of 1974, E-Government Act of 2002 (Section 208), OMB Circular A-130
 -->
 

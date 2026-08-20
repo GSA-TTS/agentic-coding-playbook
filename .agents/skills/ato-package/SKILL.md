@@ -66,7 +66,7 @@ For `docs/risk-assessment.md`, also verify:
 - Sign-off section has names and dates
 
 For `checklists/pre-deployment.md`, also verify:
-- All 60 items have a Pass/Fail/N/A status
+- All checklist items have a Pass/Fail/N/A status
 - Failed items have remediation notes
 - Sign-off block at the bottom is completed
 
