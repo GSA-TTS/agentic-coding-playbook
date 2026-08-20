@@ -4,7 +4,7 @@ description: "Starting point for a new federal coding project — fill this out 
 status: canonical
 tier: 3
 load_priority: reference-only
-audience: ["developers", "tech-leads", "managers"]
+audience: ["developers", "managers"]
 ---
 
 # Project Plan

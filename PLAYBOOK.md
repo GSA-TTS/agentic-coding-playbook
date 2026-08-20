@@ -3,7 +3,7 @@ title: "Federal AI Coding Playbook"
 description: "Step-by-step guide for starting a federal coding project with AI agents"
 tier: 1
 load_priority: always
-audience: ["developers", "tech-leads", "agents"]
+audience: ["developers", "managers", "agents"]
 status: canonical
 related:
   - AGENTS.md

@@ -14,45 +14,26 @@ from playbook_validator.config import (
     CONTRACT_ROLE_UNIVERSAL,
     CONTRACT_ROLE_VALUES,
     CONTRACT_VERSION_KEY,
+    DOC_AUDIENCE_VALUES,
     DOC_LOAD_PRIORITY_VALUES,
+    DOC_REVIEW_CYCLE_VALUES,
     DOC_STATUS_VALUES,
     DOC_TIER_VALUES,
     REQUIRED_FRONTMATTER_FIELDS,
+    STRUCTURAL_EXCLUDED_DIRS,
+    STRUCTURAL_EXCLUDED_FILENAMES,
     contract_block,
     contract_role,
     contract_version,
 )
 from playbook_validator.frontmatter import extract_frontmatter
 
-# Files excluded from frontmatter validation
-EXCLUDED_FILENAMES = frozenset(
-    {
-        "README.md",
-        "CONTRIBUTING.md",
-        "CHANGELOG.md",
-        "SECURITY.md",
-        "CODE_OF_CONDUCT.md",
-        "SUPPORT.md",
-        "GOVERNANCE.md",
-        "ACCESSIBILITY.md",
-        "LICENSE",
-        "TRANSFER.md",
-    }
-)
-
-# Directories excluded from content file discovery
-EXCLUDED_DIRS = frozenset(
-    {
-        ".git",
-        ".github",
-        ".claude",
-        "node_modules",
-        "skills",
-        "data",
-        "templates",
-        "decisions",
-    }
-)
+# Structural (non-content) files & dirs excluded from frontmatter validation.
+# Single-sourced in config.py (#248) so validate_docs and generate_index can
+# never diverge on what "the corpus" is. The §13.2 exemption prose tracks
+# STRUCTURAL_EXCLUDED_FILENAMES (#247).
+EXCLUDED_FILENAMES = STRUCTURAL_EXCLUDED_FILENAMES
+EXCLUDED_DIRS = STRUCTURAL_EXCLUDED_DIRS
 
 
 def find_content_files(root: Path) -> list[Path]:
@@ -107,6 +88,21 @@ def validate_doc_frontmatter(path: Path) -> tuple[list[str], list[str]]:
     if load_priority is not None and load_priority not in DOC_LOAD_PRIORITY_VALUES:
         errors.append(
             f"{path} — invalid load_priority: '{load_priority}' (must be one of {sorted(DOC_LOAD_PRIORITY_VALUES)})"
+        )
+
+    # Audience validation (optional; scalar or list of enum values) (#243)
+    audience = fm.get("audience")
+    if audience is not None:
+        values = audience if isinstance(audience, list) else [audience]
+        for a in values:
+            if a not in DOC_AUDIENCE_VALUES:
+                errors.append(f"{path} — invalid audience: '{a}' (must be one of {sorted(DOC_AUDIENCE_VALUES)})")
+
+    # Review-cycle validation (optional field) (#243)
+    review_cycle = fm.get("review_cycle")
+    if review_cycle is not None and review_cycle not in DOC_REVIEW_CYCLE_VALUES:
+        errors.append(
+            f"{path} — invalid review_cycle: '{review_cycle}' (must be one of {sorted(DOC_REVIEW_CYCLE_VALUES)})"
         )
 
     # Behavioral-contract block validation (optional). When present it must be a
@@ -200,6 +196,16 @@ def _validate_freshness(path: Path, fm: dict, errors: list[str], warnings: list[
                 f"old, exceeding the {cycle} review cycle ({_REVIEW_CYCLE_DAYS[cycle]} days). "
                 "Review and bump last_updated, or set stale_after (#210)."
             )
+    elif updated is not None and cycle not in _REVIEW_CYCLE_DAYS:
+        # #249: a doc carries last_updated but no review_cycle / stale_after, so
+        # staleness can never be derived — the doc is silently exempt from the
+        # freshness rule. Surface the coverage gap (warning) rather than let it
+        # sit undetectable.
+        warnings.append(
+            f"{path} — carries last_updated but no review_cycle or stale_after, "
+            "so staleness cannot be derived (this doc is exempt from the freshness "
+            "rule). Add a review_cycle or an explicit stale_after (#249)."
+        )
 
 
 # Control-overlay body rows look like: | **AC-2** | Account Management | ...

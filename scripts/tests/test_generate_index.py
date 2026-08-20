@@ -1193,3 +1193,31 @@ class TestFrameworkRefs:
         root = Path(__file__).resolve().parents[2]
         assert _validate_framework_refs(root) == []
         assert _validate_framework_frontmatter(root) == []
+
+
+class TestExclusionListsSingleSource:
+    """#248: validate_docs and generate_index MUST share one exclusion source."""
+
+    def test_structural_lists_are_single_sourced(self):
+        from playbook_validator import config, generate_index, validate_docs
+
+        # Set-equality against the config single source, so a file can never be
+        # indexed by one tool and left unvalidated by the other.
+        assert validate_docs.EXCLUDED_FILENAMES == config.STRUCTURAL_EXCLUDED_FILENAMES
+        assert validate_docs.EXCLUDED_DIRS == config.STRUCTURAL_EXCLUDED_DIRS
+        assert set(config.STRUCTURAL_EXCLUDED_FILENAMES) == generate_index._EXCLUDED_NAMES
+        assert set(config.STRUCTURAL_EXCLUDED_DIRS) == generate_index._EXCLUDED_DIRS
+
+    def test_agents_md_13_2_exemption_matches_config(self):
+        """#247: the §13.2 exemption prose lists the same meta-files as the tool."""
+        from pathlib import Path
+
+        from playbook_validator import config
+
+        repo = Path(__file__).resolve().parents[2]
+        agents = repo / "AGENTS.md"
+        if not agents.is_file():
+            return
+        text = agents.read_text(encoding="utf-8")
+        for name in config.STRUCTURAL_EXCLUDED_FILENAMES:
+            assert name in text, f"AGENTS.md §13.2 must list the exempt meta-file {name}"

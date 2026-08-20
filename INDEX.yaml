@@ -25,7 +25,7 @@ frontmatter_schema:
     1: "Core — behavioral best practices, rules, and control mappings"
     2: "Supporting documentation — how-to guides and setup instructions"
     3: "Templates and checklists — reusable artifacts for projects"
-  audience_values: ["all", "developers", "isso", "managers"]
+  audience_values: ["agents", "all", "developers", "isso", "managers"]
   load_priority_values: ["always", "on-demand", "reference-only", "task-context"]
   review_cycle_values: ["annually", "quarterly", "semi-annually"]
 
@@ -38,7 +38,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: always
-    last_updated: "2026-08-19"
+    last_updated: "2026-08-20"
     audience: all
     nist_controls_count: 28
     review_cycle: quarterly
@@ -58,7 +58,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: always
-    audience: [developers, tech-leads, agents]
+    audience: [developers, managers, agents]
 
   - path: "docs/AGENT-IDENTITY.md"
     title: "Agent Identity, Authentication, Authorization, and Delegation"
@@ -79,6 +79,7 @@ documents:
     load_priority: always
     last_updated: "2026-06-01"
     audience: [developers, agents]
+    review_cycle: quarterly
 
   - path: "docs/CODING_PRACTICES.md"
     title: "Secure Coding Practices for AI-Assisted Federal Development"
@@ -99,6 +100,7 @@ documents:
     load_priority: task-context
     last_updated: "2026-06-01"
     audience: [agents]
+    review_cycle: quarterly
 
   - path: "docs/SECURITY-CONTROLS.md"
     title: "NIST SP 800-53 Rev 5.2 Control Overlay for Agentic AI Systems"
@@ -203,6 +205,7 @@ documents:
     last_updated: "2026-06-01"
     audience: [developers, agents]
     nist_controls_count: 2
+    review_cycle: quarterly
 
   - path: "docs/ROADMAP.md"
     title: "Roadmap"
@@ -212,6 +215,7 @@ documents:
     load_priority: reference-only
     last_updated: "2026-06-01"
     audience: [developers, managers]
+    review_cycle: quarterly
 
   - path: "examples/AGENTS.md.example"
     title: "Example: AGENTS.md for a Federal Web Application"
@@ -239,7 +243,7 @@ documents:
     status: canonical
     tier: 3
     load_priority: reference-only
-    audience: [developers, tech-leads, managers]
+    audience: [developers, managers]
 
   - path: "templates/privacy-impact-assessment.md"
     title: "Privacy Impact Assessment for AI-Enabled Systems"

@@ -4,6 +4,7 @@ description: "Implementation patterns for defending against prompt injection in 
 status: canonical
 tier: 3
 last_updated: "2026-06-01"
+review_cycle: "quarterly"
 load_priority: on-demand
 audience: ["developers", "agents"]
 keywords: ["prompt injection", "defense", "security", "input validation", "output filtering"]
