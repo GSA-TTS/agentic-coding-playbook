@@ -29,12 +29,16 @@ jobs:
 
       # Provide the universal contract to the environment. Replace this step
       # with your organization's standard provisioning (e.g. the
-      # agentic-coding-patterns acq provisioning kit). The probe then verifies offline.
+      # agentic-coding-patterns acq provisioning kit). The probe then verifies
+      # offline that the file is genuinely the universal contract (declares
+      # contract.role: universal) — so the pinned release MUST be one whose
+      # AGENTS.md carries that marker (>= v0.14.0 / contract 1.0.0). Keep this tag
+      # in lockstep with PINNED_RELEASE_TAG in scripts/ensure-contract.py.
       - name: Provision universal behavioral contract
         run: |
           mkdir -p "$HOME/.agentic-coding-playbook"
           curl -fsSL \
-            https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/v0.13.0/AGENTS.md \
+            https://raw.githubusercontent.com/GSA-TTS/agentic-coding-playbook/v0.14.1/AGENTS.md \
             -o "$HOME/.agentic-coding-playbook/AGENTS.md"
 
       - name: Ensure contract is available (fail-closed)

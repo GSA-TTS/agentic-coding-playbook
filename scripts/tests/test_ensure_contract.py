@@ -13,13 +13,23 @@ from playbook_validator.ensure_contract import (
     ensure_contract,
 )
 
-CONTRACT_TEXT = "# AGENTS.md — Federal AI Agent Behavioral Best Practices\n\nrules...\n"
-
 # Frontmatter carrying the structured, versioned contract block. The thin layer
 # legitimately *names* the contract title in prose but declares project-layer.
 UNIVERSAL_FM = (
     '---\ntitle: x\ncontract:\n  role: universal\n  version: "1.0.0"\n---\n'
     "# AGENTS.md — Federal AI Agent Behavioral Best Practices\n"
+)
+
+# The contract file a valid environment provides IS the universal contract, so it
+# must carry the contract.role: universal marker. (Previously this was a bare
+# title string; the gate now validates the marker, not mere existence — #235.)
+CONTRACT_TEXT = UNIVERSAL_FM
+
+# A file that exists and is non-empty but is NOT the universal contract (no
+# contract.role: universal). The gate must fail closed on this, not accept it on
+# mere existence — this is the #235 fail-closed defect.
+NON_UNIVERSAL_FM = (
+    '---\ntitle: x\ncontract:\n  role: project-layer\n  version: "1.0.0"\n---\n# Some project\'s thin AGENTS.md\n'
 )
 
 # Repository root = two levels up from scripts/tests/
@@ -83,6 +93,50 @@ def test_empty_home_file_is_not_present(repo, tmp_path, monkeypatch):
     # Empty home file does not count as present; no cache either → halt.
     assert not result.ok
     assert result.status is ContractStatus.ABSENT
+
+
+# ── #235 fail-closed: a present-but-not-universal contract must NOT pass ──────
+
+
+def test_home_present_but_not_universal_fails_closed(repo, tmp_path, monkeypatch):
+    """The blocker (#235): a non-empty AGENTS.md at the home path that does NOT
+    declare contract.role: universal must fail closed. Existence is not enough —
+    otherwise the gate passes green on a contract that cannot satisfy a
+    downstream requires_contract."""
+    home = tmp_path / "home" / ".agentic-coding-playbook"
+    home.mkdir(parents=True)
+    (home / "AGENTS.md").write_text(NON_UNIVERSAL_FM)
+    monkeypatch.setattr(ec, "DEFAULT_HOME", home)
+
+    result = ensure_contract(repo, allow_fetch=False)
+    assert not result.ok
+    assert result.status is ContractStatus.ABSENT
+
+
+def test_stale_cache_not_universal_no_fetch_fails_closed(repo):
+    """A cached file whose content is not the universal contract must fail closed
+    under --no-fetch, rather than be reported stale-but-ok on tag mismatch."""
+    cache = repo / ec.CACHE_RELPATH
+    stamp = repo / ec.STAMP_RELPATH
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(NON_UNIVERSAL_FM)
+    stamp.write_text("source_url=x\nrelease_tag=v0.0.1-old\nfetched_at=now\n")
+
+    result = ensure_contract(repo, allow_fetch=False)
+    assert not result.ok
+    assert result.status is ContractStatus.ABSENT
+
+
+def test_cli_no_fetch_fails_closed_on_non_universal_home(repo, tmp_path, monkeypatch):
+    """End-to-end via the module CLI path: --no-fetch with a non-universal home
+    file exits non-zero (mirrors the shipped CI workflow's fail-closed step)."""
+    home = tmp_path / "home" / ".agentic-coding-playbook"
+    home.mkdir(parents=True)
+    (home / "AGENTS.md").write_text(NON_UNIVERSAL_FM)
+    monkeypatch.setattr(ec, "DEFAULT_HOME", home)
+
+    result = ensure_contract(repo, allow_fetch=False)
+    assert result.exit_code == 1
 
 
 # ── 2. Fresh cache ──────────────────────────────────────────────────────────
