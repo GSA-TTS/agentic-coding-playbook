@@ -30,14 +30,14 @@ class TestCheckSecrets:
         assert rc.checks_failed == 0
 
     def test_fail_password_in_py(self, tmp_path):
-        (tmp_path / "config.py").write_text('password = "super_secret_password123"\n')
+        (tmp_path / "config.py").write_text('password = "super_secret_password123"\n')  # pre-deploy: allow
         rc = ResultCollector()
         check_secrets(tmp_path, rc)
         assert rc.checks_failed == 1
         assert "secret" in rc._results[0].note.lower() or "1 file" in rc._results[0].note
 
     def test_fail_api_key_in_yaml(self, tmp_path):
-        (tmp_path / "config.yaml").write_text('api_key: "abcdefghijklmnop"\n')
+        (tmp_path / "config.yaml").write_text('api_key: "abcdefghijklmnop"\n')  # pre-deploy: allow
         rc = ResultCollector()
         check_secrets(tmp_path, rc)
         assert rc.checks_failed == 1
@@ -45,7 +45,7 @@ class TestCheckSecrets:
     def test_skip_excluded_dirs(self, tmp_path):
         nm = tmp_path / "node_modules" / "pkg"
         nm.mkdir(parents=True)
-        (nm / "index.js").write_text('token = "leaked_secret_value_1234"\n')
+        (nm / "index.js").write_text('token = "leaked_secret_value_1234"\n')  # pre-deploy: allow
         rc = ResultCollector()
         check_secrets(tmp_path, rc)
         assert rc.checks_passed == 1
@@ -64,13 +64,15 @@ class TestCheckSqlInjection:
         assert rc.checks_passed == 1
 
     def test_fail_format_string(self, tmp_path):
-        (tmp_path / "db.py").write_text('cursor.execute("SELECT * FROM t WHERE id = %s" % user_input)\n')
+        sql = 'cursor.execute("SELECT * FROM t WHERE id = %s" % user_input)\n'  # pre-deploy: allow
+        (tmp_path / "db.py").write_text(sql)
         rc = ResultCollector()
         check_sql_injection(tmp_path, rc)
         assert rc.checks_failed == 1
 
     def test_fail_dot_format(self, tmp_path):
-        (tmp_path / "db.py").write_text('cursor.execute("SELECT * FROM t WHERE id = {}".format(uid))\n')
+        sql = 'cursor.execute("SELECT * FROM t WHERE id = {}".format(uid))\n'  # pre-deploy: allow
+        (tmp_path / "db.py").write_text(sql)
         rc = ResultCollector()
         check_sql_injection(tmp_path, rc)
         assert rc.checks_failed == 1
@@ -88,20 +90,20 @@ class TestCheckUnsafeApis:
         check_unsafe_apis(tmp_path, rc)
         assert rc.checks_passed == 1
 
-    def test_fail_eval(self, tmp_path):
-        (tmp_path / "app.js").write_text("const x = eval(userInput);\n")
+    def test_fail_eval(self, tmp_path):  # pre-deploy: allow
+        (tmp_path / "app.js").write_text("const x = eval(userInput);\n")  # pre-deploy: allow
         rc = ResultCollector()
         check_unsafe_apis(tmp_path, rc)
         assert rc.checks_failed == 1
 
     def test_fail_innerhtml(self, tmp_path):
-        (tmp_path / "app.js").write_text("el.innerHTML = data;\n")
+        (tmp_path / "app.js").write_text("el.innerHTML = data;\n")  # pre-deploy: allow
         rc = ResultCollector()
         check_unsafe_apis(tmp_path, rc)
         assert rc.checks_failed == 1
 
     def test_fail_os_system(self, tmp_path):
-        (tmp_path / "run.py").write_text('os.system("rm -rf /")\n')
+        (tmp_path / "run.py").write_text('os.system("rm -rf /")\n')  # pre-deploy: allow
         rc = ResultCollector()
         check_unsafe_apis(tmp_path, rc)
         assert rc.checks_failed == 1
@@ -290,7 +292,7 @@ class TestCheckEmptyCatches:
         assert rc.checks_passed == 1
 
     def test_fail_empty_js_catch(self, tmp_path):
-        (tmp_path / "app.js").write_text("try { x(); } catch(e) {}\n")
+        (tmp_path / "app.js").write_text("try { x(); } catch(e) {}\n")  # pre-deploy: allow
         rc = ResultCollector()
         check_empty_catches(tmp_path, rc)
         assert rc.checks_failed == 1
@@ -404,16 +406,16 @@ class TestKnownViolations:
 
     def test_multiple_failures(self, tmp_path):
         # Secret
-        (tmp_path / "config.py").write_text('api_key = "my_secret_api_key_12345678"\n')
+        (tmp_path / "config.py").write_text('api_key = "my_secret_api_key_12345678"\n')  # pre-deploy: allow
         # SQL injection
-        (tmp_path / "db.py").write_text('cursor.execute("SELECT * FROM t WHERE id = %s" % uid)\n')
-        # Unsafe eval
-        (tmp_path / "run.js").write_text("eval(userInput);\n")
+        (tmp_path / "db.py").write_text('cursor.execute("SELECT * FROM t WHERE id = %s" % uid)\n')  # pre-deploy: allow
+        # Unsafe eval  # pre-deploy: allow
+        (tmp_path / "run.js").write_text("eval(userInput);\n")  # pre-deploy: allow
         # Floating deps
         (tmp_path / "package.json").write_text('{"dependencies": {"express": "^4.18.2"}}')
         # No lock file
         # Empty catch
-        (tmp_path / "handler.js").write_text("try { run(); } catch(e) {}\n")
+        (tmp_path / "handler.js").write_text("try { run(); } catch(e) {}\n")  # pre-deploy: allow
         # No CI
 
         rc = run_pre_deploy_checks(str(tmp_path))
@@ -440,7 +442,59 @@ class TestCheckCryptoKeys:
         assert rc.checks_passed == 1
 
     def test_fail_pem_block(self, tmp_path):
-        (tmp_path / "key.py").write_text('key = "-----BEGIN RSA PRIVATE KEY-----"\n')
+        (tmp_path / "key.py").write_text('key = "-----BEGIN RSA PRIVATE KEY-----"\n')  # pre-deploy: allow
         rc = ResultCollector()
         check_crypto_keys(tmp_path, rc)
         assert rc.checks_failed == 1
+
+
+class TestSelfScanExclusion:
+    """#263: the inline `pre-deploy: allow` marker suppresses deliberate fixtures
+    / pattern-definitions, but MUST NOT blind the scanner on UNMARKED findings —
+    that cross-repo safety property is why #263 was not fixed by skipping test
+    dirs (which would silently un-scan a consumer's tests/)."""
+
+    def test_playbook_repo_passes_pre_deploy(self):
+        """Acceptance: the playbook's own repo exits 0 under pre-deploy."""
+        repo_root = Path(__file__).resolve().parents[2]
+        rc = run_pre_deploy_checks(repo_root)
+        assert rc.checks_failed == 0, rc.format_text()
+        assert rc.exit_code == 0
+
+    def test_marker_suppresses_marked_secret(self, tmp_path):
+        (tmp_path / "fixture.py").write_text('api_key = "deliberate_fixture_value_123"  # pre-deploy: allow\n')
+        rc = ResultCollector()
+        check_secrets(tmp_path, rc)
+        assert rc.checks_passed == 1
+
+    def test_marker_does_not_blind_unmarked_secret(self, tmp_path):
+        """SAFETY: a real secret WITHOUT the marker is still flagged, even in a
+        test-named file — a consumer repo cannot be silently un-scanned."""
+        (tmp_path / "test_thing.py").write_text('api_key = "real_leaked_secret_1234"\n')  # pre-deploy: allow
+        rc = ResultCollector()
+        check_secrets(tmp_path, rc)
+        assert rc.checks_failed == 1
+
+    def test_marker_is_per_match_not_per_file(self, tmp_path):
+        """A marked fixture line does not excuse a real finding elsewhere in the
+        same file."""
+        (tmp_path / "mixed.py").write_text(
+            'api_key = "fixture_ok_12345678"  # pre-deploy: allow\n'
+            'token = "unmarked_real_leak_87654321"\n'  # pre-deploy: allow
+        )
+        rc = ResultCollector()
+        check_secrets(tmp_path, rc)
+        assert rc.checks_failed == 1
+
+    def test_marker_multiline_empty_catch(self, tmp_path):
+        """Regression guard for the multiline pattern: except:\\n pass is
+        suppressed only when a line it spans carries the marker; unmarked still
+        fails."""
+        (tmp_path / "a.py").write_text("try:\n    x()\nexcept:  # pre-deploy: allow\n    pass\n")
+        rc = ResultCollector()
+        check_empty_catches(tmp_path, rc)
+        assert rc.checks_passed == 1
+        (tmp_path / "b.py").write_text("try:\n    y()\nexcept:\n    pass\n")
+        rc2 = ResultCollector()
+        check_empty_catches(tmp_path, rc2)
+        assert rc2.checks_failed == 1
