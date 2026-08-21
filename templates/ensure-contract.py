@@ -253,8 +253,8 @@ def ensure_contract(repo_root: Path, *, allow_fetch: bool = True) -> int:
     warn = (
         f"WARNING: using cached universal contract ({cache_path}). This is a "
         "fallback — the canonical way to provide it is documented in the "
-        "project README. Remove the cache once your environment provides the "
-        "contract at the home path."
+        "project README (agentic-coding-patterns acq provisioning kit). Remove "
+        "the cache once your environment provides the contract at the home path."
     )
 
     if _is_present(cache_path):
