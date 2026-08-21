@@ -474,3 +474,57 @@ def test_copied_probe_flow_mapping_end_to_end(repo, tmp_path):
     empty_home = tmp_path / "flow-empty-home"
     empty_home.mkdir()
     assert _run_copied_probe(repo, empty_home) == 0
+
+
+class TestModuleTemplateParity:
+    """#251: templates/ensure-contract.py is a self-contained (dependency-free)
+    mirror of the playbook module. The two are hand-maintained (the template
+    can't import playbook_validator), so guard the surface that MUST stay in
+    lockstep — the shared constants and the user-facing README pointer — since
+    silent drift there breaks the downstream contract-prerequisite check.
+    """
+
+    _MODULE = PLAYBOOK_ROOT / "scripts" / "playbook_validator" / "ensure_contract.py"
+    _TEMPLATE = PLAYBOOK_ROOT / "templates" / "ensure-contract.py"
+
+    # Constants whose VALUES must be identical in both files (release tag, fetch
+    # URL, cache/stamp paths, home path, env override, filename).
+    _SHARED_CONSTANTS = (
+        "PINNED_RELEASE_TAG",
+        "CONTRACT_RAW_URL",
+        "CACHE_RELPATH",
+        "STAMP_RELPATH",
+        "CONTRACT_FILENAME",
+        "DEFAULT_HOME",
+        "HOME_OVERRIDE_ENV",
+    )
+
+    @staticmethod
+    def _const(path: Path, name: str) -> str:
+        import ast
+
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in tree.body:
+            if isinstance(node, ast.Assign):
+                for tgt in node.targets:
+                    if isinstance(tgt, ast.Name) and tgt.id == name:
+                        return ast.unparse(node.value)
+        raise AssertionError(f"{name} not found in {path.name}")
+
+    def test_shared_constants_match(self):
+        drift = []
+        for name in self._SHARED_CONSTANTS:
+            m = self._const(self._MODULE, name)
+            t = self._const(self._TEMPLATE, name)
+            if m != t:
+                drift.append(f"{name}: module={m!r} template={t!r}")
+        assert not drift, "ensure_contract module/template constant drift (#251): " + "; ".join(drift)
+
+    def test_readme_pointer_present_in_both(self):
+        """The 'agentic-coding-patterns acq provisioning kit' pointer that #251
+        found dropped from the template must be present in BOTH."""
+        pointer = "agentic-coding-patterns acq provisioning kit"
+        assert pointer in self._MODULE.read_text(encoding="utf-8")
+        assert pointer in self._TEMPLATE.read_text(encoding="utf-8"), (
+            "template dropped the README provisioning-kit pointer (#251)"
+        )

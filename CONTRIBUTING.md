@@ -234,9 +234,10 @@ make ci         # Lint + test + validate + generate-check + SCA audit
 ```
 
 `make generate` automatically keeps these in sync so you don't have to:
-- Skills tables in README.md, AGENTS.md, AGENT-INSTRUCTIONS.md
+- Skills tables in README.md and docs/AGENT-INSTRUCTIONS.md
+- Framework version strings in AGENTS.md (from `data/frameworks.yaml`)
 - Word counts in CONTEXT-GUIDE.md
-- Test count and landscape entry count across all docs
+- Test count, landscape entry count, and NIST control count across all docs
 
 If `make ci` passes, your PR is ready.
 
