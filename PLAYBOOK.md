@@ -167,16 +167,22 @@ No special configuration needed. The files ARE the configuration.
 
 ## Skill Reference
 
-| Skill | When to Use | Output |
-|---|---|---|
-| `agent-permissions` | Environment readiness check | Pass/fail checklist + fix commands |
-| `federal-repo-setup` | Starting a new project | Repository structure + config files |
-| `federal-agents-config` | Setting up AI agent rules | AGENTS.md + CONTEXT-GUIDE.md |
-| `federal-decision-records` | After architecture decisions | ADR files + index |
-| `federal-risk-assessment` | Before ATO submission | Risk assessment document |
-| `federal-security-controls-lookup` | When implementing a NIST control | Control implementation guidance |
-| `federal-pre-deployment-check` | Before deploying to production | Deployment readiness report |
-| `cloudgov-deploy` | Deploying to cloud.gov | manifest.yml + CI/CD + running app |
+<!-- GENERATED:SKILLS_TABLE:START — do not edit, run: make generate -->
+| Skill | Purpose | Scripts? |
+|-------|---------|----------|
+| `agent-permissions` | Detect available credentials, diagnose gaps against PROJECT_PLAN.md, and guide setup... | No |
+| `ato-package` | Collect and verify all ATO submission artifacts into a review-ready package | No |
+| `cloudgov-deploy` | Deploy applications to cloud.gov — sandbox setup, manifest generation, CI/CD pipeline | No |
+| `code-review` | Review AI-assisted code changes and create compliant pull requests with proper attribution | No |
+| `federal-agents-config` | Generate a project-specific AGENTS.md through interactive decision-tree elicitation. | Yes |
+| `federal-decision-records` | Create, validate, and index architectural and security decision records using MADR... | No |
+| `federal-landscape-update` | Monitor RSS feeds for federal AI guidance updates, compare against current registry,... | No |
+| `federal-pre-deployment-check` | Run the 62-item federal pre-deployment security checklist against a codebase. | Yes |
+| `federal-repo-setup` | Initialize a code repository with federal security compliance defaults including... | No |
+| `federal-risk-assessment` | Walk through the AI agent risk assessment worksheet interactively, helping users... | No |
+| `federal-security-controls-lookup` | Look up NIST SP 800-53 controls, OWASP LLM/Agentic risks, or security keywords to find... | No |
+| `project-bootstrap` | Automatically set up a new federal coding project from a PROJECT_PLAN.md file | No |
+<!-- GENERATED:SKILLS_TABLE:END -->
 
 ## Framework Alignment
 

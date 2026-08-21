@@ -23,6 +23,14 @@ review_cycle: "quarterly"
 3. **Load on demand** — do NOT load all documents preemptively
 4. **Security is non-negotiable** — when in doubt about a security requirement, load the relevant doc rather than guessing
 
+> **This is a curated load-order guide, not a full inventory.** It intentionally
+> lists only the documents an agent should load for a task — supporting
+> materials (ADRs, `docs/decisions/`, data files, and other reference docs) are
+> deliberately omitted to keep this "read first" routing doc compact
+> (progressive disclosure). For the complete document inventory see
+> [`INDEX.yaml`](INDEX.yaml) and the neutral inventory in
+> [`docs/README.md`](docs/README.md).
+
 ## Tier 1 — Always Load (~16,398 words)
 
 These define the behavioral contract. Load for **every task**.
@@ -47,7 +55,7 @@ These define the behavioral contract. Load for **every task**.
 | Document | Words | Load When Task Involves |
 |----------|-------|------------------------|
 | `docs/GETTING-STARTED.md` | 5,173 | New repo setup, CI/CD configuration, environment hardening, pre-commit hooks |
-| `docs/FEDERAL-AI-LANDSCAPE.md` | — | Federal AI guidance catalog (42 entries, EOs, OMB, NIST) |
+| `docs/FEDERAL-AI-LANDSCAPE.md` | 2,907 | Federal AI guidance catalog (42 entries, EOs, OMB, NIST) |
 | `docs/TRACEABILITY.md` | 2,694 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
 
 ## Tier 4 — Reference Only (~3,928 words)
