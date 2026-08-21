@@ -163,16 +163,11 @@ FILE_MAX_LINES = 400
 CYCLOMATIC_COMPLEXITY_MAX = 10
 MAX_PARAMETERS = 5
 
-# ── Framework Version Strings ───────────────────────────────────────
-
-FRAMEWORK_VERSIONS = {
-    "nist_sp_800_53": "Rev 5.2",
-    "nist_ai_rmf": "1.0",
-    "nist_sp_800_218a": "Final",
-    "nist_ai_600_1": "1.0",
-    "owasp_llm": "2025",
-    "owasp_agentic": "2026",
-}
+# NOTE: these four limits are enforced (#261) — CYCLOMATIC_COMPLEXITY_MAX and
+# MAX_PARAMETERS via ruff (C901 / PLR0913, configured in pyproject.toml), and
+# FILE_MAX_LINES via scripts/tests/test_file_size_limits.py. FUNCTION_MAX_LINES
+# is enforced as a statement ceiling via ruff PLR0915 (max-statements). Keep the
+# ruff config's numeric values in sync with these constants.
 
 
 # ── Validation Helpers ──────────────────────────────────────────────
