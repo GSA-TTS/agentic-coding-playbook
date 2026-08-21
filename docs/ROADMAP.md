@@ -20,7 +20,7 @@ Long-term plan for making the Agentic Coding Playbook a living, learnable resour
 |--------|-------|
 | Documents | 23 |
 | Skills | 12 |
-| Tests | 546 |
+| Tests | 548 |
 | Checklist items | 62 |
 | Landscape entries | 42 |
 | NIST controls mapped | 35 |
@@ -90,13 +90,18 @@ Each path is a curated sequence of existing documents with checkpoint exercises.
 
 | Currently automated | Not yet automated |
 |---|---|
-| Skills tables (3 files) | Test count in README |
-| Word counts in CONTEXT-GUIDE | Landscape entry count in README |
-| INDEX.yaml from frontmatter | Framework version strings |
-| CHANGELOG from commits | NIST control count in README |
+| Skills tables (2 files: README, AGENT-INSTRUCTIONS) | — |
+| Word counts in CONTEXT-GUIDE | |
+| INDEX.yaml from frontmatter | |
+| Test / landscape / NIST-control counts in README | |
+| Framework version strings (AGENTS.md, from `data/frameworks.yaml`) | |
+| ROADMAP metrics table | |
+| CHANGELOG from commits | |
 | Releases from tags | |
 
-Extend `make generate` to inject all dynamic counts from source data. Add a CI check that fails if any hardcoded count drifts from the computed value.
+The count-drift CI check (`generate-index --check`) fails if any hardcoded count
+drifts from the computed value, so the remaining manual surface is effectively
+eliminated. Extend `make generate` here if any new dynamic count is introduced.
 
 ## Phase 6: Multi-Agent Guidance (Future)
 
