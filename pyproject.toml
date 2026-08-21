@@ -37,16 +37,48 @@ select = [
     "B",    # flake8-bugbear
     "SIM",  # flake8-simplify
     "S",    # flake8-bandit (security)
+    "C901", # mccabe cyclomatic complexity (config.CYCLOMATIC_COMPLEXITY_MAX)
+    "PLR0913",  # too many arguments (config.MAX_PARAMETERS)
+    "PLR0915",  # too many statements (proxy for config.FUNCTION_MAX_LINES)
 ]
 ignore = [
     "S101",  # assert used in tests
 ]
+
+# Enforce the playbook's mandated size/complexity limits (#261). These mirror
+# config.py CYCLOMATIC_COMPLEXITY_MAX / MAX_PARAMETERS and AGENTS.md §15.2 /
+# CODING_PRACTICES §13.3, which were previously unenforced (the config constants
+# had zero code references). ruff has no file-line rule, so FILE_MAX_LINES (400)
+# is enforced by scripts/tests/test_file_size_limits.py instead.
+[tool.ruff.lint.mccabe]
+max-complexity = 10  # config.CYCLOMATIC_COMPLEXITY_MAX
+
+[tool.ruff.lint.pylint]
+max-args = 5  # config.MAX_PARAMETERS
+max-statements = 50  # config.FUNCTION_MAX_LINES (statements ≈ the 50-line ceiling)
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/tests/*" = ["S101", "S106", "S603", "S607"]
 "scripts/playbook_validator/doctor.py" = ["S603", "S607"]
 "scripts/playbook_validator/audit_repo.py" = ["S603", "S607"]
 "scripts/playbook_validator/index_updaters.py" = ["S603", "S607"]
+
+# Pre-existing complexity/arg-count offenders, waived so the new C901/PLR rules
+# (#261) enforce the mandated limits on all NEW code without a blocking mass
+# refactor. Burning these down (esp. index_updaters.py, 917 lines vs the 400
+# FILE_MAX_LINES ceiling) is tracked as a follow-up. Do NOT add to this list —
+# new violations must be fixed, not waived.
+"scripts/landscape_monitor.py" = ["C901", "PLR0915"]
+"scripts/playbook_validator/__main__.py" = ["C901"]
+"scripts/playbook_validator/new_project.py" = ["C901"]
+"scripts/playbook_validator/validate_adrs.py" = ["C901"]
+"scripts/playbook_validator/validate_docs.py" = ["C901"]
+"scripts/playbook_validator/validate_landscape.py" = ["C901"]
+"scripts/playbook_validator/validate_project_plan.py" = ["C901"]
+"scripts/playbook_validator/validate_risk_assessment.py" = ["C901"]
+"scripts/playbook_validator/validate_skills.py" = ["C901"]
+"scripts/tests/conftest.py" = ["S101", "S106", "S603", "S607", "PLR0913"]
+"scripts/tests/test_generate_index.py" = ["S101", "S106", "S603", "S607", "PLR0913"]
 
 [tool.ruff.format]
 quote-style = "double"
