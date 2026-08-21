@@ -127,12 +127,14 @@ jobs:
       - name: Audit repo compliance baseline
         run: PYTHONPATH=scripts python3 -m playbook_validator audit-repo --path .
 
-      # Advisory (non-gating) until the self-scan false-positives + lock-file
-      # item are resolved (tracked in GSA-TTS/agentic-coding-playbook#259 and a
-      # pre-deploy self-scan-exclusion follow-up). Surfaces the checks without
-      # knowingly redding main; promote to gating once green.
-      - name: Pre-deployment security checks (advisory)
-        continue-on-error: true
+      # Gating (#263): the self-scan false-positives (deliberate test fixtures +
+      # the pattern-definition module) are now suppressed with per-line
+      # `pre-deploy: allow` markers, and the lock-file item (#259/#271) is
+      # resolved, so pre-deploy exits 0 on this repo and blocks on a real finding.
+      # NOTE: the SAST/SCA checks are satisfied by the literal `semgrep` +
+      # `pip-audit` step names in this file — renaming/removing them will (now
+      # correctly) red this gate.
+      - name: Pre-deployment security checks
         run: PYTHONPATH=scripts python3 -m playbook_validator pre-deploy --path .
 
       - name: Verify INDEX.yaml is up to date

@@ -24,6 +24,15 @@ EXCLUDED_DIRS = {".git", "node_modules", ".venv", "__pycache__", "venv"}
 
 AUDIT_FILE = "pre-deploy"
 
+# Inline opt-out marker (#263). A source/config line carrying this comment is a
+# DELIBERATE fixture or pattern-definition — not a real finding — and its match
+# is skipped. Scoped strictly PER-MATCH across the lines a match spans (never
+# per-file or per-directory), so it cannot blind the scanner on a consumer repo:
+# suppression happens ONLY on lines the author explicitly marked. Absent the
+# marker, behavior is identical to before. This is why #263 was NOT fixed by
+# skipping test dirs (which would silently un-scan a consumer's tests/).
+PRE_DEPLOY_ALLOW = re.compile(r"pre-deploy:\s*allow")
+
 # ── Patterns ─────────────────────────────────────────────────────────────
 
 SECRET_PATTERN = re.compile(
@@ -38,7 +47,7 @@ SQL_CONCAT_PATTERN = re.compile(
 )
 
 UNSAFE_API_PATTERN = re.compile(
-    r"(eval\s*\(|innerHTML\s*=|dangerouslySetInnerHTML|exec\s*\(|os\.system\s*\()",
+    r"(eval\s*\(|innerHTML\s*=|dangerouslySetInnerHTML|exec\s*\(|os\.system\s*\()",  # pre-deploy: allow
 )
 
 EMPTY_CATCH_PATTERN = re.compile(
@@ -117,15 +126,29 @@ def _iter_files(repo: Path, extensions: set[str]) -> list[Path]:
 
 
 def _scan_files(repo: Path, pattern: re.Pattern[str], extensions: set[str]) -> list[Path]:
-    """Return files whose content matches *pattern*."""
+    """Return files whose content matches *pattern*, excluding matches that are
+    explicitly opted out with an inline ``pre-deploy: allow`` marker (#263).
+
+    The marker is honored per-match across every line the match spans (some
+    patterns are multiline, e.g. empty ``except:\\n    pass``). A file is a hit
+    only if it has at least one *un-marked* match, so a deliberate fixture line
+    carrying the marker is skipped while a real finding elsewhere in the same
+    file is still reported. For any file with no marker at all this is identical
+    to a plain ``pattern.search`` (the first match short-circuits to a hit).
+    """
     hits: list[Path] = []
     for path in _iter_files(repo, extensions):
         try:
             text = path.read_text(errors="ignore")
         except OSError:
             continue
-        if pattern.search(text):
-            hits.append(path)
+        lines = text.splitlines()
+        for match in pattern.finditer(text):
+            start = text.count("\n", 0, match.start())
+            end = text.count("\n", 0, match.end())
+            if not any(PRE_DEPLOY_ALLOW.search(line) for line in lines[start : end + 1]):
+                hits.append(path)
+                break
     return hits
 
 
