@@ -423,7 +423,9 @@ def generate_index(root: Path) -> None:
     table = render_skills_table(skills)
     # Note: the universal AGENTS.md deliberately carries no skills table — the
     # skills inventory lives in the repo-specific docs/AGENT-INSTRUCTIONS.md.
-    for target in ["README.md", "docs/AGENT-INSTRUCTIONS.md"]:
+    # PLAYBOOK.md's Skill Reference is generated too (#254) so it can't drift to
+    # a stale subset of the skills on disk.
+    for target in ["README.md", "docs/AGENT-INSTRUCTIONS.md", "PLAYBOOK.md"]:
         inject_readme_table(root / target, table)
 
     update_context_guide_word_counts(root)

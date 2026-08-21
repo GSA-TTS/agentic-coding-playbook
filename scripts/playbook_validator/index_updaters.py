@@ -735,8 +735,12 @@ def update_context_guide_word_counts(root: Path) -> None:
             return f"| `{path_str}` | {words:,} |{rest}"
         return match.group(0)
 
+    # Match a word-count cell that is either a number (`1,234` / `~500`) OR an
+    # em-dash / en-dash / hyphen placeholder (`—` / `–` / `-`), so a row that
+    # was seeded with a placeholder gets filled on the next generate instead of
+    # being permanently skipped (#256).
     content = re.sub(
-        r"\| `([^`]+\.md)` \| [\d,~]+\.?\d* \|(.+)",
+        r"\| `([^`]+\.md)` \| (?:[\d,~]+\.?\d*|[—–-]) \|(.+)",
         replace_word_count,
         content,
     )

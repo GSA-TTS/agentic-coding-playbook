@@ -566,6 +566,21 @@ class TestUpdateContextGuideWordCounts:
         # Should not crash when CONTEXT-GUIDE.md doesn't exist
         update_context_guide_word_counts(tmp_path)
 
+    def test_fills_em_dash_placeholder(self, tmp_path):
+        # #256: a word-count cell seeded with an em-dash placeholder was never
+        # matched by the updater regex, so it stayed "—" forever. It must now be
+        # filled on generate.
+        doc = tmp_path / "big.md"
+        doc.write_text(" ".join(["word"] * 42))
+        guide = tmp_path / "CONTEXT-GUIDE.md"
+        guide.write_text("## Tier 1 — Always Load (~0 words)\n\n| `big.md` | — | A doc |\n")
+
+        update_context_guide_word_counts(tmp_path)
+
+        content = guide.read_text()
+        assert "| `big.md` | 42 |" in content
+        assert "| `big.md` | — |" not in content
+
 
 # ── Landscape doc generation + guards (#142) ──────────────────────────────────
 

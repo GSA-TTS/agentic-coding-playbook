@@ -23,14 +23,22 @@ review_cycle: "quarterly"
 3. **Load on demand** — do NOT load all documents preemptively
 4. **Security is non-negotiable** — when in doubt about a security requirement, load the relevant doc rather than guessing
 
-## Tier 1 — Always Load (~15,666 words)
+> **This is a curated load-order guide, not a full inventory.** It intentionally
+> lists only the documents an agent should load for a task — supporting
+> materials (ADRs, `docs/decisions/`, data files, and other reference docs) are
+> deliberately omitted to keep this "read first" routing doc compact
+> (progressive disclosure). For the complete document inventory see
+> [`INDEX.yaml`](INDEX.yaml) and the neutral inventory in
+> [`docs/README.md`](docs/README.md).
+
+## Tier 1 — Always Load (~15,779 words)
 
 These define the behavioral contract. Load for **every task**.
 
 | Document | Words | What It Covers |
 |----------|-------|----------------|
 | `AGENTS.md` | 5,905 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
-| `PLAYBOOK.md` | 1,202 | Step-by-step guide: project setup → deployment (9 phases, 12 skills) |
+| `PLAYBOOK.md` | 1,315 | Step-by-step guide: project setup → deployment (9 phases, 12 skills) |
 | `docs/CODING_PRACTICES.md` | 6,886 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
 | `docs/CODING_STANDARDS_COMPACT.md` | 452 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
 | `docs/AGENT-INSTRUCTIONS.md` | 1,221 | Repo-specific tooling reference: canonical paths, validation commands, context budgets |
@@ -42,12 +50,12 @@ These define the behavioral contract. Load for **every task**.
 | `docs/SECURITY-CONTROLS.md` | 7,184 | Security controls, ATO, FedRAMP, compliance assessment, ISSO review |
 | `docs/AGENT-IDENTITY.md` | 5,656 | Authentication, authorization, OAuth, RBAC, delegation, identity management |
 
-## Tier 3 — Load On Demand (~7,735 words)
+## Tier 3 — Load On Demand (~10,642 words)
 
 | Document | Words | Load When Task Involves |
 |----------|-------|------------------------|
 | `docs/GETTING-STARTED.md` | 5,173 | New repo setup, CI/CD configuration, environment hardening, pre-commit hooks |
-| `docs/FEDERAL-AI-LANDSCAPE.md` | — | Federal AI guidance catalog (42 entries, EOs, OMB, NIST) |
+| `docs/FEDERAL-AI-LANDSCAPE.md` | 2,907 | Federal AI guidance catalog (42 entries, EOs, OMB, NIST) |
 | `docs/TRACEABILITY.md` | 2,562 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
 
 ## Tier 4 — Reference Only (~3,928 words)
