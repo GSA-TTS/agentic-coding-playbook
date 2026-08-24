@@ -1221,3 +1221,75 @@ class TestExclusionListsSingleSource:
         text = agents.read_text(encoding="utf-8")
         for name in config.STRUCTURAL_EXCLUDED_FILENAMES:
             assert name in text, f"AGENTS.md §13.2 must list the exempt meta-file {name}"
+
+
+class TestAgentsNistControlsGeneration:
+    """#238: AGENTS.md frontmatter nist_controls is GENERATED from body citations,
+    so it can't drift below the controls the body actually maps (which would
+    under-populate the generated §1 traceability matrix)."""
+
+    def test_extracts_body_controls_excludes_withdrawn(self):
+        from playbook_validator.index_updaters import _extract_body_controls
+
+        text = (
+            "---\n"
+            'nist_controls: ["AC-2"]\n'
+            "---\n"
+            "> **Control Mapping:** AC-2 (Account Management), SC-28 (At Rest)\n"
+            "<!-- NIST SP 800-53: SR-3 (Supply Chain; supersedes withdrawn SA-12) -->\n"
+            "| row | x | SI-3, CM-7 |\n"
+        )
+        controls = _extract_body_controls(text)
+        assert "AC-2" in controls and "SC-28" in controls
+        assert "SI-3" in controls and "CM-7" in controls and "SR-3" in controls
+        # SA-12 appears only as a withdrawn-supersession reference -> excluded.
+        assert "SA-12" not in controls
+        # sorted canonically (family alpha, numeric)
+        assert controls == sorted(controls, key=lambda c: (c.split("-")[0], int(c.split("-")[1])))
+
+    def test_update_regenerates_frontmatter_superset(self, tmp_path):
+        from playbook_validator.index_updaters import update_agents_nist_controls
+
+        doc = tmp_path / "AGENTS.md"
+        doc.write_text(
+            "---\n"
+            'title: "X"\n'
+            'nist_controls: ["AC-2"]\n'
+            "---\n"
+            "> **Control Mapping:** AC-2 (Account Management), AU-6 (Audit Review)\n"
+            "<!-- NIST SP 800-53: SR-3 (supersedes withdrawn SA-12) -->\n"
+        )
+        update_agents_nist_controls(tmp_path)
+        import yaml
+
+        fm = yaml.safe_load(doc.read_text().split("---", 2)[1])
+        assert set(fm["nist_controls"]) == {"AC-2", "AU-6", "SR-3"}
+        assert "SA-12" not in fm["nist_controls"]
+
+    def test_real_agents_frontmatter_covers_body(self):
+        """On the real repo, frontmatter nist_controls == body-cited controls
+        (minus withdrawn). Guards against re-drift (#238)."""
+        from pathlib import Path
+
+        import yaml
+        from playbook_validator.index_updaters import _extract_body_controls
+
+        repo = Path(__file__).resolve().parents[2]
+        agents = repo / "AGENTS.md"
+        if not agents.is_file():
+            return
+        text = agents.read_text(encoding="utf-8")
+        fm = yaml.safe_load(text.split("---", 2)[1])
+        fm_controls = set(fm.get("nist_controls") or [])
+        body_controls = set(_extract_body_controls(text))
+        missing = body_controls - fm_controls
+        assert not missing, f"frontmatter nist_controls missing body-cited controls (#238): {sorted(missing)}"
+
+    def test_no_op_without_nist_controls_line(self, tmp_path):
+        from playbook_validator.index_updaters import update_agents_nist_controls
+
+        doc = tmp_path / "AGENTS.md"
+        doc.write_text("---\ntitle: X\n---\n> **Control Mapping:** AC-2 (x)\n")
+        before = doc.read_text()
+        update_agents_nist_controls(tmp_path)
+        assert doc.read_text() == before
