@@ -520,6 +520,78 @@ def _extract_traceability_editorial(root: Path) -> dict[str, list[str]]:
     return editorial
 
 
+# ── AGENTS.md nist_controls frontmatter (generated from body citations, #238) ──
+#
+# The frontmatter `nist_controls:` array is the machine-readable projection of
+# the controls actually cited in the body's Control Mapping blocks / traceability
+# comments / Prohibited-Actions table. It feeds the generated §1 traceability
+# matrix (compute_traceability_rows reads it), so a hand-maintained list drifts
+# out of sync and silently under-populates the matrix. Generate it from the body
+# so the two can never diverge (#238).
+
+_BODY_CONTROL_RE = re.compile(r"\b([A-Z]{2}-\d{1,2})\b")
+
+# Controls that appear in the body ONLY as a withdrawn-control reference (e.g.
+# "supersedes withdrawn SA-12") MUST NOT enter the frontmatter — they are named
+# to document the supersession, not claimed as a mapped control. SA-12 was
+# withdrawn in Rev 5 and incorporated into SR-3.
+_WITHDRAWN_CONTROLS = frozenset({"SA-12"})
+
+
+def _extract_body_controls(text: str) -> list[str]:
+    """Return the sorted set of NIST control base-ids cited in AGENTS.md's body.
+
+    Scans everything after the frontmatter for control ids (Control Mapping
+    blocks, traceability comments, Prohibited-Actions table). Excludes withdrawn
+    controls that appear only as a supersession note (#238). Sorted canonically.
+    """
+    if text.startswith("---"):
+        end = text.find("\n---", 3)
+        body = text[end + 1 :] if end != -1 else text
+    else:
+        body = text
+    found = {m.group(1) for m in _BODY_CONTROL_RE.finditer(body)}
+    found -= set(_WITHDRAWN_CONTROLS)
+    return sorted(found, key=_control_sort_key)
+
+
+def _set_frontmatter_array(text: str, field: str, values: list[str]) -> str:
+    """Replace a top-level frontmatter inline-array `field: [...]` line in-place.
+
+    Emits a compact inline array matching the hand-authored style
+    (`nist_controls: ["AC-2", "AC-3"]`). No-op if the field is absent or outside
+    the leading `---` block.
+    """
+    if not text.startswith("---"):
+        return text
+    end = text.find("\n---", 3)
+    if end == -1:
+        return text
+    head, rest = text[: end + 1], text[end + 1 :]
+    pattern = re.compile(rf"(?m)^{re.escape(field)}:\s*\[.*\]\s*$")
+    if not pattern.search(head):
+        return text
+    rendered = ", ".join(f'"{v}"' for v in values)
+    return pattern.sub(f"{field}: [{rendered}]", head, count=1) + rest
+
+
+def update_agents_nist_controls(root: Path) -> None:
+    """Regenerate AGENTS.md frontmatter `nist_controls` from its body citations (#238).
+
+    No-op if AGENTS.md is absent or has no `nist_controls` array line.
+    """
+    doc = root / "AGENTS.md"
+    if not doc.is_file():
+        return
+    text = doc.read_text(encoding="utf-8")
+    controls = _extract_body_controls(text)
+    if not controls:
+        return
+    updated = _set_frontmatter_array(text, "nist_controls", controls)
+    if updated != text:
+        doc.write_text(updated, encoding="utf-8")
+
+
 def compute_traceability_rows(root: Path) -> tuple[list[str], dict[str, str]] | None:
     """Return (sorted control_ids, id→name) for the §1 matrix (#197).
 
