@@ -163,7 +163,7 @@ FILE_MAX_LINES = 400
 CYCLOMATIC_COMPLEXITY_MAX = 10
 MAX_PARAMETERS = 5
 
-# NOTE: these four limits are enforced (#261) — CYCLOMATIC_COMPLEXITY_MAX and
+# NOTE: these four limits are enforced — CYCLOMATIC_COMPLEXITY_MAX and
 # MAX_PARAMETERS via ruff (C901 / PLR0913, configured in pyproject.toml), and
 # FILE_MAX_LINES via scripts/tests/test_file_size_limits.py. FUNCTION_MAX_LINES
 # is enforced as a statement ceiling via ruff PLR0915 (max-statements). Keep the

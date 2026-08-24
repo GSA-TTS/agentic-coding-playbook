@@ -1,4 +1,4 @@
-"""Enforce config.FILE_MAX_LINES on production source (#261).
+"""Enforce config.FILE_MAX_LINES on production source.
 
 ruff has no file-length rule, so the playbook's mandated file-size ceiling
 (config.FILE_MAX_LINES, mirroring AGENTS.md §15.2 / CODING_PRACTICES §13.3) was
@@ -41,7 +41,7 @@ def _production_py_files() -> list[Path]:
 
 
 def test_production_files_within_limit_or_waived():
-    """Every production .py is <= FILE_MAX_LINES, or explicitly waived (#261)."""
+    """Every production .py is <= FILE_MAX_LINES, or explicitly waived."""
     violations = []
     for p in _production_py_files():
         rel = p.relative_to(REPO).as_posix()
@@ -49,7 +49,7 @@ def test_production_files_within_limit_or_waived():
         if n > FILE_MAX_LINES and rel not in _WAIVED:
             violations.append(f"{rel} ({n} > {FILE_MAX_LINES})")
     assert not violations, (
-        "Production files exceed config.FILE_MAX_LINES and are not waived (#261): "
+        "Production files exceed config.FILE_MAX_LINES and are not waived: "
         + ", ".join(violations)
         + ". Split the module, or (only for a tracked pre-existing case) add it to _WAIVED."
     )
@@ -68,4 +68,4 @@ def test_waiver_list_has_no_stale_entries():
         n = len(p.read_text(encoding="utf-8").splitlines())
         if n <= FILE_MAX_LINES:
             stale.append(f"{rel} (now {n} <= {FILE_MAX_LINES})")
-    assert not stale, "Remove these stale _WAIVED entries (#261): " + ", ".join(stale)
+    assert not stale, "Remove these stale _WAIVED entries: " + ", ".join(stale)

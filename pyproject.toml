@@ -45,11 +45,12 @@ ignore = [
     "S101",  # assert used in tests
 ]
 
-# Enforce the playbook's mandated size/complexity limits (#261). These mirror
-# config.py CYCLOMATIC_COMPLEXITY_MAX / MAX_PARAMETERS and AGENTS.md §15.2 /
-# CODING_PRACTICES §13.3, which were previously unenforced (the config constants
-# had zero code references). ruff has no file-line rule, so FILE_MAX_LINES (400)
-# is enforced by scripts/tests/test_file_size_limits.py instead.
+# Enforce the playbook's mandated size/complexity limits (AGENTS.md §15.2 /
+# CODING_PRACTICES §13.3). These mirror
+# config.py CYCLOMATIC_COMPLEXITY_MAX / MAX_PARAMETERS, which were previously
+# unenforced (the config constants had zero code references). ruff has no
+# file-line rule, so FILE_MAX_LINES (400) is enforced by
+# scripts/tests/test_file_size_limits.py instead.
 [tool.ruff.lint.mccabe]
 max-complexity = 10  # config.CYCLOMATIC_COMPLEXITY_MAX
 
@@ -64,7 +65,7 @@ max-statements = 50  # config.FUNCTION_MAX_LINES (statements ≈ the 50-line cei
 "scripts/playbook_validator/index_updaters.py" = ["S603", "S607"]
 
 # Pre-existing complexity/arg-count offenders, waived so the new C901/PLR rules
-# (#261) enforce the mandated limits on all NEW code without a blocking mass
+# enforce the mandated limits on all NEW code without a blocking mass
 # refactor. Burning these down (esp. index_updaters.py, 917 lines vs the 400
 # FILE_MAX_LINES ceiling) is tracked as a follow-up. Do NOT add to this list —
 # new violations must be fixed, not waived.
