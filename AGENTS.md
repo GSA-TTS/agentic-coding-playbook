@@ -6,7 +6,7 @@ tier: 1
 contract:
   role: universal
   version: "1.0.0"
-last_updated: "2026-08-22"
+last_updated: "2026-08-24"
 nist_controls: ["AC-2", "AC-3", "AC-4", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3", "AU-6", "AU-12", "CA-2", "CA-7", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "CM-8", "CM-10", "IA-2", "IA-8", "IR-4", "IR-6", "MP-4", "MP-6", "PL-4", "RA-5", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SC-18", "SC-23", "SC-28", "SI-2", "SI-3", "SI-7", "SI-10", "SI-12", "SI-17", "SR-3", "SR-11"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCoE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
@@ -727,6 +727,80 @@ This does NOT apply to: findings that fail the §9.3 filing gate; speculative "w
 
 > **Control Mapping:** CM-3 (Configuration Change Control), SA-5 (System Documentation), AU-12 (Audit Generation)
 
+### 15.6 Durable References: Cross-Link Code, Docs, and ADRs — Not Trackers
+
+<!-- NIST SP 800-53: SA-5 (System Documentation), CM-3 (Configuration Change Control) -->
+
+This repository must remain **self-contained and outlive the issue tracker.**
+GitHub issue/PR numbers, and internal epic labels ("gap A", "gap K", etc.), are
+ephemeral SaaS-dependent tracking artifacts — useful during development, but an
+obstacle to review and long-term maintenance once merged. The durable homes for
+rationale are **ADRs (`docs/decisions/`) and docs**; the durable homes for
+behavior are the **code and its tests**.
+
+The agent MUST:
+
+- Keep **code comments self-contained.** Explain *why* in prose. A comment MAY
+  point to an **ADR** (e.g. "see ADR-0001") — that is the correct durable anchor
+  for a design decision. A comment MUST NOT rely on a bare `#NNN` /
+  `GSA-TTS/agentic-coding-playbook#NNN` / `GSA-TTS/agentic-coding-patterns#NNN`
+  issue-or-PR reference, or an epic "gap X" label, to carry meaning: rewrite it
+  as prose (and cite an ADR in `docs/decisions/` if one applies).
+- Point **docs → code and ADRs** (what/where it is, why it was decided), and
+  point **code → docs and ADRs** (the durable rationale). Prefer docs pointing at
+  code over the reverse, except to cite an ADR.
+- Before opening a PR, **strip ephemeral tracker references from any code comment
+  or doc it added or touched.** Durable, cross-repo-relevant facts (a pinned
+  release SHA, an upstream bug's observable behavior) belong in prose/ADRs, not as
+  a bare tracker number.
+
+This rule governs **ephemeral tracker references only** (issue/PR numbers, epic
+"gap X" labels). It does **NOT** apply to **NIST SP 800-53 control tags** — the
+`<!-- NIST SP 800-53: ... -->` comments and `> **Control Mapping:**` footers are
+durable, standards-anchored references and are REQUIRED where relevant: the
+playbook deliberately records every control its guidance satisfies (they feed the
+generated §1 traceability matrix). Add a control mapping when a section maps to a
+control; never strip one as an "in-code reference."
+
+The agent MAY leave issue/PR references in **ephemeral, non-durable contexts**:
+commit messages, PR descriptions, `CHANGELOG.md` (release automation), and an
+ADR's own *Links / tracking* section (where issue references are acceptable,
+though prose or ADR cross-links are preferred). Test **names** that already encode
+a regression's id MAY keep it as a stable identifier.
+
+### 15.7 Fully Qualify Issue/PR References in Anything Durable
+
+<!-- NIST SP 800-53: SA-5 (System Documentation), CM-3 (Configuration Change Control) -->
+
+Shorthand like `#233` is **fine when talking to a human in this session** — but
+it MUST NOT land, unqualified, in anything durable or auto-linked (commit
+messages, PR titles/descriptions, review comments, tracking issues, ADRs). Once
+auto-linked, a bare `#233` resolves **relative to whatever repository renders
+it** — so a `#233` written for `GSA-TTS/agentic-coding-playbook` can silently
+point at `GSA-TTS/agentic-coding-patterns#233` (a different thing) when quoted or
+cross-posted.
+
+Therefore, in any durable or cross-posted artifact, the agent MUST write
+issue/PR references **fully qualified**:
+
+- Cross-repo, always safe: `GSA-TTS/agentic-coding-playbook#233` (or a full
+  URL). Use this form in every commit message, PR body, review comment, and
+  tracking issue — including when referring to the current repo — because these
+  are read and auto-linked outside their origin.
+- A bare `#233` is acceptable **only** within the same repository's PR/issue
+  body where the target is unambiguous by construction, and even then the
+  qualified form is preferred. When in doubt, fully qualify.
+
+This does not change the durable-reference rule above (code comments and docs
+prose still avoid tracker numbers entirely, qualified or not); it governs the
+*ephemeral* contexts where a reference is allowed at all.
+
+> Rationale: this is enforcement of the existing "docs-as-code" / self-contained
+> repository discipline. Doing this continuously means no later "de-reference" or
+> "re-qualify" cleanup pass is ever needed.
+>
+> **Control Mapping:** SA-5 (System Documentation), CM-3 (Configuration Change Control)
+
 ---
 
 ## NIST Control Cross-Reference
@@ -741,6 +815,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-08-24 | 1.0.0 | Add the Durable-References agent guidance (§15.6/§15.7): issue/PR numbers are ephemeral — code comments must be self-contained / cite ADRs in `docs/decisions/`; fully-qualify refs in durable artifacts. No behavioral rule for the SDLC changed; this is agent-authoring guidance. |
 | 2026-08-22 | 1.0.0 | Tooling: the frontmatter `nist_controls` list is now GENERATED from the body's Control Mapping citations by `make generate` (was hand-maintained at 28 while the body cited 47, silently under-populating the generated §1 traceability matrix). Withdrawn controls referenced only as a supersession note (SA-12 → SR-3) are excluded. No behavioral rule changed (#238). |
 | 2026-08-20 | 1.0.0 | Editorial: §13.2 now states the frontmatter-exemption explicitly (lists the exempt repository meta-files and points at the `config.py` single source), reconciling the prose with the tool so the rule and the validator can no longer diverge (#247). No behavioral rule changed. |
 | 2026-08-19 | 1.0.0 | Editorial: restore the missing `### 14.2 Pull Request Requirements` heading so the mandatory PR-requirements block is no longer orphaned inside §14.1.1 (#236); sync `last_updated` to the newest Version History entry (#240). No behavioral rule changed. |
