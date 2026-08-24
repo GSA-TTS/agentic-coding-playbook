@@ -24,13 +24,14 @@ EXCLUDED_DIRS = {".git", "node_modules", ".venv", "__pycache__", "venv"}
 
 AUDIT_FILE = "pre-deploy"
 
-# Inline opt-out marker (#263). A source/config line carrying this comment is a
+# Inline opt-out marker. A source/config line carrying this comment is a
 # DELIBERATE fixture or pattern-definition — not a real finding — and its match
 # is skipped. Scoped strictly PER-MATCH across the lines a match spans (never
 # per-file or per-directory), so it cannot blind the scanner on a consumer repo:
 # suppression happens ONLY on lines the author explicitly marked. Absent the
-# marker, behavior is identical to before. This is why #263 was NOT fixed by
-# skipping test dirs (which would silently un-scan a consumer's tests/).
+# marker, behavior is identical to before. This per-match scoping is why the
+# self-scan false-positives were NOT fixed by skipping test dirs (which would
+# silently un-scan a consumer's tests/).
 PRE_DEPLOY_ALLOW = re.compile(r"pre-deploy:\s*allow")
 
 # ── Patterns ─────────────────────────────────────────────────────────────
@@ -127,7 +128,7 @@ def _iter_files(repo: Path, extensions: set[str]) -> list[Path]:
 
 def _scan_files(repo: Path, pattern: re.Pattern[str], extensions: set[str]) -> list[Path]:
     """Return files whose content matches *pattern*, excluding matches that are
-    explicitly opted out with an inline ``pre-deploy: allow`` marker (#263).
+    explicitly opted out with an inline ``pre-deploy: allow`` marker.
 
     The marker is honored per-match across every line the match spans (some
     patterns are multiline, e.g. empty ``except:\\n    pass``). A file is a hit

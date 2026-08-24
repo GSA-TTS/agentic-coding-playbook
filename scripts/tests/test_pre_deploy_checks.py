@@ -449,10 +449,10 @@ class TestCheckCryptoKeys:
 
 
 class TestSelfScanExclusion:
-    """#263: the inline `pre-deploy: allow` marker suppresses deliberate fixtures
+    """The inline `pre-deploy: allow` marker suppresses deliberate fixtures
     / pattern-definitions, but MUST NOT blind the scanner on UNMARKED findings —
-    that cross-repo safety property is why #263 was not fixed by skipping test
-    dirs (which would silently un-scan a consumer's tests/)."""
+    that cross-repo safety property is why the self-scan was not fixed by
+    skipping test dirs (which would silently un-scan a consumer's tests/)."""
 
     def test_playbook_repo_passes_pre_deploy(self):
         """Acceptance: the playbook's own repo exits 0 under pre-deploy."""
