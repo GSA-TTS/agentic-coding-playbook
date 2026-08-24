@@ -401,6 +401,7 @@ def generate_index(root: Path) -> None:
     from playbook_validator.index_updaters import (
         inject_readme_table,
         render_skills_table,
+        update_agents_nist_controls,
         update_context_guide_word_counts,
         update_doc_inventory,
         update_framework_refs,
@@ -432,6 +433,9 @@ def generate_index(root: Path) -> None:
     update_phase_mapping(root)
     update_landscape_reviewed(root)
     update_roadmap_metrics(root, stats)
+    # Regenerate AGENTS.md nist_controls from its body BEFORE the traceability
+    # matrix, which unions that frontmatter into the §1 row-set (#238).
+    update_agents_nist_controls(root)
     update_traceability_matrix(root)
     update_doc_inventory(root)
     update_framework_refs(root)
