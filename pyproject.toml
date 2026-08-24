@@ -13,7 +13,7 @@ dependencies = [
 dev = [
     "pytest==9.1.1",
     "ruff==0.16.3",
-    "pre-commit==4.6.1",
+    "pre-commit==4.6.2",
 ]
 
 [tool.setuptools.packages.find]
