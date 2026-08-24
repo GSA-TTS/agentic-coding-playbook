@@ -6,8 +6,8 @@ tier: 1
 contract:
   role: universal
   version: "1.0.0"
-last_updated: "2026-08-20"
-nist_controls: ["AC-2", "AC-3", "AC-6", "AU-2", "AU-3", "AU-12", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "CM-10", "IA-8", "IR-4", "IR-6", "PL-4", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SI-10", "SI-17", "SR-3"]
+last_updated: "2026-08-22"
+nist_controls: ["AC-2", "AC-3", "AC-4", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3", "AU-6", "AU-12", "CA-2", "CA-7", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "CM-8", "CM-10", "IA-2", "IA-8", "IR-4", "IR-6", "MP-4", "MP-6", "PL-4", "RA-5", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SC-18", "SC-23", "SC-28", "SI-2", "SI-3", "SI-7", "SI-10", "SI-12", "SI-17", "SR-3", "SR-11"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCoE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
 keywords: ["agent-rules", "behavioral-contract", "least-privilege", "audit-logging", "prompt-injection", "prohibited-actions", "meta-constraints", "plan-before-execute", "verification-transcript", "engineering-discipline"]
@@ -741,6 +741,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-08-22 | 1.0.0 | Tooling: the frontmatter `nist_controls` list is now GENERATED from the body's Control Mapping citations by `make generate` (was hand-maintained at 28 while the body cited 47, silently under-populating the generated §1 traceability matrix). Withdrawn controls referenced only as a supersession note (SA-12 → SR-3) are excluded. No behavioral rule changed (#238). |
 | 2026-08-20 | 1.0.0 | Editorial: §13.2 now states the frontmatter-exemption explicitly (lists the exempt repository meta-files and points at the `config.py` single source), reconciling the prose with the tool so the rule and the validator can no longer diverge (#247). No behavioral rule changed. |
 | 2026-08-19 | 1.0.0 | Editorial: restore the missing `### 14.2 Pull Request Requirements` heading so the mandatory PR-requirements block is no longer orphaned inside §14.1.1 (#236); sync `last_updated` to the newest Version History entry (#240). No behavioral rule changed. |
 | 2026-08-07 | 1.0.0 | Reconcile the contract version: the `contract.version` marker, the document banner, `config.CURRENT_CONTRACT_VERSION`, and the thin template's `requires_contract: ">=1.0"` are now all **1.0.0** (was frontmatter 0.4.0 / banner 0.3.0 / config 1.0.0 — a contradiction where 0.4.0 failed the template's `>=1.0`). No behavioral rule changed; this is a version-truth fix (#191) so downstream `requires_contract` compatibility (#153) is well-defined. |

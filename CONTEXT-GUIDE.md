@@ -23,13 +23,13 @@ review_cycle: "quarterly"
 3. **Load on demand** — do NOT load all documents preemptively
 4. **Security is non-negotiable** — when in doubt about a security requirement, load the relevant doc rather than guessing
 
-## Tier 1 — Always Load (~15,666 words)
+## Tier 1 — Always Load (~15,742 words)
 
 These define the behavioral contract. Load for **every task**.
 
 | Document | Words | What It Covers |
 |----------|-------|----------------|
-| `AGENTS.md` | 5,905 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
+| `AGENTS.md` | 5,981 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
 | `PLAYBOOK.md` | 1,202 | Step-by-step guide: project setup → deployment (9 phases, 12 skills) |
 | `docs/CODING_PRACTICES.md` | 6,886 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
 | `docs/CODING_STANDARDS_COMPACT.md` | 452 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
@@ -42,13 +42,13 @@ These define the behavioral contract. Load for **every task**.
 | `docs/SECURITY-CONTROLS.md` | 7,184 | Security controls, ATO, FedRAMP, compliance assessment, ISSO review |
 | `docs/AGENT-IDENTITY.md` | 5,656 | Authentication, authorization, OAuth, RBAC, delegation, identity management |
 
-## Tier 3 — Load On Demand (~7,735 words)
+## Tier 3 — Load On Demand (~7,867 words)
 
 | Document | Words | Load When Task Involves |
 |----------|-------|------------------------|
 | `docs/GETTING-STARTED.md` | 5,173 | New repo setup, CI/CD configuration, environment hardening, pre-commit hooks |
 | `docs/FEDERAL-AI-LANDSCAPE.md` | — | Federal AI guidance catalog (42 entries, EOs, OMB, NIST) |
-| `docs/TRACEABILITY.md` | 2,562 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
+| `docs/TRACEABILITY.md` | 2,694 | Audit trail, control-to-document mapping, ISSO evidence, compliance tracing |
 
 ## Tier 4 — Reference Only (~3,928 words)
 
