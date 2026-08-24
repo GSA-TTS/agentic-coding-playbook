@@ -477,7 +477,7 @@ def test_copied_probe_flow_mapping_end_to_end(repo, tmp_path):
 
 
 class TestModuleTemplateParity:
-    """#251: templates/ensure-contract.py is a self-contained (dependency-free)
+    """templates/ensure-contract.py is a self-contained (dependency-free)
     mirror of the playbook module. The two are hand-maintained (the template
     can't import playbook_validator), so guard the surface that MUST stay in
     lockstep — the shared constants and the user-facing README pointer — since
@@ -518,13 +518,13 @@ class TestModuleTemplateParity:
             t = self._const(self._TEMPLATE, name)
             if m != t:
                 drift.append(f"{name}: module={m!r} template={t!r}")
-        assert not drift, "ensure_contract module/template constant drift (#251): " + "; ".join(drift)
+        assert not drift, "ensure_contract module/template constant drift: " + "; ".join(drift)
 
     def test_readme_pointer_present_in_both(self):
-        """The 'agentic-coding-patterns acq provisioning kit' pointer that #251
-        found dropped from the template must be present in BOTH."""
+        """The 'agentic-coding-patterns acq provisioning kit' README pointer
+        (once dropped from the template) must be present in BOTH."""
         pointer = "agentic-coding-patterns acq provisioning kit"
         assert pointer in self._MODULE.read_text(encoding="utf-8")
         assert pointer in self._TEMPLATE.read_text(encoding="utf-8"), (
-            "template dropped the README provisioning-kit pointer (#251)"
+            "template dropped the README provisioning-kit pointer"
         )
