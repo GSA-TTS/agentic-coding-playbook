@@ -567,7 +567,7 @@ class TestUpdateContextGuideWordCounts:
         update_context_guide_word_counts(tmp_path)
 
     def test_fills_em_dash_placeholder(self, tmp_path):
-        # #256: a word-count cell seeded with an em-dash placeholder was never
+        # A word-count cell seeded with an em-dash placeholder was never
         # matched by the updater regex, so it stayed "—" forever. It must now be
         # filled on generate.
         doc = tmp_path / "big.md"

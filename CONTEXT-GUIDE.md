@@ -31,14 +31,14 @@ review_cycle: "quarterly"
 > [`INDEX.yaml`](INDEX.yaml) and the neutral inventory in
 > [`docs/README.md`](docs/README.md).
 
-## Tier 1 — Always Load (~16,398 words)
+## Tier 1 — Always Load (~16,511 words)
 
 These define the behavioral contract. Load for **every task**.
 
 | Document | Words | What It Covers |
 |----------|-------|----------------|
 | `AGENTS.md` | 6,637 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
-| `PLAYBOOK.md` | 1,202 | Step-by-step guide: project setup → deployment (9 phases, 12 skills) |
+| `PLAYBOOK.md` | 1,315 | Step-by-step guide: project setup → deployment (9 phases, 12 skills) |
 | `docs/CODING_PRACTICES.md` | 6,886 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
 | `docs/CODING_STANDARDS_COMPACT.md` | 452 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
 | `docs/AGENT-INSTRUCTIONS.md` | 1,221 | Repo-specific tooling reference: canonical paths, validation commands, context budgets |
@@ -50,7 +50,7 @@ These define the behavioral contract. Load for **every task**.
 | `docs/SECURITY-CONTROLS.md` | 7,184 | Security controls, ATO, FedRAMP, compliance assessment, ISSO review |
 | `docs/AGENT-IDENTITY.md` | 5,656 | Authentication, authorization, OAuth, RBAC, delegation, identity management |
 
-## Tier 3 — Load On Demand (~7,867 words)
+## Tier 3 — Load On Demand (~10,774 words)
 
 | Document | Words | Load When Task Involves |
 |----------|-------|------------------------|
