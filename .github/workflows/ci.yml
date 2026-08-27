@@ -47,6 +47,10 @@ jobs:
           config-file: ".markdown-link-check.json"
           use-quiet-mode: "yes"
           folder-path: "."
+          # On PRs, check only the Markdown files changed in the PR to cut
+          # runtime; pushes to main still get a full repository scan.
+          check-modified-files-only: ${{ github.event_name == 'pull_request' && 'yes' || 'no' }}
+          base-branch: "main"
 
   python:
     name: Python Lint, Test & Validate
