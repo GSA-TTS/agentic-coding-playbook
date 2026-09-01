@@ -208,4 +208,9 @@ Present the generated index to the user.
 - **Policy references:** `AGENTS.md` (agent decisions), `docs/CODING_PRACTICES.md`
   (coding decisions), `docs/SECURITY-CONTROLS.md` (control guidance),
   the playbook's control-mapping matrix (docs/TRACEABILITY.md in the
-  agentic-coding-playbook repo).
+  agentic-coding-playbook repo). `docs/CODING_PRACTICES.md` and
+  `docs/SECURITY-CONTROLS.md` here are playbook-source paths — if not found
+  at that relative path (e.g. this skill was symlinked into a shared skills
+  directory), resolve them per AGENTS.md §13.1a. (The traceability matrix
+  above is already qualified as living "in the agentic-coding-playbook repo,"
+  so no separate note is added for it.)

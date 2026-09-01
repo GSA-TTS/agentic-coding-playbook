@@ -17,6 +17,28 @@ This skill walks users through the risk assessment template from
 `docs/risk-assessment.md` interactively, helping them complete each
 section with context-appropriate guidance.
 
+> **Note:** The threat-catalog portion of this skill's guidance is bundled at
+> `references/THREAT_CATALOG.md` (self-contained regardless of symlink
+> location). `docs/risk-assessment.md` (referenced throughout this skill) is a
+> **target-project** path: a worksheet assumed to already exist in the user's
+> own project repo — created either by the `project-bootstrap` skill's Step 6
+> (which copies the playbook's `templates/risk-assessment.md` to the target
+> repo's `docs/risk-assessment.md` and pre-fills it) or by manually copying
+> that same template. This skill reads and interactively fills in that
+> target-repo copy; no `docs/risk-assessment.md` file exists anywhere in the
+> agentic-coding-playbook repo, so the §13.1a fallback (skill-local reference
+> → `$AGENTIC_CODING_PLAYBOOK` → upstream GitHub) does **not** apply to it —
+> per AGENTS.md §13.1a, a target-project path is never resolved against the
+> playbook checkout or the upstream repository. If `docs/risk-assessment.md`
+> is missing from the target repo, run `project-bootstrap` (or copy
+> `templates/risk-assessment.md` from the playbook) before using this skill.
+> By contrast, `docs/SECURITY-CONTROLS.md` (the control-guidance reference
+> cited below) genuinely **is** a playbook-source path — it lives in the
+> agentic-coding-playbook repo, not the target project, and a target project
+> would never generate its own copy. If not found at its stated relative
+> path (e.g. this skill was symlinked into a shared skills directory),
+> resolve `docs/SECURITY-CONTROLS.md` per AGENTS.md §13.1a.
+
 ## When to Use
 
 - Preparing for Authority to Operate (ATO) review

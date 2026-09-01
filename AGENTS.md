@@ -529,6 +529,41 @@ The agent SHOULD:
 - Suggest updating `INDEX.yaml` when new content files are created
 - Warn when `related_files` references point to non-existent paths
 
+### 13.1a Resolving a Missing Skill Reference When Symlinked Outside the Playbook
+
+An installer kit typically clones this playbook and symlinks `skills/` (i.e.
+`.agents/skills/`) into an agent's shared skills directory (e.g.
+`~agent/.agents/skills`), alongside skills sourced from other kits. Once
+symlinked that way, a skill file's relative references to this playbook's own
+root-level content — `docs/`, `templates/`, `data/`, `scripts/` — resolve
+relative to the symlink's target location, not the playbook checkout, so a
+naive relative-path read can miss the file entirely.
+
+When a skill instruction references such a path and the file is not found at
+that literal relative path, the agent MUST resolve it in this order:
+
+1. **Skill-local `references/`** — if the skill's own `references/<file>`
+   exists, prefer it; it was bundled specifically to avoid this problem and is
+   self-contained regardless of where the skill is symlinked.
+2. **`$AGENTIC_CODING_PLAYBOOK/<referenced-path>`** — if that environment
+   variable is set (the acq-kit installer sets it to the playbook checkout's
+   root), resolve the reference against it.
+3. **The upstream playbook repository** — if neither of the above resolves it,
+   fetch the file from
+   `https://github.com/GSA-TTS/agentic-coding-playbook/blob/main/<referenced-path>`.
+
+The agent MUST distinguish a **playbook-source** reference (a path that exists
+in *this* repository, e.g. `docs/CODING_PRACTICES.md`, `docs/TRACEABILITY.md`)
+from a **target-project** reference (a path a skill instructs the agent to
+create or read *in the user's own project*, e.g. "copy `templates/AGENTS.md.template`
+to the target repo's `AGENTS.md`," or "check the target repo for
+`docs/risk-assessment.md`"). Only playbook-source references need this
+fallback order — a target-project path is never resolved against
+`$AGENTIC_CODING_PLAYBOOK` or the upstream repository, since it does not exist
+there by design. When a skill instruction is ambiguous about which kind a path
+is, treat it as target-project (do not read or modify the playbook checkout on
+a guess) and ask before proceeding.
+
 ### 13.2 Frontmatter Requirements
 
 All `.md` **content** files in this repository MUST include YAML frontmatter with at minimum:

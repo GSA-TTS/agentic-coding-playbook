@@ -93,6 +93,15 @@ Populate Status as: **Complete**, **Partial**, or **Missing**.
 Pull last-updated dates from file frontmatter `last_updated` field if present,
 otherwise use the git log date (`git log -1 --format=%ai -- <path>`).
 
+> **Note:** `docs/SECURITY-CONTROLS.md` and the traceability matrix
+> (docs/TRACEABILITY.md) below are playbook-source paths — they live in the
+> agentic-coding-playbook repo, not the target repository being assessed
+> (unlike the artifact paths checked in Step 1/Step 2 above, e.g.
+> `docs/CODING_PRACTICES.md`, `docs/risk-assessment.md`, `docs/adr/`, which are
+> read from the target repo). If not found at that relative path (e.g. this
+> skill was symlinked into a shared skills directory), resolve them per
+> AGENTS.md §13.1a.
+
 Reference `docs/SECURITY-CONTROLS.md` for NIST control family mappings and the
 playbook's control-to-document matrix (docs/TRACEABILITY.md in the
 agentic-coding-playbook repo).
@@ -158,6 +167,6 @@ Output a readiness assessment in this format:
 - This skill is **read-only** — it inventories and validates but does not create or modify artifacts.
 - The package index (`docs/ato-package-index.md`) is the only file this skill generates.
 - All sign-off lines require human signatures. The agent cannot sign on behalf of reviewers.
-- NIST control mappings come from `docs/SECURITY-CONTROLS.md` and the playbook's traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo).
+- NIST control mappings come from `docs/SECURITY-CONTROLS.md` and the playbook's traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo). (Playbook-source — see AGENTS.md §13.1a if not found at that relative path.)
 - Use dependency skills to fill gaps: `federal-risk-assessment`, `federal-pre-deployment-check`, `federal-decision-records`.
-- **Policy reference:** `docs/SECURITY-CONTROLS.md` (control mappings); the playbook traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) for the control-to-document matrix.
+- **Policy reference:** `docs/SECURITY-CONTROLS.md` (control mappings); the playbook traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) for the control-to-document matrix. (Playbook-source — see AGENTS.md §13.1a if not found at that relative path.)

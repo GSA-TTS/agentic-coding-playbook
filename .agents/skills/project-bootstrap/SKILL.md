@@ -41,6 +41,16 @@ This skill copies the following files from the playbook repo into the target rep
 
 The agent must have access to these files — either via the playbook repo cloned locally, or by fetching from the [playbook repository](https://github.com/GSA-TTS/agentic-coding-playbook).
 
+> **Note:** All five source paths above (`templates/AGENTS.md.template`,
+> `docs/CODING_PRACTICES.md`, `templates/CONTEXT-GUIDE.project.md`,
+> `templates/risk-assessment.md`, `checklists/pre-deployment.md`) are
+> playbook-source paths — they live in the agentic-coding-playbook repo, not
+> the target project. If not found at that relative path (e.g. this skill was
+> symlinked into a shared skills directory), resolve them per AGENTS.md
+> §13.1a. (The `docs/adr/001-initial-architecture.md` path in Step 5 below is
+> the opposite case — an output example showing where to create the *target
+> project's* first ADR — and does not need this fallback.)
+>
 > **Note:** The universal `AGENTS.md` is deliberately **not** copied into the
 > target repo. It is the single source of truth for the universal behavioral
 > rules and is expected to be made available to the agent globally. The thin
@@ -144,6 +154,11 @@ Copy these files from the playbook repo to the target repo (skip any that alread
 - `templates/CONTEXT-GUIDE.project.md` → target `CONTEXT-GUIDE.md`
 - `templates/risk-assessment.md` → target `docs/risk-assessment.md`
 - `checklists/pre-deployment.md` → target `checklists/pre-deployment.md`
+
+> **Note:** The four source paths above are playbook-source paths — they live
+> in the agentic-coding-playbook repo, not the target project. If not found
+> at that relative path (e.g. this skill was symlinked into a shared skills
+> directory), resolve them per AGENTS.md §13.1a.
 
 ### Step 5: Create ADR-001 (Initial Architecture)
 
