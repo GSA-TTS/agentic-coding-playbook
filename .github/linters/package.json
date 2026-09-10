@@ -10,7 +10,8 @@
     "markdownlint-cli2": "0.22.1"
   },
   "overrides": {
-    "js-yaml": "4.3.1",
-    "markdown-it": "14.3.0"
+    "js-yaml": "4.3.2",
+    "markdown-it": "14.3.0",
+    "smol-toml": "1.7.1"
   }
 }
