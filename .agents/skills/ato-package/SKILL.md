@@ -22,6 +22,14 @@ artifacts into a review-ready package for ISSO review.
 - When asked "is the compliance package complete?"
 - After completing risk assessment, pre-deployment checks, and decision records
 
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/risk-assessment.md` | target-project | Read in Step 1/Step 2 as a completed artifact in the repo under assessment; never resolved via §13.1a. |
+| `docs/CODING_PRACTICES.md` | target-project | Read in Step 1/Step 2 as an artifact-existence check in the target repo (the target repo's own copy, if any); never resolved via §13.1a. |
+| `docs/adr/` | target-project | Directory checked in Step 1/Step 2 for the target repo's own ADRs; never resolved via §13.1a. |
+| `docs/SECURITY-CONTROLS.md` | playbook-source | Used in Step 3 for NIST control family mappings. See AGENTS.md §13.1a if not found at this relative path. |
+| docs/TRACEABILITY.md | playbook-source | The playbook's traceability matrix (in the agentic-coding-playbook repo), used in Step 3. See AGENTS.md §13.1a if not found at this relative path. |
+
 ## Assembly Procedure
 
 ### Step 1: Artifact Inventory
@@ -92,15 +100,6 @@ Populate Status as: **Complete**, **Partial**, or **Missing**.
 
 Pull last-updated dates from file frontmatter `last_updated` field if present,
 otherwise use the git log date (`git log -1 --format=%ai -- <path>`).
-
-> **Note:** `docs/SECURITY-CONTROLS.md` and the traceability matrix
-> (docs/TRACEABILITY.md) below are playbook-source paths — they live in the
-> agentic-coding-playbook repo, not the target repository being assessed
-> (unlike the artifact paths checked in Step 1/Step 2 above, e.g.
-> `docs/CODING_PRACTICES.md`, `docs/risk-assessment.md`, `docs/adr/`, which are
-> read from the target repo). If not found at that relative path (e.g. this
-> skill was symlinked into a shared skills directory), resolve them per
-> AGENTS.md §13.1a.
 
 Reference `docs/SECURITY-CONTROLS.md` for NIST control family mappings and the
 playbook's control-to-document matrix (docs/TRACEABILITY.md in the

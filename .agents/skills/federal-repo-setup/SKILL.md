@@ -18,13 +18,12 @@ workflow for initializing a repository with federal security compliance defaults
 
 > **Note:** The tool-matrix portion of this skill's guidance is bundled at
 > `references/TOOL_MATRIX.md` (self-contained regardless of symlink location).
-> The primary policy document itself, `docs/GETTING-STARTED.md` (referenced
-> throughout this skill), and the coding-practices reference in Step 9's
-> generated CONTRIBUTING.md content (`../../docs/CODING_PRACTICES.md`), are
-> playbook-source paths that are NOT bundled locally — they live in the
-> agentic-coding-playbook repo, not the target project. If not found at their
-> stated relative path (e.g. this skill was symlinked into a shared skills
-> directory), resolve them per AGENTS.md §13.1a.
+
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/GETTING-STARTED.md` | playbook-source | Referenced throughout this skill. See AGENTS.md §13.1a if not found at this relative path. |
+| `../../docs/CODING_PRACTICES.md` | playbook-source | Cited in Step 9's generated CONTRIBUTING.md content. See AGENTS.md §13.1a if not found at this relative path. |
+| `references/TOOL_MATRIX.md` | bundled (skill-local) | Self-contained regardless of symlink location; not looked up via §13.1a. |
 
 ## When to Use
 

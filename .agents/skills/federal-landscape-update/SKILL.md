@@ -35,10 +35,14 @@ approach: 70% automated discovery + 30% human judgment.
 - Network access to RSS feeds (whitehouse.gov, nist.gov)
 
 > **Note:** `data/federal-ai-landscape.yaml` and `docs/FEDERAL-AI-LANDSCAPE.md`
-> (referenced throughout this skill) are playbook-source paths — they live in
-> the agentic-coding-playbook repo, not the target project. If not found at
-> that relative path (e.g. this skill was symlinked into a shared skills
-> directory), resolve them per AGENTS.md §13.1a.
+> are referenced twice in this skill (Prerequisites above, and again as
+> relative links under References below) — see the table below for how to
+> resolve them if not found at their stated relative path.
+
+| Path | Kind | Notes |
+|------|------|-------|
+| `data/federal-ai-landscape.yaml` | playbook-source | See AGENTS.md §13.1a if not found at this relative path. |
+| `docs/FEDERAL-AI-LANDSCAPE.md` | playbook-source | See AGENTS.md §13.1a if not found at this relative path. |
 
 ## Execution Procedure
 
@@ -233,10 +237,8 @@ If the script reports no updates but you expect some:
 
 ## References
 
-> **Note:** The two playbook-source links below resolve relative to this
-> skill's location in the agentic-coding-playbook repo. If not found at that
-> relative path (e.g. this skill was symlinked into a shared skills
-> directory), resolve them per AGENTS.md §13.1a.
+> **Note:** The two playbook-source links below are the same paths covered by
+> the table under Prerequisites above.
 
 - [Issue #46](https://github.com/GSA-TTS/agentic-coding-playbook/issues/46) — Original feature request
 - [data/federal-ai-landscape.yaml](../../data/federal-ai-landscape.yaml) — Structured registry

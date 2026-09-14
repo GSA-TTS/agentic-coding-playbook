@@ -17,7 +17,10 @@ Review AI-assisted code changes and create compliant pull requests.
 
 **Context loading:** When *writing* code, load `docs/CODING_STANDARDS_COMPACT.md` (~500 words). When *reviewing* code, load the full `docs/CODING_PRACTICES.md` (~4,100 words). This skill references both.
 
-> **Note:** `docs/CODING_STANDARDS_COMPACT.md` and `docs/CODING_PRACTICES.md` (referenced throughout this skill, including Steps 1 and 4) are playbook-source paths — they live in the agentic-coding-playbook repo, not the target project. If not found at that relative path (e.g. this skill was symlinked into a shared skills directory), resolve them per AGENTS.md §13.1a.
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/CODING_STANDARDS_COMPACT.md` | playbook-source | See AGENTS.md §13.1a if not found at this relative path. |
+| `docs/CODING_PRACTICES.md` | playbook-source | Referenced throughout, incl. Steps 1 and 4. See AGENTS.md §13.1a if not found at this relative path. |
 
 ## When to Use
 

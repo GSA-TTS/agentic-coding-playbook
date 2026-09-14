@@ -41,7 +41,10 @@ Determine which type of lookup the user needs:
 
 ### Step 2: Read the Traceability Matrix
 
-> **Note:** `docs/TRACEABILITY.md` (this step, and Step 3 below) and `docs/SECURITY-CONTROLS.md` (Document Inventory section below) are playbook-source paths — they live in the agentic-coding-playbook repo, not the target project. If not found at that relative path (e.g. this skill was symlinked into a shared skills directory), resolve them per AGENTS.md §13.1a.
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/TRACEABILITY.md` | playbook-source | Used in this step and Step 3. See AGENTS.md §13.1a if not found at this relative path. |
+| `docs/SECURITY-CONTROLS.md` | playbook-source | Used in Document Inventory below. See AGENTS.md §13.1a if not found at this relative path. |
 
 Read `docs/TRACEABILITY.md` — this is the navigation index for the entire repository.
 
