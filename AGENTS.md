@@ -529,6 +529,39 @@ The agent SHOULD:
 - Suggest updating `INDEX.yaml` when new content files are created
 - Warn when `related_files` references point to non-existent paths
 
+### 13.1a Resolving a Missing Skill Reference When Symlinked
+
+A skill file may be symlinked into a shared skills directory alongside skills
+from other sources, rather than read from a checkout of this playbook. Once
+symlinked, a skill's relative references to this playbook's own root-level
+content — `docs/`, `templates/`, `data/`, `scripts/` — resolve relative to the
+symlink's target location, not the playbook, so a naive relative-path read can
+miss the file entirely. `AGENTS.md` itself may also be symlinked or copied
+into an agent's home directory to apply globally, in which case it is not
+"in" any particular repository either.
+
+When a skill instruction references such a path and the file is not found at
+that literal relative path, the agent MUST resolve it in this order:
+
+1. **Skill-local `references/`** — if the skill's own `references/<file>`
+   exists, prefer it; it was bundled specifically to avoid this problem and is
+   self-contained regardless of where the skill is symlinked.
+2. **`$AGENTIC_CODING_PLAYBOOK/<referenced-path>`** — if that environment
+   variable is set, resolve the reference against it.
+3. **The upstream playbook repository** — if neither of the above resolves it,
+   fetch the file from
+   `https://github.com/GSA-TTS/agentic-coding-playbook/blob/main/<referenced-path>`.
+
+This fallback order applies only to **playbook-source** references — paths
+that live in the playbook itself. A **target-project** reference (a path a
+skill instructs the agent to create or read in the user's own project) is
+never resolved against `$AGENTIC_CODING_PLAYBOOK` or the upstream repository,
+since it does not exist there by design. Each skill that uses both kinds of
+path states explicitly, in its own text, which of its references are
+playbook-source and which are target-project — see, for example, the table
+near the top of `federal-risk-assessment/SKILL.md`. Follow what the skill
+states rather than inferring the distinction from the path alone.
+
 ### 13.2 Frontmatter Requirements
 
 All `.md` **content** files in this repository MUST include YAML frontmatter with at minimum:

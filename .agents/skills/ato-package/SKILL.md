@@ -22,6 +22,14 @@ artifacts into a review-ready package for ISSO review.
 - When asked "is the compliance package complete?"
 - After completing risk assessment, pre-deployment checks, and decision records
 
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/risk-assessment.md` | target-project | Read in Step 1/Step 2 as a completed artifact in the repo under assessment; never resolved via §13.1a. |
+| `docs/CODING_PRACTICES.md` | target-project | Read in Step 1/Step 2 as an artifact-existence check in the target repo (the target repo's own copy, if any); never resolved via §13.1a. |
+| `docs/adr/` | target-project | Directory checked in Step 1/Step 2 for the target repo's own ADRs; never resolved via §13.1a. |
+| `docs/SECURITY-CONTROLS.md` | playbook-source | Used in Step 3 for NIST control family mappings. See AGENTS.md §13.1a if not found at this relative path. |
+| docs/TRACEABILITY.md | playbook-source | The playbook's traceability matrix (in the agentic-coding-playbook repo), used in Step 3. See AGENTS.md §13.1a if not found at this relative path. |
+
 ## Assembly Procedure
 
 ### Step 1: Artifact Inventory
@@ -158,6 +166,6 @@ Output a readiness assessment in this format:
 - This skill is **read-only** — it inventories and validates but does not create or modify artifacts.
 - The package index (`docs/ato-package-index.md`) is the only file this skill generates.
 - All sign-off lines require human signatures. The agent cannot sign on behalf of reviewers.
-- NIST control mappings come from `docs/SECURITY-CONTROLS.md` and the playbook's traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo).
+- NIST control mappings come from `docs/SECURITY-CONTROLS.md` and the playbook's traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo). (Playbook-source — see AGENTS.md §13.1a if not found at that relative path.)
 - Use dependency skills to fill gaps: `federal-risk-assessment`, `federal-pre-deployment-check`, `federal-decision-records`.
-- **Policy reference:** `docs/SECURITY-CONTROLS.md` (control mappings); the playbook traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) for the control-to-document matrix.
+- **Policy reference:** `docs/SECURITY-CONTROLS.md` (control mappings); the playbook traceability matrix (docs/TRACEABILITY.md in the agentic-coding-playbook repo) for the control-to-document matrix. (Playbook-source — see AGENTS.md §13.1a if not found at that relative path.)

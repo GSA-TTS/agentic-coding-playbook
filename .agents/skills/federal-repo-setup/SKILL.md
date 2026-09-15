@@ -16,6 +16,15 @@ dependencies: []
 This skill converts the playbook in `docs/GETTING-STARTED.md` into an executable
 workflow for initializing a repository with federal security compliance defaults.
 
+> **Note:** The tool-matrix portion of this skill's guidance is bundled at
+> `references/TOOL_MATRIX.md` (self-contained regardless of symlink location).
+
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/GETTING-STARTED.md` | playbook-source | Referenced throughout this skill. See AGENTS.md §13.1a if not found at this relative path. |
+| `../../docs/CODING_PRACTICES.md` | playbook-source | Cited in Step 9's generated CONTRIBUTING.md content. See AGENTS.md §13.1a if not found at this relative path. |
+| `references/TOOL_MATRIX.md` | bundled (skill-local) | Self-contained regardless of symlink location; not looked up via §13.1a. |
+
 ## When to Use
 
 - Setting up a new code repository for federal AI development

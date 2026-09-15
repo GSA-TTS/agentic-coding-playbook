@@ -34,6 +34,16 @@ approach: 70% automated discovery + 30% human judgment.
 - Access to `data/federal-ai-landscape.yaml` (structured registry)
 - Network access to RSS feeds (whitehouse.gov, nist.gov)
 
+> **Note:** `data/federal-ai-landscape.yaml` and `docs/FEDERAL-AI-LANDSCAPE.md`
+> are referenced twice in this skill (Prerequisites above, and again as
+> relative links under References below) — see the table below for how to
+> resolve them if not found at their stated relative path.
+
+| Path | Kind | Notes |
+|------|------|-------|
+| `data/federal-ai-landscape.yaml` | playbook-source | See AGENTS.md §13.1a if not found at this relative path. |
+| `docs/FEDERAL-AI-LANDSCAPE.md` | playbook-source | See AGENTS.md §13.1a if not found at this relative path. |
+
 ## Execution Procedure
 
 ### Step 1: Run the Landscape Monitor
@@ -226,6 +236,9 @@ If the script reports no updates but you expect some:
 - **SA-5:** System Documentation — Accurate guidance references maintained
 
 ## References
+
+> **Note:** The two playbook-source links below are the same paths covered by
+> the table under Prerequisites above.
 
 - [Issue #46](https://github.com/GSA-TTS/agentic-coding-playbook/issues/46) — Original feature request
 - [data/federal-ai-landscape.yaml](../../data/federal-ai-landscape.yaml) — Structured registry

@@ -17,6 +17,12 @@ This skill walks users through the risk assessment template from
 `docs/risk-assessment.md` interactively, helping them complete each
 section with context-appropriate guidance.
 
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/risk-assessment.md` | target-project | Worksheet created by `project-bootstrap`'s Step 6 (or by copying the template by hand); never resolved via §13.1a. If missing, run `project-bootstrap` first. |
+| `docs/SECURITY-CONTROLS.md` | playbook-source | See AGENTS.md §13.1a if not found at this relative path. |
+| `references/THREAT_CATALOG.md` | bundled (skill-local) | Self-contained regardless of symlink location; not looked up via §13.1a. |
+
 ## When to Use
 
 - Preparing for Authority to Operate (ATO) review

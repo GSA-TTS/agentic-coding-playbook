@@ -20,6 +20,14 @@ Decision Records) format with federal compliance extensions.
 Decision records provide an audit trail linking design choices to NIST controls
 and risk treatment rationale — required for ATO documentation.
 
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/CODING_PRACTICES.md` | playbook-source | Cited as a policy reference for coding decisions. See AGENTS.md §13.1a if not found at this relative path. |
+| `docs/SECURITY-CONTROLS.md` | playbook-source | Cited as a policy reference for control guidance. See AGENTS.md §13.1a if not found at this relative path. |
+| docs/TRACEABILITY.md | playbook-source | The playbook's control-mapping matrix (in the agentic-coding-playbook repo). See AGENTS.md §13.1a if not found at this relative path. |
+| `docs/decisions/` | target-project | Default output directory for generated ADRs in the target repo (Step 5 asks the user to confirm); never resolved via §13.1a. |
+| `references/DECISION_CATEGORIES.md`, `references/ADR_TEMPLATE.md` | bundled (skill-local) | Self-contained regardless of symlink location; not looked up via §13.1a. |
+
 ## When to Use
 
 - Documenting a decision about AI agent authorization or capabilities
@@ -208,4 +216,5 @@ Present the generated index to the user.
 - **Policy references:** `AGENTS.md` (agent decisions), `docs/CODING_PRACTICES.md`
   (coding decisions), `docs/SECURITY-CONTROLS.md` (control guidance),
   the playbook's control-mapping matrix (docs/TRACEABILITY.md in the
-  agentic-coding-playbook repo).
+  agentic-coding-playbook repo). See the table near the top of this skill for
+  playbook-source vs. target-project classification.

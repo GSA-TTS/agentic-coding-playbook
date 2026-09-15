@@ -41,6 +41,11 @@ Determine which type of lookup the user needs:
 
 ### Step 2: Read the Traceability Matrix
 
+| Path | Kind | Notes |
+|------|------|-------|
+| `docs/TRACEABILITY.md` | playbook-source | Used in this step and Step 3. See AGENTS.md §13.1a if not found at this relative path. |
+| `docs/SECURITY-CONTROLS.md` | playbook-source | Used in Document Inventory below. See AGENTS.md §13.1a if not found at this relative path. |
+
 Read `docs/TRACEABILITY.md` — this is the navigation index for the entire repository.
 
 It contains five mapping tables:
