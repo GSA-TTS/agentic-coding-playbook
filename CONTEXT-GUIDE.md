@@ -31,13 +31,13 @@ review_cycle: "quarterly"
 > [`INDEX.yaml`](INDEX.yaml) and the neutral inventory in
 > [`docs/README.md`](docs/README.md).
 
-## Tier 1 — Always Load (~16,511 words)
+## Tier 1 — Always Load (~16,800 words)
 
 These define the behavioral contract. Load for **every task**.
 
 | Document | Words | What It Covers |
 |----------|-------|----------------|
-| `AGENTS.md` | 6,637 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
+| `AGENTS.md` | 6,926 | Agent rules: permissions, prohibitions, data handling, identity, meta-constraints |
 | `PLAYBOOK.md` | 1,315 | Step-by-step guide: project setup → deployment (9 phases, 12 skills) |
 | `docs/CODING_PRACTICES.md` | 6,886 | Secure coding: input validation, secrets, dependencies, architecture, TDD, SOLID |
 | `docs/CODING_STANDARDS_COMPACT.md` | 452 | **Code generation shortcut** — load INSTEAD of full CODING_PRACTICES.md for routine code tasks |
