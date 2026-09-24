@@ -4,6 +4,87 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.15.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.14.1...v0.15.0) (2026-09-24)
+
+
+### Features
+
+* **agents:** require human approval to accept licenses; prefer unencumbered tools ([#163](https://github.com/GSA-TTS/agentic-coding-playbook/issues/163)) ([a4179ca](https://github.com/GSA-TTS/agentic-coding-playbook/commit/a4179ca80dd56ad6fb00ff03d7ccddcb52f23ed5))
+* **data:** canonical security scanner registry + NIST mapping ([#155](https://github.com/GSA-TTS/agentic-coding-playbook/issues/155)) [MERGE FIRST] ([#157](https://github.com/GSA-TTS/agentic-coding-playbook/issues/157)) ([058ad89](https://github.com/GSA-TTS/agentic-coding-playbook/commit/058ad89e3fdab3ac50158ec1e931ec9fa2677265))
+* **docs:** frontmatter crosswalk to Dublin Core / schema.org + guard ([#209](https://github.com/GSA-TTS/agentic-coding-playbook/issues/209)) ([#213](https://github.com/GSA-TTS/agentic-coding-playbook/issues/213)) ([8685971](https://github.com/GSA-TTS/agentic-coding-playbook/commit/86859711214b4581362541757838ca074f35a99c))
+* **generate:** add generated repo-root llms.txt for agent navigation ([#212](https://github.com/GSA-TTS/agentic-coding-playbook/issues/212)) ([#218](https://github.com/GSA-TTS/agentic-coding-playbook/issues/218)) ([f717345](https://github.com/GSA-TTS/agentic-coding-playbook/commit/f717345ab0ac128482540cca64a55986948de884))
+* **generate:** landscape summary/phase + ROADMAP metrics from source ([#142](https://github.com/GSA-TTS/agentic-coding-playbook/issues/142)) ([#196](https://github.com/GSA-TTS/agentic-coding-playbook/issues/196)) ([aa9aa0c](https://github.com/GSA-TTS/agentic-coding-playbook/commit/aa9aa0ca38d08cafbd69538bb7307bea9d4388e6))
+* **generate:** neutral document inventory from INDEX.yaml ([#199](https://github.com/GSA-TTS/agentic-coding-playbook/issues/199)) ([#206](https://github.com/GSA-TTS/agentic-coding-playbook/issues/206)) ([c0d6ab4](https://github.com/GSA-TTS/agentic-coding-playbook/commit/c0d6ab43ab4317bca6bfb908f96ad2154454f8c2))
+* **generate:** re-land framework registry + NCCoE casing fix ([#198](https://github.com/GSA-TTS/agentic-coding-playbook/issues/198)) ([#223](https://github.com/GSA-TTS/agentic-coding-playbook/issues/223)) ([1ba74f8](https://github.com/GSA-TTS/agentic-coding-playbook/commit/1ba74f82ad17ef9237e8cab6c130ba7b20cd2e96))
+* **generate:** re-land TRACEABILITY control matrix from frontmatter + NIST OSCAL ([#197](https://github.com/GSA-TTS/agentic-coding-playbook/issues/197)) ([#221](https://github.com/GSA-TTS/agentic-coding-playbook/issues/221)) ([60313c0](https://github.com/GSA-TTS/agentic-coding-playbook/commit/60313c0b4e6b78496d2cadcaf9b693449f323a2a))
+* **meta:** add CITATION.cff; stop calling the repo's own content 'guidance' ([#214](https://github.com/GSA-TTS/agentic-coding-playbook/issues/214)) ([#219](https://github.com/GSA-TTS/agentic-coding-playbook/issues/219)) ([46ac233](https://github.com/GSA-TTS/agentic-coding-playbook/commit/46ac233225bf6b0b7186170bf24b8099a30f1344))
+* **validator:** enforce doc freshness — optional stale_after + staleness check ([#210](https://github.com/GSA-TTS/agentic-coding-playbook/issues/210)) ([#216](https://github.com/GSA-TTS/agentic-coding-playbook/issues/216)) ([042ad32](https://github.com/GSA-TTS/agentic-coding-playbook/commit/042ad32af77e66fd8e9ede6c446e86cf45c9e6f9))
+* **validator:** guard prose count-drift + generate landscape/control counts ([#184](https://github.com/GSA-TTS/agentic-coding-playbook/issues/184)) ([#188](https://github.com/GSA-TTS/agentic-coding-playbook/issues/188)) ([010c41f](https://github.com/GSA-TTS/agentic-coding-playbook/commit/010c41ffc804b4ebbdabf520cc6c7ffde0def287))
+* **validator:** guard SECURITY-CONTROLS.md control-count integrity ([#121](https://github.com/GSA-TTS/agentic-coding-playbook/issues/121)) ([#170](https://github.com/GSA-TTS/agentic-coding-playbook/issues/170)) ([44e0001](https://github.com/GSA-TTS/agentic-coding-playbook/commit/44e0001725ff96c27f01610754effad576239cc7))
+
+
+### Bug Fixes
+
+* **ci:** bump js-yaml override to 4.3.1 in linters (CVE-2026-59870) ([#194](https://github.com/GSA-TTS/agentic-coding-playbook/issues/194)) ([2e77ad8](https://github.com/GSA-TTS/agentic-coding-playbook/commit/2e77ad8093cc984cf6113dd2801821a16b8d8126))
+* **ci:** bump js-yaml to 4.3.2 to clear a high-severity CPU-DoS advisory ([#290](https://github.com/GSA-TTS/agentic-coding-playbook/issues/290)) ([e6d2968](https://github.com/GSA-TTS/agentic-coding-playbook/commit/e6d2968bc952fa7202915f435797671c8aea2c0e))
+* **ci:** bump smol-toml to 1.7.1 to clear an infinite-loop DoS advisory ([#291](https://github.com/GSA-TTS/agentic-coding-playbook/issues/291)) ([e557daf](https://github.com/GSA-TTS/agentic-coding-playbook/commit/e557dafc386bbdd439ce28a9236a6d32ae15a156))
+* **ci:** promote pre-deploy to gating via per-line self-scan marker ([#263](https://github.com/GSA-TTS/agentic-coding-playbook/issues/263)) ([#272](https://github.com/GSA-TTS/agentic-coding-playbook/issues/272)) ([cdf4653](https://github.com/GSA-TTS/agentic-coding-playbook/commit/cdf4653a8659dae8cdd4f4c7abac5598428e9b47))
+* **ci:** repair Link Check — OWASP agentic URL + relative-path/403 config ([#220](https://github.com/GSA-TTS/agentic-coding-playbook/issues/220)) ([6fd93d7](https://github.com/GSA-TTS/agentic-coding-playbook/commit/6fd93d751a7d4b8594b9a2b3a6b2fc02ac35ccfa))
+* **config:** enforce mandated size/complexity limits; drop vestigial FRAMEWORK_VERSIONS ([#261](https://github.com/GSA-TTS/agentic-coding-playbook/issues/261)) ([#274](https://github.com/GSA-TTS/agentic-coding-playbook/issues/274)) ([d5ba978](https://github.com/GSA-TTS/agentic-coding-playbook/commit/d5ba97849284c5b4b7dc41b355458cd25252d6bb))
+* **contract:** copied probe recognizes inline flow-mapping frontmatter ([#154](https://github.com/GSA-TTS/agentic-coding-playbook/issues/154)) ([#190](https://github.com/GSA-TTS/agentic-coding-playbook/issues/190)) ([f162a9d](https://github.com/GSA-TTS/agentic-coding-playbook/commit/f162a9d6e955168db3a80b633b4434c295ab5e49))
+* **contract:** fail closed when the provisioned contract isn't the universal one ([#262](https://github.com/GSA-TTS/agentic-coding-playbook/issues/262)) ([a726bdb](https://github.com/GSA-TTS/agentic-coding-playbook/commit/a726bdb12a5b7d63969c45b7b3566540fc37b3af))
+* **contract:** reconcile contract version to 1.0.0 + guard against drift ([#191](https://github.com/GSA-TTS/agentic-coding-playbook/issues/191)) ([#192](https://github.com/GSA-TTS/agentic-coding-playbook/issues/192)) ([bd940a3](https://github.com/GSA-TTS/agentic-coding-playbook/commit/bd940a3ca2448867a3f3258dc7f2cc427f6ddecd))
+* **deps:** commit uv.lock + require lock files to be git-tracked, not just present ([#271](https://github.com/GSA-TTS/agentic-coding-playbook/issues/271)) ([0daa0da](https://github.com/GSA-TTS/agentic-coding-playbook/commit/0daa0da2b7ca2bca1e5ec2df0f785f7605c503dd))
+* **deps:** resolve npm audit highs in CI linter deps ([#164](https://github.com/GSA-TTS/agentic-coding-playbook/issues/164)) ([1be25ec](https://github.com/GSA-TTS/agentic-coding-playbook/commit/1be25ecb8c670d880c1834fc7b33edbc5873313f))
+* **docs:** correct automation self-docs + guard contract-probe drift ([#250](https://github.com/GSA-TTS/agentic-coding-playbook/issues/250), [#251](https://github.com/GSA-TTS/agentic-coding-playbook/issues/251)) ([#275](https://github.com/GSA-TTS/agentic-coding-playbook/issues/275)) ([45f3a80](https://github.com/GSA-TTS/agentic-coding-playbook/commit/45f3a800e3d14beab0075335fd0aff912d35d9e4))
+* **generate:** generate AGENTS.md nist_controls from body citations ([#238](https://github.com/GSA-TTS/agentic-coding-playbook/issues/238)) ([#277](https://github.com/GSA-TTS/agentic-coding-playbook/issues/277)) ([d6d1045](https://github.com/GSA-TTS/agentic-coding-playbook/commit/d6d10455aaa50129efef4de957b56c1003524a7c))
+* **generate:** generate PLAYBOOK skill table + fill em-dash word-counts ([#254](https://github.com/GSA-TTS/agentic-coding-playbook/issues/254), [#256](https://github.com/GSA-TTS/agentic-coding-playbook/issues/256)) ([#276](https://github.com/GSA-TTS/agentic-coding-playbook/issues/276)) ([9bca89a](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9bca89a7350cc53c8dfec0f1a57ae55392fc65cb))
+* **landscape:** make FEDERAL-AI-LANDSCAPE.md freshness date evergreen from the registry ([#142](https://github.com/GSA-TTS/agentic-coding-playbook/issues/142)) ([#229](https://github.com/GSA-TTS/agentic-coding-playbook/issues/229)) ([cd75062](https://github.com/GSA-TTS/agentic-coding-playbook/commit/cd7506225ff72ac4c01ca7a698cf04d76dadbbc4))
+* **landscape:** scope Federal Register query + source-aware relevance gate ([#182](https://github.com/GSA-TTS/agentic-coding-playbook/issues/182)) ([#195](https://github.com/GSA-TTS/agentic-coding-playbook/issues/195)) ([cae911f](https://github.com/GSA-TTS/agentic-coding-playbook/commit/cae911ff3a480d34d1e3bf728b45cd25daa8bf78))
+* **new-project:** catch backtick dangling refs + exclude playbook-doc navigators ([#189](https://github.com/GSA-TTS/agentic-coding-playbook/issues/189)) ([#201](https://github.com/GSA-TTS/agentic-coding-playbook/issues/201)) ([89b9f4a](https://github.com/GSA-TTS/agentic-coding-playbook/commit/89b9f4a53bbd083050e26a3986d2c1d892bcc9d4))
+* **skills:** add symlink fallback resolution for playbook-source refs ([#287](https://github.com/GSA-TTS/agentic-coding-playbook/issues/287)) ([94be9b9](https://github.com/GSA-TTS/agentic-coding-playbook/commit/94be9b9fe17223f07edaf82ee07810b64420b28f))
+* **validators:** correct validate-adrs dir + dependency-pin regex; wire validators into CI ([#264](https://github.com/GSA-TTS/agentic-coding-playbook/issues/264)) ([1e18d2d](https://github.com/GSA-TTS/agentic-coding-playbook/commit/1e18d2d271a7101a049d1dc5b55d3c1db6f086cf))
+* **validators:** enforce frontmatter enums, single-source exclusions, close staleness gap ([#270](https://github.com/GSA-TTS/agentic-coding-playbook/issues/270)) ([b7de498](https://github.com/GSA-TTS/agentic-coding-playbook/commit/b7de49807c091b5e7a734336da06bdf4c529f0a5))
+
+
+### Documentation
+
+* **a11y:** add Section 508 accessibility statement + document md-hygiene ([#211](https://github.com/GSA-TTS/agentic-coding-playbook/issues/211)) ([#224](https://github.com/GSA-TTS/agentic-coding-playbook/issues/224)) ([a250360](https://github.com/GSA-TTS/agentic-coding-playbook/commit/a250360a0657570101b94af31a9fe0f0d361e72d))
+* add SUPPORT.md and emphasize federal community ([#178](https://github.com/GSA-TTS/agentic-coding-playbook/issues/178)) ([#187](https://github.com/GSA-TTS/agentic-coding-playbook/issues/187)) ([e43f8ef](https://github.com/GSA-TTS/agentic-coding-playbook/commit/e43f8ef9dbe3bc1b05b8d74f3293be486c355efe))
+* **agents:** add Durable-References guidance (ephemeral refs vs NIST tags) ([#280](https://github.com/GSA-TTS/agentic-coding-playbook/issues/280)) ([7f3bece](https://github.com/GSA-TTS/agentic-coding-playbook/commit/7f3becea7d54d6c0c04983f7029cf1224651cf0a))
+* **backend:** make sandbox references backend-agnostic (acq wrapper, not sbx-only) ([#217](https://github.com/GSA-TTS/agentic-coding-playbook/issues/217)) ([380cad3](https://github.com/GSA-TTS/agentic-coding-playbook/commit/380cad3f64318ad57162bea89669934577be8de2))
+* **codeowners:** make the security-sensitive review claim honest ([#269](https://github.com/GSA-TTS/agentic-coding-playbook/issues/269)) ([1f0b8a5](https://github.com/GSA-TTS/agentic-coding-playbook/commit/1f0b8a55624336162d4b912d8505e4ddfeaf7426))
+* de-drift stale version/count stamps + restore orphaned §14.2 heading ([#265](https://github.com/GSA-TTS/agentic-coding-playbook/issues/265)) ([2788e37](https://github.com/GSA-TTS/agentic-coding-playbook/commit/2788e37108e3e4450b9d4647ac3c2c8edea574ad))
+* frontmatter is a convention (not a standard) + MCP crosswalk column ([#215](https://github.com/GSA-TTS/agentic-coding-playbook/issues/215)) ([#225](https://github.com/GSA-TTS/agentic-coding-playbook/issues/225)) ([fe33e5a](https://github.com/GSA-TTS/agentic-coding-playbook/commit/fe33e5a1df9ed85467e0dfdd1c34a49ade7bb725))
+* public-readiness governance files + scope reframe ([#185](https://github.com/GSA-TTS/agentic-coding-playbook/issues/185)) ([78cb5ba](https://github.com/GSA-TTS/agentic-coding-playbook/commit/78cb5ba7a7ddedeb2ed2ed3fd7b78b39f418d952))
+* remove internal Slack references for public readiness ([#176](https://github.com/GSA-TTS/agentic-coding-playbook/issues/176)) ([#186](https://github.com/GSA-TTS/agentic-coding-playbook/issues/186)) ([94fdf42](https://github.com/GSA-TTS/agentic-coding-playbook/commit/94fdf42a4ab0fba7219f92ba1542f264873aa41e))
+
+
+### Maintenance
+
+* **deps:** bump actions/checkout from 7.0.0 to 7.0.1 ([#166](https://github.com/GSA-TTS/agentic-coding-playbook/issues/166)) ([b16b104](https://github.com/GSA-TTS/agentic-coding-playbook/commit/b16b1048549f46e5940c2c4770708d1efd0a93bb))
+* **deps:** bump actions/setup-python from 6.3.0 to 7.0.0 ([#167](https://github.com/GSA-TTS/agentic-coding-playbook/issues/167)) ([cf65a76](https://github.com/GSA-TTS/agentic-coding-playbook/commit/cf65a768b966d7290bd9a07c87babda840a01985))
+* **deps:** bump feedparser from 6.0.12 to 6.0.14 ([#205](https://github.com/GSA-TTS/agentic-coding-playbook/issues/205)) ([023586a](https://github.com/GSA-TTS/agentic-coding-playbook/commit/023586a1b38ba72e9a8e8a693c094d7ebaf007a0))
+* **deps:** bump pre-commit from 4.6.0 to 4.6.1 ([#172](https://github.com/GSA-TTS/agentic-coding-playbook/issues/172)) ([8e22797](https://github.com/GSA-TTS/agentic-coding-playbook/commit/8e2279704c5264c0bbf54cfce5ef8e4a423ef16e))
+* **deps:** bump pre-commit from 4.6.1 to 4.6.2 ([#279](https://github.com/GSA-TTS/agentic-coding-playbook/issues/279)) ([89891bd](https://github.com/GSA-TTS/agentic-coding-playbook/commit/89891bdc8119230b5d061f42b86b9d556f438475))
+* **deps:** bump ruff from 0.15.21 to 0.15.22 ([#169](https://github.com/GSA-TTS/agentic-coding-playbook/issues/169)) ([0b9142a](https://github.com/GSA-TTS/agentic-coding-playbook/commit/0b9142afbda9de2875c0c02a62b67f455f5c5929))
+* **deps:** bump ruff from 0.15.22 to 0.16.0 ([#173](https://github.com/GSA-TTS/agentic-coding-playbook/issues/173)) ([69d3bc2](https://github.com/GSA-TTS/agentic-coding-playbook/commit/69d3bc21dfebd9ff843d2d6eb737f32eda822db7))
+* **deps:** bump ruff from 0.16.0 to 0.16.1 ([#204](https://github.com/GSA-TTS/agentic-coding-playbook/issues/204)) ([2512c33](https://github.com/GSA-TTS/agentic-coding-playbook/commit/2512c33218418145fea68d4a47b8d167535c7878))
+* **deps:** bump ruff from 0.16.1 to 0.16.2 ([#230](https://github.com/GSA-TTS/agentic-coding-playbook/issues/230)) ([dbc6ca9](https://github.com/GSA-TTS/agentic-coding-playbook/commit/dbc6ca9e461b2df0f1806013ca9e5db9c56e61ad))
+* **deps:** bump ruff from 0.16.2 to 0.16.3 ([#278](https://github.com/GSA-TTS/agentic-coding-playbook/issues/278)) ([4095253](https://github.com/GSA-TTS/agentic-coding-playbook/commit/409525316af110639e04f4686e1771d7cbbb58ad))
+* **deps:** bump ruff from 0.16.3 to 0.16.7 ([#294](https://github.com/GSA-TTS/agentic-coding-playbook/issues/294)) ([d05c036](https://github.com/GSA-TTS/agentic-coding-playbook/commit/d05c036562478f58cfdb9c4db4bd2fc13186ac78))
+* **deps:** bump tcort/github-action-markdown-link-check ([#203](https://github.com/GSA-TTS/agentic-coding-playbook/issues/203)) ([3267760](https://github.com/GSA-TTS/agentic-coding-playbook/commit/32677606af89c72b6ae8ad87e23c0a16eca6f456))
+* **deps:** bump zizmorcore/zizmor-action from 0.5.7 to 0.6.0 ([#168](https://github.com/GSA-TTS/agentic-coding-playbook/issues/168)) ([e73018d](https://github.com/GSA-TTS/agentic-coding-playbook/commit/e73018d1f10cdee589f9527b100fb9e37e68ad69))
+* **deps:** bump zizmorcore/zizmor-action from 0.6.0 to 0.6.1 ([#171](https://github.com/GSA-TTS/agentic-coding-playbook/issues/171)) ([07ce3ce](https://github.com/GSA-TTS/agentic-coding-playbook/commit/07ce3ce848ae6c9315a6c23be59d7de45f88354a))
+* **deps:** bump zizmorcore/zizmor-action from 0.6.1 to 0.6.2 ([#202](https://github.com/GSA-TTS/agentic-coding-playbook/issues/202)) ([1147e4a](https://github.com/GSA-TTS/agentic-coding-playbook/commit/1147e4a4a7acbb986765d56d5db1f9479079f10f))
+* **deps:** bump zizmorcore/zizmor-action from 0.6.2 to 0.6.4 ([#293](https://github.com/GSA-TTS/agentic-coding-playbook/issues/293)) ([b47f40b](https://github.com/GSA-TTS/agentic-coding-playbook/commit/b47f40b31739aa40501ea585feed1f8a4f7be657))
+* **landscape:** review federal AI registry — no new governance docs (2026-08-04) ([#181](https://github.com/GSA-TTS/agentic-coding-playbook/issues/181)) ([b5e95cc](https://github.com/GSA-TTS/agentic-coding-playbook/commit/b5e95cc861b5fa04ea574083bdd2ba047593e373))
+
+
+### CI/CD
+
+* check only changed markdown links on PRs ([#283](https://github.com/GSA-TTS/agentic-coding-playbook/issues/283)) ([9ea8add](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9ea8add75a017bed007230a530da4a943c3eebdf))
+
 ## [0.14.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.14.0...v0.14.1) (2026-07-21)
 
 
