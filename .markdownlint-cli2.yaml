@@ -43,21 +43,19 @@ config:
   MD060: false
 
 # Scan these files
+# Scan these files. This is the SINGLE source of truth for file selection: both
+# the pre-commit hook and CI invoke markdownlint-cli2 with no glob arguments, so
+# neither can select a different set. Previously CI passed "**/*.md" plus
+# exclusions on the command line (69 files) while these globs alone selected 34,
+# so the hook checked half of what CI did.
 globs:
-  - "AGENTS.md"
-  - "PLAYBOOK.md"
-  - "CONTEXT-GUIDE.md"
-  - "CONTRIBUTING.md"
-  - "README.md"
-  - "docs/*.md"
-  - "skills/*/SKILL.md"
-  - "checklists/*.md"
-  - "templates/*.md"
-  - "examples/*.md"
+  - "**/*.md"
 
 # Ignore files
 ignores:
   - "node_modules"
+  - ".github/linters/node_modules"
+  - "CHANGELOG.md"
   - "MIGRATION.md"
 
 # Support YAML frontmatter
