@@ -18,20 +18,43 @@ repos:
     hooks:
       - id: gitleaks
 
+  # Keep this rev in lockstep with the `ruff==` pin in pyproject.toml. Unlike
+  # markdownlint below, this one cannot collapse to a single pin yet: CI invokes
+  # a bare `ruff` from `pip install -e ".[dev]"` (ci.yml), so a `repo: local`
+  # hook would resolve to whatever ruff is on the developer's PATH -- trading a
+  # detectable drift for an undetectable one. Tracked for a proper fix.
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: e8f7d69b957a30acb2c875078d5fd012de24b64c  # v0.16.7
+    rev: 2eeb5678de71a00c0902cbda7105d328432f72cb  # v0.16.8
     hooks:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
 
-  # Markdown linting — ensures consistent doc quality
-  # Uses .markdownlint-cli2.yaml for configuration
-  - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: 996abf60411a8d954288ac9856aae7602b80cbda  # v0.22.1
+  # Markdown linting. The version is pinned ONCE, in
+  # .github/linters/package.json (+ package-lock.json, which also carries the
+  # transitive overrides and is what `npm audit` gates in CI). This hook
+  # delegates to that install instead of pinning a second time via a remote rev,
+  # so the two can never drift. Configuration and file selection both come from
+  # .markdownlint-cli2.yaml. Mirrors agentic-coding-patterns#451.
+  - repo: local
     hooks:
+      # Local commits: auto-fix what is fixable.
       - id: markdownlint-cli2
-        args: ["--fix"]
+        name: markdownlint-cli2 (npm-pinned, --fix)
+        entry: npx --prefix .github/linters markdownlint-cli2 --fix
+        language: system
+        types: [markdown]
+        pass_filenames: false
+      # CI: check only, never --fix. With --fix the hook rewrites the file and
+      # exits 0, so a real violation would pass silently -- CI must use this id.
+      # `stages: [manual]` keeps it out of the default commit-time run.
+      - id: markdownlint-cli2-check
+        name: markdownlint-cli2 (npm-pinned, check only)
+        entry: npx --prefix .github/linters markdownlint-cli2
+        language: system
+        types: [markdown]
+        pass_filenames: false
+        stages: [manual]
 
   # Universal behavioral contract prerequisite (ADR-0003) — fail-closed.
   # Blocks the commit if the universal contract is not available. In the
