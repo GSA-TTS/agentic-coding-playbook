@@ -44,3 +44,24 @@ updates:
     commit-message:
       prefix: "chore(deps)"
     open-pull-requests-limit: 5
+
+  # Pre-commit hook versions. Without this ecosystem NOTHING updates the revs in
+  # .pre-commit-config.yaml: this repo's gitleaks and pre-commit-hooks pins had
+  # not been touched since 2026-04-09, and matched patterns/quickstart only
+  # because all three were seeded from the same template. It also keeps the
+  # ruff-pre-commit rev in lockstep with the pyproject `ruff==` pin -- the pip
+  # ecosystem above only bumps the PyPI dep, so without this the two ruff
+  # versions drift apart after every release. patterns has had this entry.
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 7
+    labels:
+      - "dependencies"
+      - "pre-commit"
+    commit-message:
+      prefix: "chore(deps)"
+    open-pull-requests-limit: 3
