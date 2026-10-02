@@ -6,7 +6,7 @@ tier: 1
 contract:
   role: universal
   version: "1.0.0"
-last_updated: "2026-08-24"
+last_updated: "2026-10-02"
 nist_controls: ["AC-2", "AC-3", "AC-4", "AC-6", "AC-12", "AC-17", "AU-2", "AU-3", "AU-6", "AU-12", "CA-2", "CA-7", "CM-2", "CM-3", "CM-5", "CM-6", "CM-7", "CM-8", "CM-10", "IA-2", "IA-8", "IR-4", "IR-6", "MP-4", "MP-6", "PL-4", "RA-5", "SA-4", "SA-5", "SA-8", "SA-11", "SA-15", "SA-17", "SC-7", "SC-8", "SC-13", "SC-18", "SC-23", "SC-28", "SI-2", "SI-3", "SI-7", "SI-10", "SI-12", "SI-17", "SR-3", "SR-11"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST AI RMF 1.0", "NIST AI 600-1", "NCCoE Agent Identity", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026"]
 audience: "all"
@@ -712,6 +712,10 @@ When reviewing code (its own or human-written), the agent MUST flag violations o
 - Missing tests for new functionality (§12.1)
 - Missing regression tests for bug fixes (§12.3)
 - Cross-module boundary violations (§13.5)
+- Comments that narrate change history, record how a conclusion was reached,
+  restate third-party facts, or argue for the approach (§13.6; full rule at
+  §15.6.1) — this is a recurring finding in agent-authored code and is not
+  mechanically detectable, so it needs an explicit review pass
 - Speculative or YAGNI code (§13.1) — apply the **Laziness Ladder** (§13.1.1): prefer the first rung that holds (skip it → stdlib → native feature → existing dependency → one line → minimum code), while never simplifying away validation, error handling, security, or accessibility
 
 The agent SHOULD:
@@ -801,6 +805,73 @@ ADR's own *Links / tracking* section (where issue references are acceptable,
 though prose or ADR cross-links are preferred). Test **names** that already encode
 a regression's id MAY keep it as a stable identifier.
 
+### 15.6.1 Comment Content: Describe the Code, Not How You Got There
+
+<!-- NIST SP 800-53: SA-5 (System Documentation), CM-3 (Configuration Change Control) -->
+
+§15.6 says to explain *why* in prose rather than lean on a tracker number. That
+instruction has a ceiling, and this section sets it. A code comment explains
+**what this code does and why it is this way.** It is not the place for the
+investigation that produced it.
+
+A comment MUST NOT contain:
+
+| Anti-pattern | Why it is wrong here |
+|---|---|
+| **Change narration** — "was X, now Y", "previously", "used to", "as of <date>", "had not been touched since" | Git records this accurately and keeps it current. A comment duplicating history is a second source of truth that only decays. |
+| **Derivation** — probe output, command transcripts, measured values, alternatives considered, the reasoning chain | This is a decision record. Its durable home is an ADR; its ephemeral home is the commit message or PR body. |
+| **Third-party facts restated** — an upstream schema's enum values, another tool's API shape | Cite the source instead. A copy goes stale silently and invisibly. |
+| **Advocacy** — arguing for the approach, weighing trade-offs, pre-empting objections | Review is where a change is argued. Once merged, the argument is settled. |
+
+The test for whether a comment earns its place:
+
+> **Would a reader who edits this line, without the comment, break something the
+> code cannot express?**
+
+If yes, keep it — tersely. If no, the content belongs in the commit message, the
+PR, or an ADR. Applied honestly this test removes most explanatory comments an
+agent is inclined to write, because most of them record the *author's* journey
+rather than a constraint on the *reader's* edit.
+
+Worked example. A substring regex that must not be "tidied" into a
+word-boundary form passes the test, because the hazard is invisible in the code:
+
+```js
+// Substring, not `\bembed\b`: `_` is a word character, so a word-boundary
+// form matches no underscore-delimited id.
+const EMBEDDING_ID_RE = /embedding|embed/
+```
+
+The same construct's rejected comment — reciting which endpoints were probed,
+what each returned, and why one error direction costs more than the other — fails
+it. None of that changes what a reader must not do.
+
+**Before opening a PR**, the agent MUST re-read every comment it added or touched
+and delete anything failing the test above. This is a distinct step from
+§15.6's tracker-reference strip: a comment can be free of issue numbers and still
+be a diary entry.
+
+Scope: this governs comment **content**. It does not weaken any rule requiring a
+comment to exist — `<!-- NIST SP 800-53: ... -->` tags and
+`> **Control Mapping:**` footers (§15.6), the intentional-simplification note
+(`docs/CODING_PRACTICES.md` §13.1), and `docstring`/API documentation are all
+unaffected. Where a comment is required, write it; this section bounds what goes
+in it.
+
+The same rule is stated as a MUST-list for code review in
+[`docs/CODING_PRACTICES.md`](./docs/CODING_PRACTICES.md) §13.6.
+
+> Rationale: this rule exists because stating the principle was demonstrably not
+> enough. Two reviewers flagged diary-style comments on one PR; the rule was
+> filed as an issue; the next PR in the same session shipped four more and was
+> flagged again in the same terms. Note also that none of those comments
+> contained a date, a tracker number, or the word "previously" — they were
+> well-formed prose about verified facts, in the wrong artifact. A linter
+> searching for those markers would have caught none of them, which is why this
+> is an authoring MUST and a review checklist item rather than a pattern match.
+>
+> **Control Mapping:** SA-5 (System Documentation), CM-3 (Configuration Change Control)
+
 ### 15.7 Fully Qualify Issue/PR References in Anything Durable
 
 <!-- NIST SP 800-53: SA-5 (System Documentation), CM-3 (Configuration Change Control) -->
@@ -848,6 +919,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-10-02 | 1.0.0 | Add §15.6.1 Comment Content and `docs/CODING_PRACTICES.md` §13.6: a comment explains what the code does and why it is this way, not how the author got there — no change narration, derivation, restated third-party facts, or advocacy, gated by the would-an-editor-break-something test, with a pre-PR re-read step and a review-checklist item (§15.2, code-review skill 1.4/4.8). §15.6 already said "explain why in prose" with no ceiling, which read as license for decision records in source; none of the observed instances contained a date or tracker number, so pattern matching would not have caught them. |
 | 2026-08-24 | 1.0.0 | Add the Durable-References agent guidance (§15.6/§15.7): issue/PR numbers are ephemeral — code comments must be self-contained / cite ADRs in `docs/decisions/`; fully-qualify refs in durable artifacts. No behavioral rule for the SDLC changed; this is agent-authoring guidance. |
 | 2026-08-22 | 1.0.0 | Tooling: the frontmatter `nist_controls` list is now GENERATED from the body's Control Mapping citations by `make generate` (was hand-maintained at 28 while the body cited 47, silently under-populating the generated §1 traceability matrix). Withdrawn controls referenced only as a supersession note (SA-12 → SR-3) are excluded. No behavioral rule changed (#238). |
 | 2026-08-20 | 1.0.0 | Editorial: §13.2 now states the frontmatter-exemption explicitly (lists the exempt repository meta-files and points at the `config.py` single source), reconciling the prose with the tool so the rule and the validator can no longer diverge (#247). No behavioral rule changed. |
