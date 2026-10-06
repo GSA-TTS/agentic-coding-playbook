@@ -28,7 +28,7 @@ Every Markdown document in this repository is expected to:
 - **Prefer plain language and descriptive link text** ("see the contributing
   guide", not "click here"), per [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-The image alt-text rule runs in CI (`markdownlint-cli2`) and pre-commit, so that
+The image alt-text rule runs in CI (`markdownlint`) and pre-commit, so that
 regression fails the build rather than shipping. Heading structure, table
 headers, and link text are contributor conventions reinforced in review.
 

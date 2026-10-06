@@ -95,22 +95,23 @@ jobs:
           npm ci
           npm audit --audit-level=high
 
-      # No glob arguments: file selection comes from .markdownlint-cli2.yaml, the
-      # same source the pre-commit hook reads, so CI and local cannot diverge.
+      # Glob/ignore list lives once, in .github/linters/run-markdownlint.mjs,
+      # shared by CI and the pre-commit hook below so the two cannot diverge
+      # (same guarantee the old .markdownlint-cli2.yaml globs: key gave us).
       # The version comes from .github/linters/package-lock.json (installed
-      # above), so there is no second version pin to drift.
+      # above), so there is no second version pin to drift either.
       - name: Markdown lint
-        run: npx --prefix .github/linters markdownlint-cli2
+        run: node .github/linters/run-markdownlint.mjs
 
-      # A markdownlint-cli2 run that matched no files still exits 0, so assert
-      # the file count is non-zero rather than trusting the exit status alone.
+      # run-markdownlint.mjs --count-only exits 0 and prints the matched file
+      # count without linting -- assert it is non-zero so a typo'd glob fails
+      # loudly instead of the real lint step passing with nothing matched.
       - name: Assert markdownlint actually linted files
         run: |
-          count=$(npx --prefix .github/linters markdownlint-cli2 2>&1 \
-            | sed -n 's/^Linting: \([0-9]\{1,\}\) file.*/\1/p')
+          count=$(node .github/linters/run-markdownlint.mjs --count-only)
           echo "markdownlint linted ${count:-0} file(s)"
           if [ "${count:-0}" -lt 1 ]; then
-            echo "::error::markdownlint matched no files - check globs in .markdownlint-cli2.yaml" >&2
+            echo "::error::markdownlint matched no files - check the glob list in .github/linters/run-markdownlint.mjs" >&2
             exit 1
           fi
 
