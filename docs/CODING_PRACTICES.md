@@ -603,12 +603,7 @@ Apply these principles proportionally to the project's complexity:
 ### 13.6 Comment Content
 
 A comment explains **what the code does and why it is this way** — not how the
-author arrived at it. The test:
-
-> Would a reader who edits this line, without the comment, break something the
-> code cannot express?
-
-If no, the content belongs in the commit message, the PR, or an ADR.
+author arrived at it.
 
 - MUST NOT narrate change history — "was X, now Y", "previously", "as of
   `<date>`". Git records this and keeps it current; a comment copy only decays.
@@ -620,13 +615,25 @@ If no, the content belongs in the commit message, the PR, or an ADR.
 - MUST NOT argue for the approach. Review is where a change is argued; once
   merged, the argument is settled.
 - MUST re-read every comment added or touched before opening a PR, and delete
-  what fails the test above.
+  what matches one of the four patterns above.
+
+For a comment that matches one of those four patterns, this test decides whether
+any of it survives:
+
+> Would a reader who edits this line, without the comment, break something the
+> code cannot express?
+
+If yes, keep the part encoding that constraint, tersely. If no, the content
+belongs in the commit message, the PR, or an ADR. The test applies **only within
+the four patterns above** — it is not a filter to run over every comment in a
+file. Short navigational labels and section markers match no pattern and are out
+of scope.
 
 This bounds comment **content**; it removes no requirement that a comment exist.
 Control-mapping tags, the intentional-simplification note in §13.1, and
 docstring/API documentation are unaffected.
 
-For the worked example and the enforcement rationale, see [`AGENTS.md`](../AGENTS.md) §15.6.1.
+For the worked example, see [`AGENTS.md`](../AGENTS.md) §15.6.1.
 
 > **Control Mapping:** SA-5 (System Documentation), CM-3 (Configuration Change Control)
 
@@ -874,7 +881,7 @@ This section maps the OWASP Top 10 for LLM Applications (2025) to relevant secti
 
 | Date | Version | Change |
 |------|---------|--------|
-| 2026-10-02 | 0.2.0 | Add §13.6 Comment Content: a comment explains what the code does and why it is this way, not how the author arrived at it. Bounds the pre-existing "explain why in prose" guidance, which had no ceiling. See `AGENTS.md` §15.6.1. |
+| 2026-10-02 | 0.2.0 | Add §13.6 Comment Content: a comment explains what the code does and why it is this way, not how the author arrived at it. Four MUST-NOT patterns (change narration, derivation, restated third-party facts, advocacy); the would-an-editor-break-something test is scoped to comments matching one of them. See `AGENTS.md` §15.6.1. |
 | 2026-02-25 | 0.1.0 | Initial release |
 
 ## Framework References

@@ -59,23 +59,25 @@ Flag violations in the PR description with justification if they are intentional
 
 ### 1.4 Comment Content
 
-Re-read every comment the change added or touched. Delete the ones that fail
-this test (`docs/CODING_PRACTICES.md` Section 13.6, full rule at `AGENTS.md`
-Section 15.6.1):
-
-> Would a reader who edits this line, without the comment, break something the
-> code cannot express?
-
-Delete:
+Re-read every comment the change added or touched. Delete the ones matching one
+of these patterns (`docs/CODING_PRACTICES.md` Section 13.6, full rule at
+`AGENTS.md` Section 15.6.1):
 
 - Change narration — "was X, now Y", "previously", "as of `<date>`"
 - Derivation — probe output, measured values, alternatives considered
 - Third-party facts restated — an upstream schema's enum values, another tool's API shape
 - Advocacy — arguing for the approach, weighing trade-offs
 
+For a comment matching one of those, this test decides whether any of it stays:
+
+> Would a reader who edits this line, without the comment, break something the
+> code cannot express?
+
 Keep terse notes about a constraint the code cannot express, such as why a
-simpler-looking form is wrong. Control-mapping tags, the
-intentional-simplification note, and docstrings are out of scope.
+simpler-looking form is wrong. Apply the test only within the four patterns
+above — a short navigational label or section marker matches none of them and is
+out of scope, as are control-mapping tags, the intentional-simplification note,
+and docstrings.
 
 This is a separate pass from the secrets scan and the tracker-reference strip. A
 comment can be free of secrets and issue numbers and still be a diary entry.

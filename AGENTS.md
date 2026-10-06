@@ -714,8 +714,7 @@ When reviewing code (its own or human-written), the agent MUST flag violations o
 - Cross-module boundary violations (§13.5)
 - Comments that narrate change history, record how a conclusion was reached,
   restate third-party facts, or argue for the approach (§13.6; full rule at
-  §15.6.1) — this is a recurring finding in agent-authored code and is not
-  mechanically detectable, so it needs an explicit review pass
+  §15.6.1)
 - Speculative or YAGNI code (§13.1) — apply the **Laziness Ladder** (§13.1.1): prefer the first rung that holds (skip it → stdlib → native feature → existing dependency → one line → minimum code), while never simplifying away validation, error handling, security, or accessibility
 
 The agent SHOULD:
@@ -823,15 +822,22 @@ A comment MUST NOT contain:
 | **Third-party facts restated** — an upstream schema's enum values, another tool's API shape | Cite the source instead. A copy goes stale silently and invisibly. |
 | **Advocacy** — arguing for the approach, weighing trade-offs, pre-empting objections | Review is where a change is argued. Once merged, the argument is settled. |
 
-The test for whether a comment earns its place:
+The test that decides a flagged comment's fate:
 
 > **Would a reader who edits this line, without the comment, break something the
 > code cannot express?**
 
-If yes, keep it — tersely. If no, the content belongs in the commit message, the
-PR, or an ADR. Applied honestly this test removes most explanatory comments an
-agent is inclined to write, because most of them record the *author's* journey
-rather than a constraint on the *reader's* edit.
+Apply it **only to comments matching one of the four anti-patterns above.** It is
+a tie-breaker within that set, not a general-purpose filter: a comment that
+matches no anti-pattern is out of scope, and this section never licenses deleting
+it. Short navigational labels (`# Fetch the feeds`), section dividers, and step
+markers encode no hazard and would all "fail" the test if it were applied to
+every comment — they are not what this rule is for, and stripping them is not an
+outcome this section authorizes.
+
+If a flagged comment passes the test, keep the part that encodes the constraint —
+tersely. If it fails, the content belongs in the commit message, the PR, or an
+ADR.
 
 Worked example. A substring regex that must not be "tidied" into a
 word-boundary form passes the test, because the hazard is invisible in the code:
@@ -861,15 +867,6 @@ in it.
 The same rule is stated as a MUST-list for code review in
 [`docs/CODING_PRACTICES.md`](./docs/CODING_PRACTICES.md) §13.6.
 
-> Rationale: this rule exists because stating the principle was demonstrably not
-> enough. Two reviewers flagged diary-style comments on one PR; the rule was
-> filed as an issue; the next PR in the same session shipped four more and was
-> flagged again in the same terms. Note also that none of those comments
-> contained a date, a tracker number, or the word "previously" — they were
-> well-formed prose about verified facts, in the wrong artifact. A linter
-> searching for those markers would have caught none of them, which is why this
-> is an authoring MUST and a review checklist item rather than a pattern match.
->
 > **Control Mapping:** SA-5 (System Documentation), CM-3 (Configuration Change Control)
 
 ### 15.7 Fully Qualify Issue/PR References in Anything Durable
@@ -919,7 +916,7 @@ Each section above includes inline control mappings (e.g., `> **Control Mapping:
 
 | Date | Version | Change |
 |------|---------|--------|
-| 2026-10-02 | 1.0.0 | Add §15.6.1 Comment Content and `docs/CODING_PRACTICES.md` §13.6: a comment explains what the code does and why it is this way, not how the author got there — no change narration, derivation, restated third-party facts, or advocacy, gated by the would-an-editor-break-something test, with a pre-PR re-read step and a review-checklist item (§15.2, code-review skill 1.4/4.8). §15.6 already said "explain why in prose" with no ceiling, which read as license for decision records in source; none of the observed instances contained a date or tracker number, so pattern matching would not have caught them. |
+| 2026-10-02 | 1.0.0 | Add §15.6.1 Comment Content and `docs/CODING_PRACTICES.md` §13.6: a comment explains what the code does and why it is this way, not how the author got there — no change narration, derivation, restated third-party facts, or advocacy. The would-an-editor-break-something test is scoped to comments matching one of those four patterns, so short labels and section markers stay out of scope. Pre-PR re-read step and review-checklist item (§15.2, code-review skill 1.4/4.8). |
 | 2026-08-24 | 1.0.0 | Add the Durable-References agent guidance (§15.6/§15.7): issue/PR numbers are ephemeral — code comments must be self-contained / cite ADRs in `docs/decisions/`; fully-qualify refs in durable artifacts. No behavioral rule for the SDLC changed; this is agent-authoring guidance. |
 | 2026-08-22 | 1.0.0 | Tooling: the frontmatter `nist_controls` list is now GENERATED from the body's Control Mapping citations by `make generate` (was hand-maintained at 28 while the body cited 47, silently under-populating the generated §1 traceability matrix). Withdrawn controls referenced only as a supersession note (SA-12 → SR-3) are excluded. No behavioral rule changed (#238). |
 | 2026-08-20 | 1.0.0 | Editorial: §13.2 now states the frontmatter-exemption explicitly (lists the exempt repository meta-files and points at the `config.py` single source), reconciling the prose with the tool so the rule and the validator can no longer diverge (#247). No behavioral rule changed. |
