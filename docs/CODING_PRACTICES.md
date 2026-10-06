@@ -3,7 +3,7 @@ title: "Secure Coding Practices for AI-Assisted Federal Development"
 description: "Secure coding standards for AI-assisted development — input validation, secrets management, dependency security, architecture discipline, change safety, SOLID principles, OWASP/SSDF alignment"
 status: canonical
 tier: 1
-last_updated: "2026-06-22"
+last_updated: "2026-10-02"
 nist_controls: ["SA-8", "SA-11", "SA-15", "SA-17", "SI-2", "SI-4", "SI-7", "SI-10", "SI-11", "SI-15", "SC-3", "SC-13", "SC-28", "CP-10", "CA-7", "CM-2", "CM-3", "IA-2", "IA-5", "AC-3", "AU-2", "SR-3"]
 frameworks: ["NIST SP 800-53 Rev 5.2", "NIST SP 800-218A", "OWASP Top 10 LLM 2025", "OWASP Top 10 Agentic 2026", "CISA Secure by Design"]
 audience: "developers"
@@ -600,6 +600,43 @@ Apply these principles proportionally to the project's complexity:
 
 > **Control Mapping:** SA-8 (Security Engineering Principles), SA-15 (Development Process), SC-3 (Security Function Isolation), CM-3 (Configuration Change Control)
 
+### 13.6 Comment Content
+
+A comment explains **what the code does and why it is this way** — not how the
+author arrived at it.
+
+- MUST NOT narrate change history — "was X, now Y", "previously", "as of
+  `<date>`". Git records this and keeps it current; a comment copy only decays.
+- MUST NOT record derivation — probe output, command transcripts, measured
+  values, alternatives considered. That is a decision record; its durable home
+  is an ADR.
+- MUST NOT restate third-party facts (an upstream schema's enum values, another
+  tool's API shape). Cite the source; a copy goes stale invisibly.
+- MUST NOT argue for the approach. Review is where a change is argued; once
+  merged, the argument is settled.
+- MUST re-read every comment added or touched before opening a PR, and delete
+  what matches one of the four patterns above.
+
+For a comment that matches one of those four patterns, this test decides whether
+any of it survives:
+
+> Would a reader who edits this line, without the comment, break something the
+> code cannot express?
+
+If yes, keep the part encoding that constraint, tersely. If no, the content
+belongs in the commit message, the PR, or an ADR. The test applies **only within
+the four patterns above** — it is not a filter to run over every comment in a
+file. Short navigational labels and section markers match no pattern and are out
+of scope.
+
+This bounds comment **content**; it removes no requirement that a comment exist.
+Control-mapping tags, the intentional-simplification note in §13.1, and
+docstring/API documentation are unaffected.
+
+For the worked example, see [`AGENTS.md`](../AGENTS.md) §15.6.1.
+
+> **Control Mapping:** SA-5 (System Documentation), CM-3 (Configuration Change Control)
+
 ---
 
 ## 14. Accessibility (Section 508 / WCAG 2.1)
@@ -844,6 +881,7 @@ This section maps the OWASP Top 10 for LLM Applications (2025) to relevant secti
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-10-02 | 0.2.0 | Add §13.6 Comment Content: a comment explains what the code does and why it is this way, not how the author arrived at it. Four MUST-NOT patterns (change narration, derivation, restated third-party facts, advocacy); the would-an-editor-break-something test is scoped to comments matching one of them. See `AGENTS.md` §15.6.1. |
 | 2026-02-25 | 0.1.0 | Initial release |
 
 ## Framework References
