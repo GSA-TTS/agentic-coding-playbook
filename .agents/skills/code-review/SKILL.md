@@ -59,7 +59,7 @@ Flag violations in the PR description with justification if they are intentional
 
 ### 1.4 Comment Content
 
-Re-read every comment the change added or touched. Delete the ones matching one
+Re-read every comment the change added or touched. Review comments matching one
 of these patterns (`docs/CODING_PRACTICES.md` Section 13.6, full rule at
 `AGENTS.md` Section 15.6.1):
 
@@ -68,7 +68,8 @@ of these patterns (`docs/CODING_PRACTICES.md` Section 13.6, full rule at
 - Third-party facts restated — an upstream schema's enum values, another tool's API shape
 - Advocacy — arguing for the approach, weighing trade-offs
 
-For a comment matching one of those, this test decides whether any of it stays:
+For a comment matching one of those, this test decides whether any of it stays;
+delete the portions that fail:
 
 > Would a reader who edits this line, without the comment, break something the
 > code cannot express?

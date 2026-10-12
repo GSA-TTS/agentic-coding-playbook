@@ -614,8 +614,9 @@ author arrived at it.
   tool's API shape). Cite the source; a copy goes stale invisibly.
 - MUST NOT argue for the approach. Review is where a change is argued; once
   merged, the argument is settled.
-- MUST re-read every comment added or touched before opening a PR, and delete
-  what matches one of the four patterns above.
+- MUST re-read every comment added or touched before opening a PR, review
+  comments matching one of the four patterns above, and delete the portions
+  that fail the test below.
 
 For a comment that matches one of those four patterns, this test decides whether
 any of it survives:
