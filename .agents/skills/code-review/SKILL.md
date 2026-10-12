@@ -165,7 +165,7 @@ Review against the Category 1 checks from `checklists/pre-deployment.md`:
 | 4.5 | Test coverage is adequate | New code has corresponding tests; coverage did not decrease |
 | 4.6 | No TODO/FIXME/HACK without a linked issue | Every temporary workaround references a tracking issue |
 | 4.7 | Error handling is explicit | No empty catch blocks, no swallowed errors, no silent fallbacks |
-| 4.8 | Comments describe the code, not the investigation | No change narration, derivation, restated third-party facts, or advocacy (Section 1.4) |
+| 4.8 | Comments describe the code, not the investigation | For comments matching Section 1.4's four patterns, remove only portions that fail its constraint-preservation test |
 
 ### Hallucination Check
 

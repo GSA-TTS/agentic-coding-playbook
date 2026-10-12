@@ -712,9 +712,8 @@ When reviewing code (its own or human-written), the agent MUST flag violations o
 - Missing tests for new functionality (§12.1)
 - Missing regression tests for bug fixes (§12.3)
 - Cross-module boundary violations (§13.5)
-- Comments that narrate change history, record how a conclusion was reached,
-  restate third-party facts, or argue for the approach (§13.6; full rule at
-  §15.6.1)
+- Comments matching the four patterns in §15.6.1 whose matching portions fail
+  its constraint-preservation tie-breaker (§13.6; full rule at §15.6.1)
 - Speculative or YAGNI code (§13.1) — apply the **Laziness Ladder** (§13.1.1): prefer the first rung that holds (skip it → stdlib → native feature → existing dependency → one line → minimum code), while never simplifying away validation, error handling, security, or accessibility
 
 The agent SHOULD:
@@ -852,10 +851,11 @@ The same construct's rejected comment — reciting which endpoints were probed,
 what each returned, and why one error direction costs more than the other — fails
 it. None of that changes what a reader must not do.
 
-**Before opening a PR**, the agent MUST re-read every comment it added or touched
-and delete anything failing the test above. This is a distinct step from
-§15.6's tracker-reference strip: a comment can be free of issue numbers and still
-be a diary entry.
+**Before opening a PR**, the agent MUST re-read every comment it added or touched,
+review comments matching one of the four anti-patterns above, and delete only the
+portions that fail the test. This is a distinct step from §15.6's
+tracker-reference strip: a comment can be free of issue numbers and still be a
+diary entry.
 
 Scope: this governs comment **content**. It does not weaken any rule requiring a
 comment to exist — `<!-- NIST SP 800-53: ... -->` tags and
