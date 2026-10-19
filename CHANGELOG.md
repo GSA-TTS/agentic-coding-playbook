@@ -4,6 +4,20 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.15.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.15.0...v0.15.1) (2026-10-19)
+
+
+### Documentation
+
+* bound comment content — describe the code, not the investigation ([#299](https://github.com/GSA-TTS/agentic-coding-playbook/issues/299)) ([d74f0ae](https://github.com/GSA-TTS/agentic-coding-playbook/commit/d74f0aee78e6c6286e50afb888caf61094d21707))
+
+
+### Maintenance
+
+* **deps:** bump actions/setup-node from 7.0.0 to 7.1.0 ([#321](https://github.com/GSA-TTS/agentic-coding-playbook/issues/321)) ([13607dd](https://github.com/GSA-TTS/agentic-coding-playbook/commit/13607dd9ce70aed3f4499b6cbd56b184d8eefcd6))
+* **deps:** bump https://github.com/astral-sh/ruff-pre-commit from v0.16.9 to 0.17.0 ([#323](https://github.com/GSA-TTS/agentic-coding-playbook/issues/323)) ([9c4cf52](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9c4cf524bc3eea4d0cfbfe259e986248bf80ea8d))
+* **deps:** bump ruff from 0.16.9 to 0.17.0 ([#322](https://github.com/GSA-TTS/agentic-coding-playbook/issues/322)) ([ec83eda](https://github.com/GSA-TTS/agentic-coding-playbook/commit/ec83eda119565df6222f5aa45e9af4f52309d305))
+
 ## [0.15.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.14.1...v0.15.0) (2026-10-06)
 
 
