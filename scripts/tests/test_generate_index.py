@@ -1213,7 +1213,7 @@ class TestFrameworkRefs:
 class TestExclusionListsSingleSource:
     """#248: validate_docs and generate_index MUST share one exclusion source."""
 
-    def test_structural_lists_are_single_sourced(self):
+    def test_structural_lists_are_single_sourced(self, tmp_path):
         from playbook_validator import config, generate_index, validate_docs
 
         # Set-equality against the config single source, so a file can never be
@@ -1222,6 +1222,30 @@ class TestExclusionListsSingleSource:
         assert validate_docs.EXCLUDED_DIRS == config.STRUCTURAL_EXCLUDED_DIRS
         assert set(config.STRUCTURAL_EXCLUDED_FILENAMES) == generate_index._EXCLUDED_NAMES
         assert set(config.STRUCTURAL_EXCLUDED_DIRS) == generate_index._EXCLUDED_DIRS
+
+        content = "---\ntitle: Fixture\ndescription: Fixture\nstatus: draft\ntier: 2\n---\n"
+        for directory in (".venv", "venv", "nested/.venv", "nested/venv"):
+            dependency = tmp_path / directory / "lib/python3.13/site-packages/example.dist-info/licenses"
+            dependency.mkdir(parents=True)
+            (dependency / "THIRD-PARTY-NOTICES.md").write_text("License notice without frontmatter\n")
+            (dependency / "guide.md").write_text(content)
+            (dependency / "guide.md.template").write_text(content)
+
+        docs = tmp_path / "docs"
+        docs.mkdir()
+        for name in ("THIRD-PARTY-NOTICES.md", "venv.md", ".venv.md"):
+            (docs / name).write_text("Repository document missing frontmatter\n")
+        (docs / "guide.md").write_text(content)
+        (docs / "guide.md.template").write_text(content)
+
+        discovered = {path.relative_to(tmp_path).as_posix() for path in validate_docs.find_content_files(tmp_path)}
+        assert discovered == {"docs/THIRD-PARTY-NOTICES.md", "docs/venv.md", "docs/.venv.md", "docs/guide.md"}
+        errors, _ = validate_docs.validate_doc_frontmatter(docs / "THIRD-PARTY-NOTICES.md")
+        assert any("missing YAML frontmatter" in error for error in errors)
+        assert {doc.path for doc in generate_index.collect_documents(tmp_path)} == {
+            "docs/guide.md",
+            "docs/guide.md.template",
+        }
 
     def test_agents_md_13_2_exemption_matches_config(self):
         """#247: the §13.2 exemption prose lists the same meta-files as the tool."""

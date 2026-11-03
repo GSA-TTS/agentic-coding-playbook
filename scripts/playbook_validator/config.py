@@ -65,6 +65,8 @@ STRUCTURAL_EXCLUDED_DIRS = frozenset(
         ".github",
         ".claude",
         ".agents",
+        ".venv",
+        "venv",
         "node_modules",
         "skills",
         "data",
