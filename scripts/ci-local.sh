@@ -87,10 +87,17 @@ if [[ "$NO_NET" -eq 0 ]]; then
     "$CA_BUNDLE" "$(grep -c "BEGIN CERTIFICATE" "$CA_BUNDLE" 2>/dev/null || echo '?')"
 fi
 
+# shellcheck disable=SC2329  # invoked indirectly via `step "Markdown lint" run_markdownlint`
+run_markdownlint() {
+  if [[ ! -d .github/linters/node_modules ]]; then
+    npm ci --prefix .github/linters --ignore-scripts || return 1
+  fi
+  node .github/linters/run-markdownlint.mjs
+}
+
 step "Ruff lint"            ruff check scripts/
 step "Ruff format check"    ruff format --check scripts/
-step "Markdown lint"        npx --prefix .github/linters markdownlint-cli2 \
-                              "**/*.md" "#node_modules" "#.github/linters/node_modules" "#CHANGELOG.md"
+step "Markdown lint"        run_markdownlint
 step "Pytest"               env PYTHONPATH=scripts python3 -m pytest scripts/tests/ -q
 step "Validate frontmatter" env PYTHONPATH=scripts python3 -m playbook_validator validate-docs --root .
 step "Validate landscape"   env PYTHONPATH=scripts python3 -m playbook_validator validate-landscape --path data/federal-ai-landscape.yaml
