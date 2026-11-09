@@ -90,6 +90,12 @@ fi
 # shellcheck disable=SC2329  # invoked indirectly via `step "Markdown lint" run_markdownlint`
 run_markdownlint() {
   if [[ ! -d .github/linters/node_modules ]]; then
+    if [[ "$NO_NET" -eq 1 ]]; then
+      printf '%s\n' \
+        'Markdown lint dependencies are missing; --no-net prevents installation.' \
+        'When network access is permitted, run: npm ci --prefix .github/linters --ignore-scripts' >&2
+      return 1
+    fi
     npm ci --prefix .github/linters --ignore-scripts || return 1
   fi
   node .github/linters/run-markdownlint.mjs
