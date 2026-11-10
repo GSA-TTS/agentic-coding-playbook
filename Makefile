@@ -42,7 +42,8 @@ test-quick: ## Run tests without verbose output
 .PHONY: lint
 lint: ## Run ruff linter + markdown linter
 	ruff check scripts/
-	npx markdownlint-cli2
+	@test -d .github/linters/node_modules || npm ci --prefix .github/linters --ignore-scripts
+	node .github/linters/run-markdownlint.mjs
 
 .PHONY: format
 format: ## Format Python code with ruff
