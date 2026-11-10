@@ -4,6 +4,33 @@ All notable changes to this playbook will be documented in this file.
 
 This project uses [Semantic Versioning](https://semver.org/). Framework alignment versions are tracked inline in each document.
 
+## [0.15.1](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.15.0...v0.15.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* **ci:** pin patched Markdown linter transitive dependencies ([#338](https://github.com/GSA-TTS/agentic-coding-playbook/issues/338)) ([8489653](https://github.com/GSA-TTS/agentic-coding-playbook/commit/8489653920058cd36c355e4a7b1d5a560daaa6d6))
+* **deps:** align pre-commit lock and patched environment tooling ([#339](https://github.com/GSA-TTS/agentic-coding-playbook/issues/339)) ([9b03cae](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9b03caebe66fac96e86604ccb476cacba0c8efe3))
+* **deps:** align Ruff package hook and lockfile at 0.17.3 ([#341](https://github.com/GSA-TTS/agentic-coding-playbook/issues/341)) ([5455640](https://github.com/GSA-TTS/agentic-coding-playbook/commit/545564051dea92d510a1a9f9d9e135a30e5771f6))
+* **lint:** route Makefile and ci-local through pinned markdownlint-cli runner ([#316](https://github.com/GSA-TTS/agentic-coding-playbook/issues/316)) ([#342](https://github.com/GSA-TTS/agentic-coding-playbook/issues/342)) ([cfd0c0b](https://github.com/GSA-TTS/agentic-coding-playbook/commit/cfd0c0bd92fdd3aa8b993dfd86f502ddf46e3648))
+* **validator:** exclude Python environments from document inventory ([#340](https://github.com/GSA-TTS/agentic-coding-playbook/issues/340)) ([f8b7b68](https://github.com/GSA-TTS/agentic-coding-playbook/commit/f8b7b68abbc4ddbb72c3fe6f0fbcde40dba339e5))
+
+
+### Documentation
+
+* bound comment content — describe the code, not the investigation ([#299](https://github.com/GSA-TTS/agentic-coding-playbook/issues/299)) ([d74f0ae](https://github.com/GSA-TTS/agentic-coding-playbook/commit/d74f0aee78e6c6286e50afb888caf61094d21707))
+
+
+### Maintenance
+
+* **deps:** bump actions/setup-node from 7.0.0 to 7.1.0 ([#321](https://github.com/GSA-TTS/agentic-coding-playbook/issues/321)) ([13607dd](https://github.com/GSA-TTS/agentic-coding-playbook/commit/13607dd9ce70aed3f4499b6cbd56b184d8eefcd6))
+* **deps:** bump actions/setup-python from 7.0.0 to 7.1.0 ([#335](https://github.com/GSA-TTS/agentic-coding-playbook/issues/335)) ([15909d0](https://github.com/GSA-TTS/agentic-coding-playbook/commit/15909d0b12696495ed8d2e738c92529dc37ab78a))
+* **deps:** bump https://github.com/astral-sh/ruff-pre-commit from v0.16.9 to 0.17.0 ([#323](https://github.com/GSA-TTS/agentic-coding-playbook/issues/323)) ([9c4cf52](https://github.com/GSA-TTS/agentic-coding-playbook/commit/9c4cf524bc3eea4d0cfbfe259e986248bf80ea8d))
+* **deps:** bump ruff from 0.16.9 to 0.17.0 ([#322](https://github.com/GSA-TTS/agentic-coding-playbook/issues/322)) ([ec83eda](https://github.com/GSA-TTS/agentic-coding-playbook/commit/ec83eda119565df6222f5aa45e9af4f52309d305))
+* **deps:** bump virtualenv from 21.14.10 to 21.14.13 in the uv group across 1 directory ([#345](https://github.com/GSA-TTS/agentic-coding-playbook/issues/345)) ([31afc60](https://github.com/GSA-TTS/agentic-coding-playbook/commit/31afc60f7f8daccf396a41f4e5797bbbf60b63dd))
+* **deps:** bump zizmorcore/zizmor-action from 0.6.4 to 0.8.0 ([#334](https://github.com/GSA-TTS/agentic-coding-playbook/issues/334)) ([bc32f57](https://github.com/GSA-TTS/agentic-coding-playbook/commit/bc32f57e6414191a14e30a9454d68b3cc09a1292))
+* **deps:** bump zizmorcore/zizmor-action from 0.8.0 to 0.8.1 ([#343](https://github.com/GSA-TTS/agentic-coding-playbook/issues/343)) ([0d5843b](https://github.com/GSA-TTS/agentic-coding-playbook/commit/0d5843b0df377bcf2e22f76a0eb7f5175a89d938))
+
 ## [0.15.0](https://github.com/GSA-TTS/agentic-coding-playbook/compare/v0.14.1...v0.15.0) (2026-10-06)
 
 
