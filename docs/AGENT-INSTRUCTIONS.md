@@ -3,7 +3,7 @@ title: "Agent Instructions"
 description: "Model-agnostic repo-specific reference for any AI coding agent working in this repository"
 status: canonical
 tier: 1
-last_updated: "2026-06-01"
+last_updated: "2026-10-31"
 load_priority: always
 audience: ["developers", "agents"]
 keywords: ["agent", "instructions", "commands", "paths", "skills", "validation"]
@@ -16,7 +16,7 @@ Model-agnostic reference for any AI coding agent working in this repository. Rea
 ## Quick Reference
 
 ```bash
-# Validation (Python package — 569 tests)
+# Validation (Python package — 578 tests)
 PYTHONPATH=scripts python3 -m playbook_validator validate-docs
 PYTHONPATH=scripts python3 -m playbook_validator validate-skills
 PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
@@ -26,6 +26,7 @@ PYTHONPATH=scripts python3 -m playbook_validator validate-risk-assessment --path
 PYTHONPATH=scripts python3 -m playbook_validator doctor [--json]
 PYTHONPATH=scripts python3 -m playbook_validator audit-repo
 PYTHONPATH=scripts python3 -m playbook_validator pre-deploy
+PYTHONPATH=scripts python3 -m playbook_validator validate-executables --root .
 
 # Generation
 make generate            # Generate INDEX.yaml + README skills table
@@ -47,6 +48,12 @@ python scripts/check_federal_landscape_rss.py           # Check RSS feeds for ne
 python scripts/check_federal_landscape_rss.py | \
   python scripts/compare_landscape_versions.py          # Check and compare against registry
 ```
+
+`validate-executables` checks the small, explicit inventory of repository tool
+entry points twice: Git's recorded `100755` mode (what a fresh checkout receives)
+and the local working-tree mode. Shared mounts can disagree with Git; fix the
+recorded mode with `git update-index --chmod=+x <path>` rather than changing a
+global Git mode setting. A local-only mismatch is reported separately.
 
 ## Canonical Paths
 

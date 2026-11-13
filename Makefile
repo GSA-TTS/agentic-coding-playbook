@@ -79,12 +79,16 @@ validate-risk-assessment: ## Validate risk assessment worksheet
 validate-adrs: ## Validate ADR decision records
 	$(VALIDATOR) validate-adrs --dir $(or $(ADR_DIR),docs/decisions)
 
+.PHONY: validate-executables
+validate-executables: ## Validate Git-recorded executable modes
+	$(VALIDATOR) validate-executables --root .
+
 .PHONY: audit-repo
 audit-repo: ## Audit repository compliance baseline
 	$(VALIDATOR) audit-repo --path .
 
 .PHONY: validate
-validate: validate-docs validate-skills validate-landscape ## Run all validators
+validate: validate-docs validate-skills validate-landscape validate-executables ## Run all validators
 
 # ── Generation ─────────────────────────────────────────────────────
 

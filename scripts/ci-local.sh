@@ -108,6 +108,7 @@ step "Pytest"               env PYTHONPATH=scripts python3 -m pytest scripts/tes
 step "Validate frontmatter" env PYTHONPATH=scripts python3 -m playbook_validator validate-docs --root .
 step "Validate landscape"   env PYTHONPATH=scripts python3 -m playbook_validator validate-landscape --path data/federal-ai-landscape.yaml
 step "Validate skills"      env PYTHONPATH=scripts python3 -m playbook_validator validate-skills --root .
+step "Validate executables" env PYTHONPATH=scripts python3 -m playbook_validator validate-executables --root .
 step "INDEX.yaml freshness" env PYTHONPATH=scripts python3 -m playbook_validator generate-index --check --root .
 
 # --- Semgrep SAST (mirrors ci.yml `semgrep` job) ---------------------------

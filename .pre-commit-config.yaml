@@ -69,6 +69,12 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      - id: validate-executables
+        name: Validate Git-recorded executable modes
+        entry: python3 -m playbook_validator validate-executables --root .
+        language: system
+        pass_filenames: false
+        always_run: true
 
   # NOTE: GitHub Actions security scanning (zizmor) runs in CI only —
   # see .github/workflows/zizmor.yml. It is intentionally NOT a local
