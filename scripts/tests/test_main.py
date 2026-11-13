@@ -148,3 +148,33 @@ class TestValidateSkills:
         with patch("sys.argv", ["pv", "validate-skills", "--root", str(tmp_path)]):
             rc = main()
         assert rc == 0
+
+
+class TestValidateExecutables:
+    """Test executable-mode command dispatch."""
+
+    def test_missing_inventory_path_returns_1(self, tmp_path):
+        with patch("sys.argv", ["pv", "validate-executables", "--root", str(tmp_path)]):
+            assert main() == 1
+
+    def test_local_only_mode_mismatch_warns_without_failing(self, git_repo, capsys):
+        from playbook_validator.validate_executables import EXECUTABLE_PATHS
+
+        for relative_path in EXECUTABLE_PATHS:
+            path = git_repo / relative_path
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("entry point\n")
+            path.chmod(0o755)
+
+        import subprocess
+
+        subprocess.run(
+            ["git", "-C", str(git_repo), "add", *EXECUTABLE_PATHS],
+            check=True,
+        )
+        for relative_path in EXECUTABLE_PATHS:
+            (git_repo / relative_path).chmod(0o644)
+
+        with patch("sys.argv", ["pv", "validate-executables", "--root", str(git_repo)]):
+            assert main() == 0
+        assert "WARNING: scripts/ci-local.sh: not executable in the working tree" in capsys.readouterr().err

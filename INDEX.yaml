@@ -7,10 +7,10 @@
 # before making changes that span multiple documents.
 #
 # Schema version: 1.0
-# Last generated: 2026-10-06
+# Last generated: 2026-11-13
 
 schema_version: "1.0"
-generated: "2026-10-06"
+generated: "2026-11-13"
 repo: "GSA-TTS/agentic-coding-playbook"
 scope: "FIPS Moderate | Single-agent | Internal enterprise"
 
@@ -77,7 +77,7 @@ documents:
     status: canonical
     tier: 1
     load_priority: always
-    last_updated: "2026-06-01"
+    last_updated: "2026-10-31"
     audience: [developers, agents]
 
   - path: "docs/CODING_PRACTICES.md"

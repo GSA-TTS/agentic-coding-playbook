@@ -142,6 +142,9 @@ jobs:
       - name: Validate skills
         run: PYTHONPATH=scripts python3 -m playbook_validator validate-skills --root .
 
+      - name: Validate executable modes
+        run: PYTHONPATH=scripts python3 -m playbook_validator validate-executables --root .
+
       - name: Validate ADRs (decision records)
         run: PYTHONPATH=scripts python3 -m playbook_validator validate-adrs --dir docs/decisions
 
