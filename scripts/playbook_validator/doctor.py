@@ -298,13 +298,14 @@ def check_dependencies() -> list[dict[str, object]]:
     else:
         results.append(_skip("ruff", "not found — install with: pip install ruff"))
 
-    # markdownlint — Markdown linter (used by pre-commit; the pinned install in
-    # .github/linters is what pre-commit/CI actually run, this just checks for
-    # a convenience global install for ad-hoc local use)
-    if shutil.which("markdownlint") is not None:
+    # markdownlint — the Markdown lint engine installed by the pinned,
+    # lockfile-recorded .github/linters install that pre-commit and CI run.
+    if (Path.cwd() / ".github/linters/node_modules/markdownlint").is_dir():
         results.append(_result("markdownlint", True, "installed"))
     else:
-        results.append(_skip("markdownlint", "not found — install with: npm install -g markdownlint-cli"))
+        results.append(
+            _skip("markdownlint", "not found — install with: npm ci --prefix .github/linters --ignore-scripts")
+        )
 
     return results
 

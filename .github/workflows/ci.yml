@@ -70,7 +70,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "22.22.2"
+          node-version: "22"
           cache: "npm"
           cache-dependency-path: ".github/linters/package-lock.json"
 
@@ -95,23 +95,26 @@ jobs:
           npm ci
           npm audit --audit-level=high
 
-      # Glob/ignore list lives once, in .github/linters/run-markdownlint.mjs,
-      # shared by CI and the pre-commit hook below so the two cannot diverge
-      # (same guarantee the old .markdownlint-cli2.yaml globs: key gave us).
-      # The version comes from .github/linters/package-lock.json (installed
-      # above), so there is no second version pin to drift either.
+      # File selection lives once, in .github/linters/markdown-files.mjs (see
+      # ADR-0005), shared by CI and the pre-commit hook below so the two cannot
+      # diverge. The engine version comes from
+      # .github/linters/package-lock.json (installed above), so there is no
+      # second version pin to drift either.
+      - name: Markdown lint adapter tests
+        run: node --test .github/linters/tests/*.test.mjs
+
       - name: Markdown lint
         run: node .github/linters/run-markdownlint.mjs
 
-      # run-markdownlint.mjs --count-only exits 0 and prints the matched file
-      # count without linting -- assert it is non-zero so a typo'd glob fails
-      # loudly instead of the real lint step passing with nothing matched.
+      # run-markdownlint.mjs --count-only prints the selected file count
+      # without linting -- assert it is non-zero as a belt-and-braces check
+      # alongside the adapter's own fail-closed empty-selection error.
       - name: Assert markdownlint actually linted files
         run: |
           count=$(node .github/linters/run-markdownlint.mjs --count-only)
           echo "markdownlint linted ${count:-0} file(s)"
           if [ "${count:-0}" -lt 1 ]; then
-            echo "::error::markdownlint matched no files - check the glob list in .github/linters/run-markdownlint.mjs" >&2
+            echo "::error::markdownlint matched no files - check the selection in .github/linters/markdown-files.mjs" >&2
             exit 1
           fi
 

@@ -45,6 +45,11 @@ lint: ## Run ruff linter + markdown linter
 	@test -d .github/linters/node_modules || npm ci --prefix .github/linters --ignore-scripts
 	node .github/linters/run-markdownlint.mjs
 
+.PHONY: test-linters
+test-linters: ## Run the Markdown lint adapter tests (locked install first)
+	npm ci --prefix .github/linters --ignore-scripts --no-audit --no-fund --prefer-offline
+	node --test .github/linters/tests/*.test.mjs
+
 .PHONY: format
 format: ## Format Python code with ruff
 	ruff format scripts/
@@ -128,7 +133,7 @@ audit: ## Run SCA vulnerability scan on installed packages
 # ── CI Reproduction ───────────────────────────────────────────────
 
 .PHONY: ci
-ci: lint format-check test validate generate-check audit ## Reproduce full CI locally
+ci: lint test-linters format-check test validate generate-check audit ## Reproduce full CI locally
 
 .PHONY: check
 check: ci ## Alias for ci

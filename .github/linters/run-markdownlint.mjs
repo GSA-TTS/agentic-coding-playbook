@@ -1,48 +1,96 @@
 #!/usr/bin/env node
-// Shared glob/ignore list for markdownlint, used by both CI and the
-// pre-commit hook so the two cannot diverge (same requirement the old
-// .markdownlint-cli2.yaml's globs: key enforced, now expressed here instead
-// since markdownlint-cli takes globs/ignores as CLI args, not config keys).
-//
-// Usage:
-//   node run-markdownlint.mjs [--fix] [--count-only]
-//
-// --count-only prints the number of files the glob list matches (via the
-// same tinyglobby engine markdownlint-cli uses internally) and exits 0,
-// without running the linter. Used by CI to assert the glob list didn't
-// silently match zero files.
-import { spawnSync } from "node:child_process";
+// Repository adapter, not a general markdownlint-cli replacement.
+// Usage: node .github/linters/run-markdownlint.mjs [--fix] [--count-only]
+// Run from the repository root. See docs/decisions/0005-markdown-engine-adapter.md.
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { applyFixes } from "markdownlint";
+import { lint, readConfig } from "markdownlint/sync";
+import markdownIt from "markdown-it";
+import { load } from "js-yaml";
+import { markdownFiles } from "./markdown-files.mjs";
 
-const here = dirname(fileURLToPath(import.meta.url));
+const configParsers = [(text) => {
+  const config = load(text);
+  if (!config || typeof config !== "object" ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(config))) {
+    throw new Error("Markdown configuration must be a YAML mapping");
+  }
+  return config;
+}];
 
-const globs = ["**/*.md"];
+export const markdownItFactory = () => markdownIt({ html: true });
 
-const ignores = [
-  "node_modules",
-  ".github/linters/node_modules",
-  "CHANGELOG.md",
-  "MIGRATION.md",
-];
-
-const args = process.argv.slice(2);
-const countOnly = args.includes("--count-only");
-const passthroughArgs = args.filter((a) => a !== "--count-only");
-
-if (countOnly) {
-  const { globSync } = await import(
-    join(here, "node_modules", "tinyglobby", "dist", "index.mjs")
+// Preserve the CLI's text format and ordering, including warning-only success.
+export function diagnostics(results) {
+  const entries = Object.entries(results).flatMap(([file, errors]) =>
+    errors.map((error) => ({
+      file,
+      line: error.lineNumber,
+      column: error.errorRange?.[0] || 0,
+      names: error.ruleNames.join("/"),
+      severity: error.severity,
+      description: error.ruleDescription +
+        (error.errorDetail ? ` [${error.errorDetail}]` : "") +
+        (error.errorContext ? ` [Context: "${error.errorContext}"]` : ""),
+    }))
   );
-  const files = globSync(globs, { ignore: ignores, dot: true });
-  console.log(files.length);
-  process.exit(0);
+  entries.sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line ||
+    a.names.localeCompare(b.names) || a.description.localeCompare(b.description));
+  return {
+    text: entries.map(({ file, line, column, severity, names, description }) =>
+      `${file}:${line}${column ? `:${column}` : ""} ${severity} ${names} ${description}`
+    ).join("\n"),
+    status: entries.some(({ severity }) => severity === "error") ? 1 : 0,
+  };
 }
 
-const ignoreArgs = ignores.flatMap((i) => ["-i", i]);
-const result = spawnSync(
-  join(here, "node_modules", ".bin", "markdownlint"),
-  ["--dot", ...globs, ...ignoreArgs, ...passthroughArgs],
-  { stdio: "inherit" }
-);
-process.exit(result.status ?? 1);
+// Read the repository's YAML explicitly; readConfig retains engine extends
+// semantics. Do not turn the historical config.frontMatter string into a
+// top-level engine option: the old CLI passed it only inside config, too.
+export function lintFiles(files, { fix = false } = {}) {
+  const options = {
+    files,
+    config: readConfig(".markdownlint.yaml", configParsers),
+    configParsers,
+    markdownItFactory,
+  };
+  if (fix) {
+    // Exactly one fix pass per file, then lint the complete selection again.
+    // Use files (not strings) so inline config and file-read failures survive.
+    for (const file of files) {
+      const fixes = lint({ ...options, files: [file] })[file]
+        .filter((error) => error.fixInfo);
+      if (fixes.length) {
+        const original = readFileSync(file, "utf8");
+        const fixed = applyFixes(original, fixes);
+        if (fixed !== original) writeFileSync(file, fixed, "utf8");
+      }
+    }
+  }
+  return lint(options);
+}
+
+export function run(args = process.argv.slice(2)) {
+  try {
+    const unsupported = args.find((arg) => !["--fix", "--count-only"].includes(arg));
+    if (unsupported !== undefined) throw new Error(`Unsupported argument: ${unsupported}`);
+    const files = markdownFiles();
+    if (!files.length) throw new Error("markdownlint matched no files");
+    if (args.includes("--count-only")) {
+      console.log(files.length);
+      return 0;
+    }
+    const result = diagnostics(lintFiles(files, { fix: args.includes("--fix") }));
+    if (result.text) console.error(result.text);
+    return result.status;
+  } catch (error) {
+    console.error(error);
+    return 4;
+  }
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  process.exitCode = run();
+}
