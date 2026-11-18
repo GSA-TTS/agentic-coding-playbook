@@ -6,6 +6,7 @@ points, rather than treating every shebang or code example as an executable.
 
 from __future__ import annotations
 
+import os
 import subprocess
 from collections.abc import Iterable
 from pathlib import Path
@@ -29,6 +30,13 @@ def _expected_paths(paths: Iterable[str] = EXECUTABLE_PATHS) -> tuple[str, ...]:
     return expected
 
 
+def _decode_output(data: bytes | str | None) -> str:
+    """Decode Git output without failing on non-UTF-8 filenames."""
+    if data is None:
+        return ""
+    return data if isinstance(data, str) else os.fsdecode(data)
+
+
 def _git_index_modes(root: Path) -> dict[str, list[tuple[str, str]]]:
     """Read staged modes without relying on filesystem mode bits."""
     git = which("git")
@@ -39,16 +47,16 @@ def _git_index_modes(root: Path) -> dict[str, list[tuple[str, str]]]:
             [git, "-C", str(root), "ls-files", "--stage", "-z"],
             check=True,
             capture_output=True,
-            text=True,
         )
     except subprocess.CalledProcessError as error:
-        detail = error.stderr.strip() or error.stdout.strip() or str(error)
+        detail = _decode_output(error.stderr).strip() or _decode_output(error.stdout).strip() or str(error)
         raise ValueError(f"could not read Git index: {detail}") from error
 
     records: dict[str, list[tuple[str, str]]] = {}
-    for record in result.stdout.split("\0"):
-        if not record:
+    for raw_record in result.stdout.split(b"\0"):
+        if not raw_record:
             continue
+        record = os.fsdecode(raw_record)
         try:
             metadata, path = record.split("\t", 1)
             mode, _object_id, stage = metadata.split()

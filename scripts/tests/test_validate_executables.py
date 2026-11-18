@@ -1,5 +1,6 @@
 """Tests for Git-recorded executable-mode validation."""
 
+import os
 import subprocess
 from pathlib import Path
 from unittest.mock import patch
@@ -91,3 +92,14 @@ def test_git_index_errors_are_reported(git_repo: Path):
 def test_empty_inventory_is_rejected(git_repo: Path):
     with pytest.raises(ValueError, match="executable inventory is empty"):
         validate_git_executable_modes(git_repo, [])
+
+
+def test_git_index_ignores_unrelated_non_utf8_filename(git_repo: Path):
+    _write_executable_candidate(git_repo, 0o755)
+    try:
+        (git_repo / os.fsdecode(b"unrelated-\xff.txt")).write_text("data")
+    except (OSError, UnicodeError):
+        pytest.skip("filesystem cannot create non-UTF-8 filenames")
+    subprocess.run(["git", "-C", str(git_repo), "add", "-A"], check=True)
+
+    assert validate_git_executable_modes(git_repo, [PATH]) == []
