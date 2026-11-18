@@ -39,16 +39,23 @@ test-quick: ## Run tests without verbose output
 
 # ── Linting & Formatting ──────────────────────────────────────────
 
+LINTER_DIR := .github/linters
+LINTER_DEPS := $(LINTER_DIR)/node_modules/.package-lock.json
+
+# Single locked install shared by `lint` and `test-linters`. Both depend on this
+# one target, so `make -j` runs it once before either consumer starts instead of
+# letting two `npm ci` runs delete and repopulate node_modules concurrently.
+$(LINTER_DEPS): $(LINTER_DIR)/package.json $(LINTER_DIR)/package-lock.json
+	npm ci --prefix $(LINTER_DIR) --ignore-scripts --no-audit --no-fund --prefer-offline
+
 .PHONY: lint
-lint: ## Run ruff linter + markdown linter
+lint: $(LINTER_DEPS) ## Run ruff linter + markdown linter
 	ruff check scripts/
-	@test -d .github/linters/node_modules || npm ci --prefix .github/linters --ignore-scripts
-	node .github/linters/run-markdownlint.mjs
+	node $(LINTER_DIR)/run-markdownlint.mjs
 
 .PHONY: test-linters
-test-linters: ## Run the Markdown lint adapter tests (locked install first)
-	npm ci --prefix .github/linters --ignore-scripts --no-audit --no-fund --prefer-offline
-	node --test .github/linters/tests/*.test.mjs
+test-linters: $(LINTER_DEPS) ## Run the Markdown lint adapter tests
+	node --test $(LINTER_DIR)/tests/*.test.mjs
 
 .PHONY: format
 format: ## Format Python code with ruff

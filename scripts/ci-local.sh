@@ -3,8 +3,9 @@
 #
 # Mirrors .github/workflows/ci.yml so contributors can validate a branch WITHOUT
 # waiting on GitHub Actions (useful during Actions outages, or for a fast inner
-# loop). It runs the same steps: ruff lint+format, markdownlint, pytest, the
-# playbook_validator suite, INDEX freshness, Semgrep SAST, and pip-audit SCA.
+# loop). It runs the same steps: ruff lint+format, markdownlint and its adapter
+# tests, pytest, the playbook_validator suite, INDEX freshness, Semgrep SAST,
+# and pip-audit SCA.
 #
 # CORPORATE TLS-INTERCEPTING PROXY (e.g. ZScaler)
 # ----------------------------------------------
@@ -87,22 +88,43 @@ if [[ "$NO_NET" -eq 0 ]]; then
     "$CA_BUNDLE" "$(grep -c "BEGIN CERTIFICATE" "$CA_BUNDLE" 2>/dev/null || echo '?')"
 fi
 
+# shellcheck disable=SC2329  # invoked indirectly via `step "Markdown lint dependencies" provision_markdownlint`
+provision_markdownlint() {
+  if [[ -d .github/linters/node_modules ]]; then
+    return 0
+  fi
+  if [[ "$NO_NET" -eq 1 ]]; then
+    printf '%s\n' \
+      'Markdown lint dependencies are missing; --no-net prevents installation.' \
+      'When network access is permitted, run: npm ci --prefix .github/linters --ignore-scripts' >&2
+    return 1
+  fi
+  npm ci --prefix .github/linters --ignore-scripts
+}
+
+# Both consumers depend on the single provisioning step above; they never install.
+# shellcheck disable=SC2329  # invoked indirectly via `step "Markdown lint adapter tests" run_markdownlint_adapter_tests`
+run_markdownlint_adapter_tests() {
+  if [[ ! -d .github/linters/node_modules ]]; then
+    echo 'Markdown lint dependencies are not installed; skipping adapter tests.' >&2
+    return 1
+  fi
+  node --test .github/linters/tests/*.test.mjs
+}
+
 # shellcheck disable=SC2329  # invoked indirectly via `step "Markdown lint" run_markdownlint`
 run_markdownlint() {
   if [[ ! -d .github/linters/node_modules ]]; then
-    if [[ "$NO_NET" -eq 1 ]]; then
-      printf '%s\n' \
-        'Markdown lint dependencies are missing; --no-net prevents installation.' \
-        'When network access is permitted, run: npm ci --prefix .github/linters --ignore-scripts' >&2
-      return 1
-    fi
-    npm ci --prefix .github/linters --ignore-scripts || return 1
+    echo 'Markdown lint dependencies are not installed.' >&2
+    return 1
   fi
   node .github/linters/run-markdownlint.mjs
 }
 
 step "Ruff lint"            ruff check scripts/
 step "Ruff format check"    ruff format --check scripts/
+step "Markdown lint dependencies" provision_markdownlint
+step "Markdown lint adapter tests" run_markdownlint_adapter_tests
 step "Markdown lint"        run_markdownlint
 step "Pytest"               env PYTHONPATH=scripts python3 -m pytest scripts/tests/ -q
 step "Validate frontmatter" env PYTHONPATH=scripts python3 -m playbook_validator validate-docs --root .
