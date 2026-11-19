@@ -427,9 +427,15 @@ class TestCheckDependencies:
         (target / ".github/linters/node_modules/markdownlint").mkdir(parents=True)
         other.mkdir()
         monkeypatch.chdir(other)
+        # Offline filesystem regression: no tool discovery, so no external
+        # command (gh, cf, git) can run with ambient credentials or services.
+        monkeypatch.setattr("shutil.which", lambda *_a, **_k: None)
+        external_calls: list[tuple] = []
+        monkeypatch.setattr("subprocess.run", lambda *a, **k: external_calls.append(a))
 
         collector = run_doctor(str(target))
 
+        assert external_calls == []
         entry = next(r for r in collector.to_dict()["results"] if r["check"] == "markdownlint")
         assert entry["note"] == "installed"
 
