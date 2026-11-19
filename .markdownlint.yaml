@@ -1,15 +1,13 @@
-# markdownlint configuration (plain markdownlint-cli, not markdownlint-cli2)
+# markdownlint engine configuration (repository adapter)
 # Equivalent to the previous .pymarkdown.json rules
 # See: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
 #
-# Auto-discovered by `markdownlint-cli` (no --config flag needed) because its
-# name matches one of the config filenames markdownlint-cli looks for.
+# Read explicitly from the working directory by
+# .github/linters/run-markdownlint.mjs.
 #
-# File selection (globs/ignores) is NOT configured here: markdownlint-cli
-# takes globs and -i/--ignore flags directly as CLI arguments, resolved by
-# its own glob engine (tinyglobby) rather than a hand-rolled walker. See
-# .github/linters/run-markdownlint.mjs for the actual glob/ignore list,
-# shared by CI and the pre-commit hook so the two cannot diverge.
+# File selection lives in .github/linters/markdown-files.mjs. CI, pre-commit
+# and the Make/ci-local callers all use the same adapter for linting and
+# --count-only. See docs/decisions/0005-markdown-engine-adapter.md.
 
 # MD003 - Heading style (disabled — mixed styles OK)
 MD003: false
@@ -50,7 +48,7 @@ MD058: false
 # MD060 - Table column style spacing
 MD060: false
 
-# Support YAML frontmatter (markdownlint already skips common frontmatter by
-# default for most rules; this explicit regex is kept for parity with the
-# prior .markdownlint-cli2.yaml config so behavior does not shift silently).
+# Historical config key retained unchanged. Like the old CLI, the adapter
+# passes this inside config, not as a top-level frontMatter engine option, so
+# the engine's default frontmatter handling remains in force.
 frontMatter: "/^---\\s*$[\\s\\S]*?^---\\s*$/m"

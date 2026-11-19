@@ -16,7 +16,7 @@ Model-agnostic reference for any AI coding agent working in this repository. Rea
 ## Quick Reference
 
 ```bash
-# Validation (Python package — 579 tests)
+# Validation (Python package — 592 tests)
 PYTHONPATH=scripts python3 -m playbook_validator validate-docs
 PYTHONPATH=scripts python3 -m playbook_validator validate-skills
 PYTHONPATH=scripts python3 -m playbook_validator validate-landscape
@@ -36,7 +36,8 @@ make generate-check    # Verify INDEX.yaml is up to date
 PYTHONPATH=scripts python3 -m pytest scripts/tests/ -v
 
 # Local CI (mirrors .github/workflows/ci.yml — ruff, markdownlint, pytest,
-# validators, INDEX freshness, Semgrep SAST, pip-audit SCA). Useful for a fast
+# validators, INDEX freshness, Semgrep SAST, pip-audit SCA; markdownlint adapter
+# tests run after dependency provisioning). Useful for a fast
 # inner loop or when GitHub Actions is unavailable. Builds an invocation-scoped
 # CA bundle so it works behind a TLS-intercepting proxy (e.g. ZScaler); runs
 # pip-audit in an ephemeral venv to match CI isolation.

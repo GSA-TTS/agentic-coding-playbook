@@ -375,21 +375,69 @@ class TestCheckPythonVersion:
 class TestCheckDependencies:
     """Test dependency availability checks."""
 
-    def test_yaml_available(self):
+    def test_yaml_available(self, tmp_path):
         """PyYAML should be available in the test environment."""
-        results = check_dependencies()
+        results = check_dependencies(str(tmp_path))
         yaml_results = [r for r in results if r["name"] == "PyYAML"]
         assert len(yaml_results) == 1
         assert yaml_results[0]["passed"] is True
 
     @patch("shutil.which", return_value=None)
-    def test_missing_tool_skips(self, mock_which):
-        results = check_dependencies()
+    def test_missing_tool_skips(self, mock_which, tmp_path):
+        results = check_dependencies(str(tmp_path))
         ruff_results = [r for r in results if r["name"] == "ruff"]
         assert len(ruff_results) == 1
         # Missing tool returns a skip (passed=True with status=skip)
         assert ruff_results[0]["passed"] is True
         assert ruff_results[0].get("status") == "skip"
+
+    @staticmethod
+    def _markdownlint(results):
+        return next(r for r in results if r["name"] == "markdownlint")
+
+    def test_markdownlint_detected_in_target_root_not_cwd(self, tmp_path, monkeypatch):
+        """The selected --root decides the result, not the working directory."""
+        target = tmp_path / "target"
+        other = tmp_path / "other"
+        (target / ".github/linters/node_modules/markdownlint").mkdir(parents=True)
+        other.mkdir()
+        monkeypatch.chdir(other)
+
+        result = self._markdownlint(check_dependencies(str(target)))
+
+        assert result["passed"] is True
+        assert result.get("status") != "skip"
+
+    def test_markdownlint_ignores_cwd_install_when_target_lacks_it(self, tmp_path, monkeypatch):
+        """An unrelated checkout in the CWD must not satisfy the target's check."""
+        target = tmp_path / "target"
+        other = tmp_path / "other"
+        target.mkdir()
+        (other / ".github/linters/node_modules/markdownlint").mkdir(parents=True)
+        monkeypatch.chdir(other)
+
+        result = self._markdownlint(check_dependencies(str(target)))
+
+        assert result.get("status") == "skip"
+
+    def test_run_doctor_passes_selected_root_to_dependency_check(self, tmp_path, monkeypatch):
+        """run_doctor must hand its repo_root through to check_dependencies."""
+        target = tmp_path / "target"
+        other = tmp_path / "other"
+        (target / ".github/linters/node_modules/markdownlint").mkdir(parents=True)
+        other.mkdir()
+        monkeypatch.chdir(other)
+        # Offline filesystem regression: no tool discovery, so no external
+        # command (gh, cf, git) can run with ambient credentials or services.
+        monkeypatch.setattr("shutil.which", lambda *_a, **_k: None)
+        external_calls: list[tuple] = []
+        monkeypatch.setattr("subprocess.run", lambda *a, **k: external_calls.append(a))
+
+        collector = run_doctor(str(target))
+
+        assert external_calls == []
+        entry = next(r for r in collector.to_dict()["results"] if r["check"] == "markdownlint")
+        assert entry["note"] == "installed"
 
 
 class TestCheckPrecommitHooks:

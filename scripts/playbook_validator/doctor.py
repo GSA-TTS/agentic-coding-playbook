@@ -281,8 +281,13 @@ def check_python_version() -> list[dict[str, object]]:
     return [_result("Python version", False, f"{version} — requires >=3.12")]
 
 
-def check_dependencies() -> list[dict[str, object]]:
-    """Check that required Python packages and dev tools are available."""
+def check_dependencies(repo_root: str) -> list[dict[str, object]]:
+    """Check that required Python packages and dev tools are available.
+
+    Args:
+        repo_root: Repository root directory (the ``doctor --root`` target),
+            used for repository-local installs instead of the working directory.
+    """
     results: list[dict[str, object]] = []
 
     # PyYAML — hard runtime dependency
@@ -298,13 +303,14 @@ def check_dependencies() -> list[dict[str, object]]:
     else:
         results.append(_skip("ruff", "not found — install with: pip install ruff"))
 
-    # markdownlint — Markdown linter (used by pre-commit; the pinned install in
-    # .github/linters is what pre-commit/CI actually run, this just checks for
-    # a convenience global install for ad-hoc local use)
-    if shutil.which("markdownlint") is not None:
+    # markdownlint — the Markdown lint engine installed by the pinned,
+    # lockfile-recorded .github/linters install that pre-commit and CI run.
+    if (Path(repo_root) / ".github/linters/node_modules/markdownlint").is_dir():
         results.append(_result("markdownlint", True, "installed"))
     else:
-        results.append(_skip("markdownlint", "not found — install with: npm install -g markdownlint-cli"))
+        results.append(
+            _skip("markdownlint", "not found — install with: npm ci --prefix .github/linters --ignore-scripts")
+        )
 
     return results
 
@@ -337,7 +343,7 @@ def run_doctor(repo_root: str, plan_path: str | None = None) -> ResultCollector:
 
     all_checks: list[dict[str, object]] = []
     all_checks.extend(check_python_version())
-    all_checks.extend(check_dependencies())
+    all_checks.extend(check_dependencies(repo_root))
     all_checks.extend(check_precommit_hooks(repo_root))
     all_checks.extend(check_git(repo_root))
     all_checks.extend(check_github(plan_path=detected_plan))
