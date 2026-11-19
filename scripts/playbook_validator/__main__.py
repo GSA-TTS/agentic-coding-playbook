@@ -11,6 +11,7 @@ Usage:
     python -m playbook_validator generate-index [--check] [--root PATH]
     python -m playbook_validator pre-deploy [--path PATH]
     python -m playbook_validator ensure-contract [--root PATH] [--no-fetch]
+    python -m playbook_validator validate-executables [--root PATH]
 """
 
 import argparse
@@ -288,6 +289,22 @@ def cmd_ensure_contract(args: argparse.Namespace) -> int:
     return result.exit_code
 
 
+def cmd_validate_executables(args: argparse.Namespace) -> int:
+    """Validate Git-recorded and local executable modes for tool entry points."""
+    from playbook_validator.validate_executables import validate_executable_modes
+
+    errors, warnings = validate_executable_modes(Path(args.root))
+    for warning in warnings:
+        print(f"WARNING: {warning}", file=sys.stderr)
+    for error in errors:
+        print(f"ERROR: {error}", file=sys.stderr)
+    if errors:
+        print(f"FAILED — {len(errors)} executable-mode error(s) found", file=sys.stderr)
+        return 1
+    print("All intended executable modes are recorded in the Git index.")
+    return 0
+
+
 def cmd_landscape_check(args: argparse.Namespace) -> int:
     """Run the landscape monitor to check for federal AI guidance updates."""
     import landscape_monitor
@@ -341,6 +358,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--root", default=".", help="Working project root (where the cache lives)")
     p.add_argument("--no-fetch", action="store_true", help="Do not fetch; use only home path or existing cache")
 
+    p = sub.add_parser("validate-executables", help="Validate Git-recorded executable modes")
+    p.add_argument("--root", default=".", help="Repository root")
+
     p = sub.add_parser("landscape-check", help="Check for federal AI guidance updates via RSS")
     p.add_argument("--registry", default="data/federal-ai-landscape.yaml", help="Path to landscape registry")
     p.add_argument("--output", help="Output path for diff report (default: stdout)")
@@ -369,6 +389,7 @@ _COMMANDS = {
     "audit-repo": cmd_audit_repo,
     "pre-deploy": cmd_pre_deploy,
     "ensure-contract": cmd_ensure_contract,
+    "validate-executables": cmd_validate_executables,
     "landscape-check": cmd_landscape_check,
     "validate-plan": cmd_validate_plan,
     "validate-risk-assessment": cmd_validate_risk_assessment,

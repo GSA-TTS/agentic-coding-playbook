@@ -726,6 +726,7 @@ The agent MUST ensure that every repository it works in supports:
 
 - **One-command bootstrap:** A single command (e.g., `make setup`, `npm run setup`) that installs all dependencies and prepares the development environment
 - **One-command verify:** A single command (e.g., `make check`, `npm test`) that runs all linters, tests, and security checks
+- For directly executed scripts, verify version control preserves executability (Git: `100755`), not just filesystem permissions; fix specific entries, never blanket `chmod` or global VCS settings. Interpreter-only scripts are exempt unless their distribution contract requires execution.
 
 If these commands do not exist, the agent SHOULD recommend creating them as part of the initial repository setup (see the `federal-repo-setup` skill).
 
