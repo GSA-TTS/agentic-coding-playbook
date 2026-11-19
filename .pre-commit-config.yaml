@@ -31,11 +31,11 @@ repos:
       - id: ruff-format
 
   # Markdown linting. The version is pinned ONCE, in
-  # .github/linters/package.json (+ package-lock.json, which also carries the
-  # transitive overrides and is what `npm audit` gates in CI). This hook
+  # .github/linters/package.json (+ package-lock.json, which is what
+  # `npm audit` gates in CI). This hook
   # delegates to that install instead of pinning a second time via a remote rev,
-  # so the two can never drift. Glob/ignore selection lives once in
-  # .github/linters/run-markdownlint.mjs, shared with CI, so file selection
+  # so the two can never drift. File selection lives once in
+  # .github/linters/markdown-files.mjs, shared with CI, so file selection
   # cannot drift between local and CI either. Mirrors agentic-coding-patterns#471.
   - repo: local
     hooks:

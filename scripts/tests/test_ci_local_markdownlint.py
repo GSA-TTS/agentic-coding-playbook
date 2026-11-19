@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+ADAPTER_CALL = "node --test .github/linters/tests/a.test.mjs"
+LINT_CALL = "node .github/linters/run-markdownlint.mjs"
 
 
 def write_stub(path: Path, body: str) -> None:
@@ -20,7 +22,8 @@ def ci_repo(tmp_path):
     """Copy the real caller and expose only fixtures and local file utilities."""
     root = tmp_path / "repo with spaces"
     (root / "scripts").mkdir(parents=True)
-    (root / ".github/linters").mkdir(parents=True)
+    (root / ".github/linters/tests").mkdir(parents=True)
+    (root / ".github/linters/tests/a.test.mjs").write_text("", encoding="utf-8")
     shutil.copy2(REPO_ROOT / "scripts/ci-local.sh", root / "scripts/ci-local.sh")
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
@@ -52,16 +55,20 @@ mkdir -p .github/linters/node_modules""",
     write_stub(
         bin_dir / "node",
         """printf 'node %s\\n' "$*" >> "$CALL_LOG"
-[ "$*" = ".github/linters/run-markdownlint.mjs" ]
+case "$*" in
+    ".github/linters/run-markdownlint.mjs") status="$NODE_STATUS" ;;
+    "--test .github/linters/tests/"*) status="$ADAPTER_STATUS" ;;
+    *) exit 99 ;;
+esac
 [ -d .github/linters/node_modules ]
-exit "$NODE_STATUS"
+exit "$status"
 """,
     )
     assert shutil.which("pnpm", path=str(bin_dir)) is None
     return root, bin_dir
 
 
-def run_ci(ci_repo, *, offline=False, npm_status=0, node_status=0):
+def run_ci(ci_repo, *, offline=False, npm_status=0, node_status=0, adapter_status=0):
     """Run the unchanged caller with no ambient tools or shell configuration."""
     root, bin_dir = ci_repo
     log = root / "calls.log"
@@ -77,6 +84,7 @@ def run_ci(ci_repo, *, offline=False, npm_status=0, node_status=0):
             "CALL_LOG": str(log),
             "NPM_STATUS": str(npm_status),
             "NODE_STATUS": str(node_status),
+            "ADAPTER_STATUS": str(adapter_status),
             "SKIP_SEMGREP": "1",
         },
         capture_output=True,
@@ -95,7 +103,7 @@ def test_offline_fresh_checkout_fails_without_invoking_npm(ci_repo):
     assert calls == []
     assert "--no-net" in result.stderr
     assert "npm ci --prefix .github/linters --ignore-scripts" in result.stderr
-    assert "FAILED: Markdown lint" in result.stdout
+    assert "FAILED: Markdown lint dependencies" in result.stdout
     assert "All executed checks passed." not in result.stdout
     assert not (ci_repo[0] / ".github/linters/node_modules").exists()
 
@@ -109,13 +117,14 @@ def test_normal_run_bootstraps_missing_dependencies(ci_repo, npm_status):
         assert result.returncode == 1
         assert len(calls) == 1
         assert "fixture npm failure" in result.stderr
-        assert "FAILED: Markdown lint" in result.stdout
+        assert "FAILED: Markdown lint dependencies" in result.stdout
         assert "All executed checks passed." not in result.stdout
     else:
         assert result.returncode == 0, result.stdout + result.stderr
         assert calls == [
             "npm ci --prefix .github/linters --ignore-scripts",
-            "node .github/linters/run-markdownlint.mjs",
+            ADAPTER_CALL,
+            LINT_CALL,
         ]
         assert "All executed checks passed." in result.stdout
 
@@ -127,10 +136,38 @@ def test_installed_dependencies_run_lint_without_npm(ci_repo, offline, node_stat
 
     result, calls = run_ci(ci_repo, offline=offline, node_status=node_status)
 
-    assert calls == ["node .github/linters/run-markdownlint.mjs"]
+    assert calls == [ADAPTER_CALL, LINT_CALL]
     assert result.returncode == (1 if node_status else 0), result.stdout + result.stderr
     if node_status:
         assert "FAILED: Markdown lint" in result.stdout
         assert "All executed checks passed." not in result.stdout
     else:
         assert "All executed checks passed." in result.stdout
+
+
+@pytest.mark.parametrize("offline", [False, True], ids=["normal", "offline"])
+def test_adapter_test_failure_fails_run_but_still_lints(ci_repo, offline):
+    (ci_repo[0] / ".github/linters/node_modules").mkdir()
+
+    result, calls = run_ci(ci_repo, offline=offline, adapter_status=23)
+
+    assert calls == [ADAPTER_CALL, LINT_CALL]
+    assert result.returncode == 1
+    assert "FAILED: Markdown lint adapter tests" in result.stdout
+    assert "FAILED: Markdown lint\n" not in result.stdout
+    assert "All executed checks passed." not in result.stdout
+
+
+def test_adapter_tests_run_after_dependency_provisioning(ci_repo):
+    result, calls = run_ci(ci_repo)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert calls.index(ADAPTER_CALL) > calls.index("npm ci --prefix .github/linters --ignore-scripts")
+
+
+def test_offline_missing_dependencies_skip_all_node_invocations(ci_repo):
+    result, calls = run_ci(ci_repo, offline=True)
+
+    assert calls == []
+    assert "FAILED: Markdown lint dependencies" in result.stdout
+    assert "FAILED: Markdown lint adapter tests" in result.stdout
